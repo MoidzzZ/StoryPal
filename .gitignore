@@ -1,0 +1,21 @@
+# Local upstream source references and runtime data
+.reference/
+.runtime/
+story_mem/
+.pnpm-store/
+.pytest_cache/
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+*.key
+
+# Python / Node generated files
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+node_modules/
+dist/
+coverage/

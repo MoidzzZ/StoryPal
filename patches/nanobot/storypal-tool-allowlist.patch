@@ -1,0 +1,39 @@
+diff --git a/nanobot/agent/loop.py b/nanobot/agent/loop.py
+index f10434f..6dcc72e 100644
+--- a/nanobot/agent/loop.py
++++ b/nanobot/agent/loop.py
+@@ -1780,6 +1780,15 @@ class AgentLoop:
+         session = ctx.session
+         ctx.ephemeral = ctx.ephemeral or not session.policy.persist
+         tools = ctx.tools or self.tools
++        allowed_tools = self.tools_config.allowed_tools
++        if allowed_tools is not None:
++            allowed_names = frozenset(allowed_tools)
++            restricted = ToolRegistry()
++            for name in tools.tool_names:
++                tool = tools.get(name)
++                if name in allowed_names and tool:
++                    restricted.register(tool)
++            tools = restricted
+         if session.policy.disabled_tools:
+             restricted = ToolRegistry()
+             for name in tools.tool_names:
+diff --git a/nanobot/config/schema.py b/nanobot/config/schema.py
+index c32d0fc..c099e61 100644
+--- a/nanobot/config/schema.py
++++ b/nanobot/config/schema.py
+@@ -399,6 +399,14 @@ class ToolsConfig(Base):
+     image_generation: ImageGenerationToolConfig = Field(
+         default_factory=lambda: _lazy_default("nanobot.agent.tools.image_generation", "ImageGenerationToolConfig"),
+     )
++    # None preserves nanobot's default behavior. A configured list is an exact
++    # per-turn allowlist: tools outside it are not sent to the model and cannot
++    # be called by that turn.
++    allowed_tools: list[str] | None = Field(
++        default=None,
++        validation_alias=AliasChoices("allowedTools", "allowed_tools"),
++        serialization_alias="allowedTools",
++    )
+     max_session_messages_per_minute: int = Field(default=6, ge=1)
+     restrict_to_workspace: bool = False  # policy intent: keep tool access inside workspace when possible
+     webui_allow_local_service_access: bool = Field(

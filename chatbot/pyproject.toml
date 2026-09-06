@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "storypal-chatbot"
+version = "0.1.0"
+description = "StoryPal integration layer for nanobot"
+requires-python = ">=3.11"
+dependencies = ["nanobot-ai==0.3.0"]
+
+[project.entry-points."nanobot.tools"]
+story_state = "storypal_chatbot.tools:StorySessionStateTool"
+read_notes = "storypal_chatbot.tools:ReadNotesTool"
+write_note = "storypal_chatbot.tools:WriteNoteTool"
+read_reading_notebook = "storypal_chatbot.tools:ReadReadingNotebookTool"
+write_reading_notebook = "storypal_chatbot.tools:WriteReadingNotebookTool"
+search_story = "storypal_chatbot.tools:SearchStoryTool"
+get_story_evidence = "storypal_chatbot.tools:GetStoryEvidenceTool"
+
+[project.scripts]
+storypal-chatbot-configure = "storypal_chatbot.bootstrap:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+storypal_chatbot = ["persona/*.md"]

@@ -1,0 +1,190 @@
+diff --git a/nanobot/config/schema.py b/nanobot/config/schema.py
+index c32d0fc..b7d057f 100644
+--- a/nanobot/config/schema.py
++++ b/nanobot/config/schema.py
+@@ -65,6 +65,9 @@ class DreamConfig(Base):
+         default=None,
+         validation_alias=AliasChoices("modelOverride", "model", "model_override"),
+     )  # Model preset name for Dream sessions
++    editable_files: list[Literal["SOUL.md", "USER.md", "memory/MEMORY.md"]] = Field(
++        default_factory=lambda: ["SOUL.md", "USER.md", "memory/MEMORY.md"]
++    )  # Durable files Dream may modify; workspace skills remain separately writable
+ 
+     def build_schedule(self, timezone: str) -> CronSchedule:
+         """Build the runtime schedule, preferring the legacy cron override if present."""
+
+diff --git a/nanobot/agent/memory.py b/nanobot/agent/memory.py
+index e23a4c2..33d4fe6 100644
+--- a/nanobot/agent/memory.py
++++ b/nanobot/agent/memory.py
+@@ -68,7 +68,12 @@ class MemoryStore:
+         r"^\[\d{4}-\d{2}-\d{2}[^\]]*\]\s+[A-Z][A-Z0-9_]*(?:\s+\[tools:\s*[^\]]+\])?:"
+     )
+ 
+-    def __init__(self, workspace: Path, max_history_entries: int = _DEFAULT_MAX_HISTORY):
++    def __init__(
++        self,
++        workspace: Path,
++        max_history_entries: int = _DEFAULT_MAX_HISTORY,
++        dream_editable_files: list[str] | None = None,
++    ):
+         self.workspace = workspace
+         self.max_history_entries = max_history_entries
+         self.memory_dir = ensure_dir(workspace / "memory")
+@@ -77,6 +82,22 @@ class MemoryStore:
+         self.legacy_history_file = self.memory_dir / "HISTORY.md"
+         self.soul_file = workspace / "SOUL.md"
+         self.user_file = workspace / "USER.md"
++        requested_dream_files = set(
++            self._DREAM_CONTENT_PATHS
++            if dream_editable_files is None
++            else dream_editable_files
++        )
++        self._dream_content_paths = tuple(
++            path for path in self._DREAM_CONTENT_PATHS if path in requested_dream_files
++        )
++        dream_path_map = {
++            "SOUL.md": self.soul_file,
++            "USER.md": self.user_file,
++            "memory/MEMORY.md": self.memory_file,
++        }
++        self._dream_editable_files = [
++            dream_path_map[path] for path in self._dream_content_paths
++        ]
+         self._cursor_file = self.memory_dir / ".cursor"
+         self._dream_cursor_file = self.memory_dir / ".dream_cursor"
+         self._corruption_logged = False  # rate-limit invalid cursor warning
+@@ -84,9 +105,10 @@ class MemoryStore:
+         self._oversize_logged = False  # rate-limit oversized-entry warning
+         self._dream_prompt_oversize_logged = False
+         self._append_lock = threading.Lock()  # serialize cursor allocation + append
+-        self._git = GitStore(workspace, tracked_files=[
+-            "SOUL.md", "USER.md", "memory/MEMORY.md", "memory/.dream_cursor",
+-        ])
++        self._git = GitStore(
++            workspace,
++            tracked_files=[*self._dream_content_paths, "memory/.dream_cursor"],
++        )
+         self._maybe_migrate_legacy_history()
+ 
+     @property
+@@ -569,7 +591,7 @@ class MemoryStore:
+         """
+         if not self._git.is_initialized():
+             return ""
+-        return self._git.summarize_working_tree(list(self._DREAM_CONTENT_PATHS))
++        return self._git.summarize_working_tree(list(self._dream_content_paths))
+ 
+     def build_dream_tools(self) -> ToolRegistry:
+         """Build the restricted tool registry used by Dream runs."""
+@@ -586,7 +608,7 @@ class MemoryStore:
+         skills_dir.mkdir(parents=True, exist_ok=True)
+ 
+         extra_read = [BUILTIN_SKILLS_DIR] if BUILTIN_SKILLS_DIR.exists() else None
+-        editable_files = [self.memory_file, self.soul_file, self.user_file]
++        editable_files = self._dream_editable_files
+ 
+         tools.register(ReadFileTool(
+             workspace=workspace,
+
+diff --git a/nanobot/agent/context.py b/nanobot/agent/context.py
+index 5d49f25..3746adb 100644
+--- a/nanobot/agent/context.py
++++ b/nanobot/agent/context.py
+@@ -96,10 +96,16 @@ class ContextBuilder:
+     _RUNTIME_CONTEXT_TAG = RUNTIME_CONTEXT_TAG
+     _RUNTIME_CONTEXT_END = RUNTIME_CONTEXT_END
+ 
+-    def __init__(self, workspace: Path, timezone: str | None = None, disabled_skills: list[str] | None = None):
++    def __init__(
++        self,
++        workspace: Path,
++        timezone: str | None = None,
++        disabled_skills: list[str] | None = None,
++        dream_editable_files: list[str] | None = None,
++    ):
+         self.workspace = workspace
+         self.timezone = timezone
+-        self.memory = MemoryStore(workspace)
++        self.memory = MemoryStore(workspace, dream_editable_files=dream_editable_files)
+         self.skills = SkillsLoader(workspace, disabled_skills=set(disabled_skills) if disabled_skills else None)
+ 
+     def build_system_prompt(
+
+diff --git a/nanobot/agent/loop.py b/nanobot/agent/loop.py
+index f10434f..c7bd904 100644
+--- a/nanobot/agent/loop.py
++++ b/nanobot/agent/loop.py
+@@ -287,6 +287,7 @@ class AgentLoop:
+         preset_catalog_loader: preset_helpers.PresetCatalogLoader | None = None,
+         model_preset: str | None = None,
+         dream_model_preset: str | None = None,
++        dream_editable_files: list[str] | None = None,
+         preset_snapshot_loader: preset_helpers.PresetSnapshotLoader | None = None,
+         runtime_events: RuntimeEventBus | None = None,
+         turn_delivery_factory: TurnDeliveryFactory | None = None,
+@@ -375,7 +376,12 @@ class AgentLoop:
+         self._extra_hooks: list[AgentHook] = hooks or []
+         self._hook_factories: list[AgentTurnHookFactory] = hook_factories or []
+ 
+-        self.context = ContextBuilder(workspace, timezone=timezone, disabled_skills=disabled_skills)
++        self.context = ContextBuilder(
++            workspace,
++            timezone=timezone,
++            disabled_skills=disabled_skills,
++            dream_editable_files=dream_editable_files,
++        )
+         self.sessions = session_manager or SessionManager(workspace)
+         # One file-read/write tracker per logical session. The tool registry is
+         # shared by this loop, so tools resolve the active state via contextvars.
+@@ -519,6 +525,7 @@ class AgentLoop:
+             model_presets=preset_helpers.configured_model_presets(config),
+             model_preset=defaults.model_preset,
+             dream_model_preset=defaults.dream.model_override,
++            dream_editable_files=list(defaults.dream.editable_files),
+             restart_mode=config.gateway.restart_mode,
+             provider_snapshot_loader=provider_snapshot_loader,
+             preset_snapshot_loader=preset_snapshot_loader,
+
+diff --git a/tests/agent/test_dream.py b/tests/agent/test_dream.py
+index 15f1080..ea9a56f 100644
+--- a/tests/agent/test_dream.py
++++ b/tests/agent/test_dream.py
+@@ -252,6 +252,36 @@ class TestDreamTools:
+         assert "Precise" in store.soul_file.read_text(encoding="utf-8")
+         assert "**Name**: Ada" in store.user_file.read_text(encoding="utf-8")
+ 
++    @pytest.mark.asyncio
++    async def test_dream_editable_files_can_exclude_general_memory(self, tmp_path):
++        store = MemoryStore(
++            tmp_path,
++            dream_editable_files=["SOUL.md", "USER.md"],
++        )
++        store.write_memory("# Story memory\n\nDo not change this.")
++        tools = store.build_dream_tools()
++
++        blocked = await tools.execute(
++            "write_file",
++            {
++                "path": "memory/MEMORY.md",
++                "content": "overwritten",
++            },
++        )
++        allowed = await tools.execute(
++            "write_file",
++            {
++                "path": "USER.md",
++                "content": "# User\n\n- Prefers reflective discussion.\n",
++            },
++        )
++
++        assert "outside allowed directory" in blocked
++        assert store.read_memory() == "# Story memory\n\nDo not change this."
++        assert "Successfully wrote" in allowed
++        assert "reflective discussion" in store.read_user()
++        assert store._dream_content_paths == ("SOUL.md", "USER.md")
++
+     @pytest.mark.asyncio
+     async def test_dream_can_write_workspace_skills(self, store):
+         tools = store.build_dream_tools()
+

@@ -1,0 +1,457 @@
+diff --git a/nanobot/webui/settings_api.py b/nanobot/webui/settings_api.py
+index 276f354..687719b 100644
+--- a/nanobot/webui/settings_api.py
++++ b/nanobot/webui/settings_api.py
+@@ -40,6 +40,50 @@ _provider_requires_api_key = models.provider_requires_api_key
+ _reasoning_effort_values_for = models.reasoning_effort_values_for
+ 
+ 
++_PERSONA_DOCUMENTS = (
++    ("soul", "SOUL.md", "身份与语气", "StoryPal 的稳定身份、关系定位与表达风格。"),
++    ("agents", "AGENTS.md", "对话规则", "产品契约、工具策略、记忆边界与防剧透规则。"),
++    ("user", "USER.md", "用户信息", "只保存经过用户确认的信息，不自动推断人格。"),
++)
++_PERSONA_DOCUMENT_MAX_CHARS = 128_000
++
++
++def _persona_documents(config: Config) -> list[dict[str, Any]]:
++    """Return the three allowlisted StoryPal persona files for read-only display."""
++    workspace = Path(str(config.agents.defaults.workspace)).expanduser().resolve(strict=False)
++    documents: list[dict[str, Any]] = []
++    for document_id, filename, title, description in _PERSONA_DOCUMENTS:
++        candidate = (workspace / filename).resolve(strict=False)
++        content = ""
++        error: str | None = None
++        truncated = False
++        if candidate.parent != workspace:
++            error = "文件路径超出 StoryPal 工作区。"
++        elif not candidate.is_file():
++            error = "文件尚未创建。"
++        else:
++            try:
++                content = candidate.read_text(encoding="utf-8")
++            except (OSError, UnicodeError):
++                error = "文件暂时无法读取。"
++            if len(content) > _PERSONA_DOCUMENT_MAX_CHARS:
++                content = content[:_PERSONA_DOCUMENT_MAX_CHARS]
++                truncated = True
++        documents.append(
++            {
++                "id": document_id,
++                "filename": filename,
++                "title": title,
++                "description": description,
++                "content": content,
++                "available": error is None,
++                "truncated": truncated,
++                "error": error,
++            }
++        )
++    return documents
++
++
+ _RUNTIME_CAPABILITIES = {
+     "can_restart_engine": False,
+     "can_pick_folder": False,
+@@ -178,6 +222,7 @@ def settings_payload(
+             config_path=_settings_config_path(config_path),
+             version=__version__,
+         ),
++        "persona_documents": _persona_documents(config),
+         "requires_restart": requires_restart,
+     }
+     return decorate_settings_payload(
+
+diff --git a/webui/src/lib/types.ts b/webui/src/lib/types.ts
+index d7dd1c2..ad4e899 100644
+--- a/webui/src/lib/types.ts
++++ b/webui/src/lib/types.ts
+@@ -565,6 +565,16 @@ export interface SettingsPayload {
+     sections: string[];
+   };
+   restart_behavior_by_section?: Record<string, RestartBehavior>;
++  persona_documents?: Array<{
++    id: "soul" | "agents" | "user";
++    filename: "SOUL.md" | "AGENTS.md" | "USER.md";
++    title: string;
++    description: string;
++    content: string;
++    available: boolean;
++    truncated: boolean;
++    error: string | null;
++  }>;
+   agent: {
+     model: string;
+     provider: string;
+
+diff --git a/webui/src/components/settings/contracts.ts b/webui/src/components/settings/contracts.ts
+index f24cc79..5502cdf 100644
+--- a/webui/src/components/settings/contracts.ts
++++ b/webui/src/components/settings/contracts.ts
+@@ -11,6 +11,7 @@ export type SettingsSectionKey =
+   | "apps"
+   | "automations"
+   | "skills"
++  | "persona"
+   | "runtime"
+   | "advanced";
+ 
+
+diff --git a/webui/src/components/settings/SettingsSidebar.tsx b/webui/src/components/settings/SettingsSidebar.tsx
+index 2c35235..c9b25e6 100644
+--- a/webui/src/components/settings/SettingsSidebar.tsx
++++ b/webui/src/components/settings/SettingsSidebar.tsx
+@@ -1,6 +1,7 @@
+ import { useRef } from "react";
+ import {
+   Activity,
++  BookOpenText,
+   Check,
+   ChevronDown,
+   ChevronLeft,
+@@ -35,6 +36,7 @@ const SETTINGS_NAV_ITEMS: Array<{ key: SettingsSectionKey; icon: LucideIcon; fal
+   { key: "overview", icon: Activity, fallback: "Overview" },
+   { key: "appearance", icon: Palette, fallback: "Appearance" },
+   { key: "models", icon: SlidersHorizontal, fallback: "Models" },
++  { key: "persona", icon: BookOpenText, fallback: "Persona & Memory" },
+   { key: "image", icon: ImageIcon, fallback: "Image" },
+   { key: "voice", icon: Mic, fallback: "Voice" },
+   { key: "browser", icon: Globe2, fallback: "Web" },
+
+diff --git a/webui/src/App.tsx b/webui/src/App.tsx
+index 8fc89e0..5eafb13 100644
+--- a/webui/src/App.tsx
++++ b/webui/src/App.tsx
+@@ -167,6 +167,7 @@ const SETTINGS_SECTION_KEYS: SettingsSectionKey[] = [
+   "apps",
+   "automations",
+   "skills",
++  "persona",
+   "runtime",
+   "advanced",
+ ];
+
+diff --git a/webui/src/components/settings/SettingsPage.tsx b/webui/src/components/settings/SettingsPage.tsx
+index ed76dcd..e58e9e6 100644
+--- a/webui/src/components/settings/SettingsPage.tsx
++++ b/webui/src/components/settings/SettingsPage.tsx
+@@ -15,6 +15,7 @@ import {
+   providerFormFromRow,
+ } from "@/components/settings/models/ProviderSettings";
+ import { AppearanceSettings, OverviewSettings } from "@/components/settings/overview/OverviewSettings";
++import { PersonaSettings } from "@/components/settings/persona/PersonaSettings";
+ import { SettingsSidebar, standaloneSectionTitle } from "@/components/settings/SettingsSidebar";
+ import {
+   NanobotFeatureInstallDialog,
+@@ -477,6 +478,8 @@ export function SettingsPage({
+         );
+       case "skills":
+         return <SkillsCatalogSettings skills={skills} />;
++      case "persona":
++        return <PersonaSettings documents={settings.persona_documents} />;
+       case "runtime":
+         return (
+           <RuntimeSettings
+
+diff --git a/webui/src/i18n/locales/en/common.json b/webui/src/i18n/locales/en/common.json
+index 403b164..6d3dc91 100644
+--- a/webui/src/i18n/locales/en/common.json
++++ b/webui/src/i18n/locales/en/common.json
+@@ -102,7 +102,8 @@
+       "advanced": "Security",
+       "apps": "Apps",
+       "automations": "Automations",
+-      "skills": "Skills"
++      "skills": "Skills",
++      "persona": "Persona & Memory"
+     },
+     "sections": {
+       "interface": "Interface",
+
+diff --git a/webui/src/i18n/locales/zh-CN/common.json b/webui/src/i18n/locales/zh-CN/common.json
+index f6fca32..a7c0e87 100644
+--- a/webui/src/i18n/locales/zh-CN/common.json
++++ b/webui/src/i18n/locales/zh-CN/common.json
+@@ -102,7 +102,8 @@
+       "advanced": "安全",
+       "apps": "应用",
+       "automations": "自动任务",
+-      "skills": "技能"
++      "skills": "技能",
++      "persona": "人格与规则"
+     },
+     "sections": {
+       "interface": "界面",
+
+diff --git a/webui/src/i18n/locales/zh-TW/common.json b/webui/src/i18n/locales/zh-TW/common.json
+index 50a0377..e2ab8f1 100644
+--- a/webui/src/i18n/locales/zh-TW/common.json
++++ b/webui/src/i18n/locales/zh-TW/common.json
+@@ -102,7 +102,8 @@
+       "mcp": "MCP",
+       "apps": "應用程式",
+       "automations": "自動任務",
+-      "skills": "技能"
++      "skills": "技能",
++      "persona": "人格與規則"
+     },
+     "sections": {
+       "interface": "介面",
+
+diff --git a/tests/webui/test_settings_api.py b/tests/webui/test_settings_api.py
+index e674037..8b14b3c 100644
+--- a/tests/webui/test_settings_api.py
++++ b/tests/webui/test_settings_api.py
+@@ -98,6 +98,35 @@ def test_settings_payload_includes_versioned_docs(
+     }
+ 
+ 
++def test_settings_payload_includes_allowlisted_persona_documents(
++    tmp_path,
++    monkeypatch: pytest.MonkeyPatch,
++) -> None:
++    workspace = tmp_path / "workspace"
++    workspace.mkdir()
++    (workspace / "SOUL.md").write_text("# Soul\n\nWarm and direct.", encoding="utf-8")
++    (workspace / "AGENTS.md").write_text("# Rules\n\nNo spoilers.", encoding="utf-8")
++
++    config = Config()
++    config.agents.defaults.workspace = str(workspace)
++    config_path = tmp_path / "config.json"
++    save_config(config, config_path)
++    monkeypatch.setattr("nanobot.config.loader._current_config_path", config_path)
++
++    documents = settings_payload()["persona_documents"]
++
++    assert [document["filename"] for document in documents] == [
++        "SOUL.md",
++        "AGENTS.md",
++        "USER.md",
++    ]
++    assert documents[0]["content"] == "# Soul\n\nWarm and direct."
++    assert documents[0]["available"] is True
++    assert documents[1]["content"] == "# Rules\n\nNo spoilers."
++    assert documents[2]["available"] is False
++    assert documents[2]["error"] == "文件尚未创建。"
++
++
+ def test_settings_payload_exposes_edenai_provider(
+     tmp_path,
+     monkeypatch: pytest.MonkeyPatch,
+
+diff --git a/webui/src/components/settings/persona/PersonaSettings.tsx b/webui/src/components/settings/persona/PersonaSettings.tsx
+new file mode 100644
+--- /dev/null
++++ b/webui/src/components/settings/persona/PersonaSettings.tsx
+@@ -0,0 +1,150 @@
++import { Bot, ScrollText, UserRound, type LucideIcon } from "lucide-react";
++import { useMemo, useState } from "react";
++
++import { MarkdownText } from "@/components/MarkdownText";
++import type { SettingsPayload } from "@/lib/types";
++import { cn } from "@/lib/utils";
++
++type PersonaDocument = NonNullable<SettingsPayload["persona_documents"]>[number];
++type PersonaDocumentId = PersonaDocument["id"];
++
++const DOCUMENT_META: Array<{
++  id: PersonaDocumentId;
++  filename: PersonaDocument["filename"];
++  title: string;
++  description: string;
++  icon: LucideIcon;
++}> = [
++  {
++    id: "soul",
++    filename: "SOUL.md",
++    title: "身份与语气",
++    description: "StoryPal 是谁，以及它应该怎样与你交谈。",
++    icon: Bot,
++  },
++  {
++    id: "agents",
++    filename: "AGENTS.md",
++    title: "对话规则",
++    description: "工具、记忆、剧情证据和防剧透边界。",
++    icon: ScrollText,
++  },
++  {
++    id: "user",
++    filename: "USER.md",
++    title: "用户信息",
++    description: "只展示经过确认的信息，不自动推断人格。",
++    icon: UserRound,
++  },
++];
++
++export function PersonaSettings({
++  documents = [],
++}: {
++  documents?: SettingsPayload["persona_documents"];
++}) {
++  const [activeId, setActiveId] = useState<PersonaDocumentId>("soul");
++  const documentsById = useMemo(
++    () => new Map(documents.map((document) => [document.id, document])),
++    [documents],
++  );
++  const activeMeta = DOCUMENT_META.find((item) => item.id === activeId) ?? DOCUMENT_META[0];
++  const activeDocument = documentsById.get(activeId);
++
++  return (
++    <div className="space-y-6">
++      <header className="space-y-2">
++        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
++          StoryPal
++        </p>
++        <h1 className="text-[26px] font-normal tracking-tight text-foreground">人格与规则</h1>
++        <p className="max-w-2xl text-[13px] leading-6 text-muted-foreground">
++          这里展示每轮对话都会重新装配的三个稳定 Markdown 文件。页面只读；受约束的 Dream 可更新身份与用户认识，故事记忆保持不可写。
++        </p>
++      </header>
++
++      <div
++        role="tablist"
++        aria-label="人格文档"
++        className="grid gap-2 sm:grid-cols-3"
++      >
++        {DOCUMENT_META.map((item) => {
++          const Icon = item.icon;
++          const active = item.id === activeId;
++          const document = documentsById.get(item.id);
++          return (
++            <button
++              key={item.id}
++              type="button"
++              role="tab"
++              aria-selected={active}
++              aria-controls="storypal-persona-document"
++              onClick={() => setActiveId(item.id)}
++              className={cn(
++                "rounded-panel border px-4 py-4 text-left transition-colors",
++                active
++                  ? "border-foreground/15 bg-settings-surface text-foreground shadow-sm"
++                  : "border-transparent bg-settings-surface/60 text-muted-foreground hover:bg-settings-surface",
++              )}
++            >
++              <span className="flex items-center justify-between gap-3">
++                <span className="flex items-center gap-2 text-[13px] font-semibold">
++                  <Icon className="h-4 w-4" aria-hidden />
++                  {item.title}
++                </span>
++                <span
++                  className={cn(
++                    "h-2 w-2 rounded-full",
++                    document?.available ? "bg-emerald-500" : "bg-amber-500",
++                  )}
++                  aria-label={document?.available ? "可读取" : "不可读取"}
++                />
++              </span>
++              <span className="mt-2 block font-mono text-[11px] text-muted-foreground/75">
++                {item.filename}
++              </span>
++              <span className="mt-2 block text-[12px] leading-5">{item.description}</span>
++            </button>
++          );
++        })}
++      </div>
++
++      <section
++        id="storypal-persona-document"
++        role="tabpanel"
++        className="overflow-hidden rounded-panel bg-settings-surface"
++      >
++        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/55 px-5 py-4">
++          <div>
++            <h2 className="text-[15px] font-semibold text-foreground">{activeMeta.title}</h2>
++            <p className="mt-1 font-mono text-[11px] text-muted-foreground">
++              {activeMeta.filename}
++            </p>
++          </div>
++          <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
++            只读
++          </span>
++        </div>
++        <div className="min-h-[360px] px-5 py-5 sm:px-7 sm:py-6">
++          {!activeDocument?.available ? (
++            <div className="rounded-control border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-[13px] text-amber-700 dark:text-amber-300">
++              {activeDocument?.error ?? "该文档暂时不可读取。"}
++            </div>
++          ) : activeDocument.content.trim() ? (
++            <MarkdownText className="max-w-none text-[14px] leading-7">
++              {activeDocument.content}
++            </MarkdownText>
++          ) : (
++            <p className="text-[13px] text-muted-foreground">该文档当前为空。</p>
++          )}
++          {activeDocument?.truncated ? (
++            <p className="mt-5 text-[11px] text-amber-700 dark:text-amber-300">
++              文档过长，页面仅展示前 128,000 个字符。
++            </p>
++          ) : null}
++        </div>
++      </section>
++    </div>
++  );
++}
++
+
+diff --git a/webui/src/tests/settings-persona.test.tsx b/webui/src/tests/settings-persona.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/webui/src/tests/settings-persona.test.tsx
+@@ -0,0 +1,55 @@
++import { render, screen } from "@testing-library/react";
++import userEvent from "@testing-library/user-event";
++import { describe, expect, it } from "vitest";
++
++import { PersonaSettings } from "@/components/settings/persona/PersonaSettings";
++import type { SettingsPayload } from "@/lib/types";
++
++const documents: NonNullable<SettingsPayload["persona_documents"]> = [
++  {
++    id: "soul",
++    filename: "SOUL.md",
++    title: "身份与语气",
++    description: "Identity",
++    content: "# StoryPal Soul\n\nWarm and direct.",
++    available: true,
++    truncated: false,
++    error: null,
++  },
++  {
++    id: "agents",
++    filename: "AGENTS.md",
++    title: "对话规则",
++    description: "Rules",
++    content: "# StoryPal Rules\n\nNever spoil future chapters.",
++    available: true,
++    truncated: false,
++    error: null,
++  },
++  {
++    id: "user",
++    filename: "USER.md",
++    title: "用户信息",
++    description: "Confirmed user information",
++    content: "",
++    available: true,
++    truncated: false,
++    error: null,
++  },
++];
++
++describe("PersonaSettings", () => {
++  it("shows all three persona documents and switches the rendered markdown", async () => {
++    const user = userEvent.setup();
++    render(<PersonaSettings documents={documents} />);
++
++    expect(screen.getByRole("tabpanel")).toHaveTextContent("StoryPal Soul");
++    expect(screen.getAllByRole("tab")).toHaveLength(3);
++
++    await user.click(screen.getByRole("tab", { name: /对话规则/ }));
++
++    expect(screen.getByRole("tabpanel")).toHaveTextContent("StoryPal Rules");
++    expect(screen.getByRole("tabpanel")).toHaveTextContent("Never spoil future chapters.");
++  });
++});
++
