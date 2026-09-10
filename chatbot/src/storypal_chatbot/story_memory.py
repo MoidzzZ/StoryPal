@@ -30,6 +30,20 @@ class StoryMemoryBackend(Protocol):
 
     def get_unit(self, work_id: str, unit_id: str) -> dict[str, Any] | None: ...
 
+    def get_reading_locations(self, work_id: str) -> dict[str, Any]: ...
+
+    def get_recap(
+        self, work_id: str, *, max_order: int, recent_limit: int = 5
+    ) -> dict[str, Any]: ...
+
+    def get_entity_context(
+        self, work_id: str, name: str, *, max_order: int
+    ) -> dict[str, Any]: ...
+
+    def get_plotline_context(
+        self, work_id: str, title: str, *, max_order: int
+    ) -> dict[str, Any]: ...
+
 
 def _project_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -98,6 +112,26 @@ class PipelineStoryMemoryBackend:
 
     def get_unit(self, work_id: str, unit_id: str) -> dict[str, Any] | None:
         return self._get_adapter().get_unit(work_id, unit_id)
+
+    def get_reading_locations(self, work_id: str) -> dict[str, Any]:
+        return self._get_adapter().get_reading_locations(work_id)
+
+    def get_recap(
+        self, work_id: str, *, max_order: int, recent_limit: int = 5
+    ) -> dict[str, Any]:
+        return self._get_adapter().get_recap(
+            work_id, max_order=max_order, recent_limit=recent_limit
+        )
+
+    def get_entity_context(
+        self, work_id: str, name: str, *, max_order: int
+    ) -> dict[str, Any]:
+        return self._get_adapter().get_entity_context(work_id, name, max_order=max_order)
+
+    def get_plotline_context(
+        self, work_id: str, title: str, *, max_order: int
+    ) -> dict[str, Any]:
+        return self._get_adapter().get_plotline_context(work_id, title, max_order=max_order)
 
 
 class PipelineFtsBackend(PipelineStoryMemoryBackend):
@@ -190,6 +224,70 @@ class StoryMemoryService:
             anchors=anchors,
             adjacent_context=adjacent,
         )
+
+    def reading_locations(self, *, work_id: str | None) -> dict[str, Any]:
+        if not work_id:
+            raise StoryProgressRequired("请选择作品后再读取阅读位置。")
+        raw = self.backend.get_reading_locations(work_id)
+        locations = raw.get("locations") if isinstance(raw, dict) else None
+        if not isinstance(locations, list):
+            raise StoryMemoryError("故事处理管线返回的阅读位置格式无效。")
+        safe_locations = []
+        for location in locations:
+            if not isinstance(location, dict):
+                continue
+            try:
+                end_order = int(location["end_order"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            safe_locations.append({
+                "location_id": str(location.get("location_id", "")),
+                "label": str(location.get("label", "")),
+                "kind": str(location.get("kind", "chapter")),
+                "start_order": int(location.get("start_order", 0)),
+                "end_order": end_order,
+                "unit_count": int(location.get("unit_count", 0)),
+            })
+        return {"work_id": work_id, "source_version": raw.get("source_version"), "locations": safe_locations}
+
+    def structured_context(
+        self,
+        *,
+        kind: str,
+        work_id: str | None,
+        max_seen_order: int | None,
+        query: str | None = None,
+    ) -> dict[str, Any]:
+        """取得供回答组织使用的已读结构化线索，不替代原文证据。"""
+        if not work_id or max_seen_order is None:
+            raise StoryProgressRequired("读取故事状态前请先设置作品和已读范围。")
+        if kind == "recap":
+            raw = self.backend.get_recap(work_id, max_order=max_seen_order)
+        elif kind == "entity":
+            if not query or not query.strip():
+                raise StoryMemoryError("查询人物或术语状态时必须提供名称。")
+            raw = self.backend.get_entity_context(work_id, query.strip(), max_order=max_seen_order)
+        elif kind == "plotline":
+            if not query or not query.strip():
+                raise StoryMemoryError("查询情节线时必须提供名称。")
+            raw = self.backend.get_plotline_context(work_id, query.strip(), max_order=max_seen_order)
+        else:
+            raise StoryMemoryError("结构化故事查询类型无效。")
+        if not isinstance(raw, dict):
+            raise StoryMemoryError("故事处理管线返回的结构化记忆格式无效。")
+        safe = dict(raw)
+        safe["work_id"] = work_id
+        safe["max_order"] = max_seen_order
+        history = safe.get("history")
+        if isinstance(history, list):
+            safe["history"] = [
+                item for item in history
+                if isinstance(item, dict) and int(item.get("order", -1)) <= max_seen_order
+            ]
+        snapshot_order = safe.get("snapshot_order")
+        if snapshot_order is not None and int(snapshot_order) > max_seen_order:
+            raise StoryMemoryError("结构化记忆越过了当前防剧透边界。")
+        return safe
 
     def get_evidence(
         self, *, work_id: str | None, unit_id: str, max_seen_order: int | None

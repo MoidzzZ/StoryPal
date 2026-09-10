@@ -11,11 +11,13 @@ dependencies = ["nanobot-ai==0.3.0"]
 
 [project.entry-points."nanobot.tools"]
 story_state = "storypal_chatbot.tools:StorySessionStateTool"
+reading_location = "storypal_chatbot.tools:ReadingLocationTool"
 read_notes = "storypal_chatbot.tools:ReadNotesTool"
 write_note = "storypal_chatbot.tools:WriteNoteTool"
 read_reading_notebook = "storypal_chatbot.tools:ReadReadingNotebookTool"
 write_reading_notebook = "storypal_chatbot.tools:WriteReadingNotebookTool"
 search_story = "storypal_chatbot.tools:SearchStoryTool"
+story_context = "storypal_chatbot.tools:StoryContextTool"
 get_story_evidence = "storypal_chatbot.tools:GetStoryEvidenceTool"
 
 [project.scripts]

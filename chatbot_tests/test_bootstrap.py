@@ -24,6 +24,10 @@ def test_defaults_are_bounded_and_preserve_provider_secret(tmp_path):
     assert defaults["dream"]["editableFiles"] == ["SOUL.md", "USER.md"]
     assert result["gateway"]["heartbeat"]["enabled"] is False
     assert result["tools"]["restrictToWorkspace"] is True
+    assert result["tools"]["allowedTools"] == [
+        "story_state", "reading_location", "search_story", "get_story_evidence", "story_context",
+        "read_notes", "write_note", "read_reading_notebook", "write_reading_notebook",
+    ]
     assert result["tools"]["exec"]["enable"] is False
     assert result["providers"]["custom"]["apiKey"] == "keep-me"
 

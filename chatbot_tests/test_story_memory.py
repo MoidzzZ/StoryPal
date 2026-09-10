@@ -14,7 +14,7 @@ from storypal_chatbot.story_memory import (
     StoryMemoryService,
     StoryProgressRequired,
 )
-from storypal_chatbot.tools import GetStoryEvidenceTool, SearchStoryTool, StorySessionStateTool
+from storypal_chatbot.tools import (GetStoryEvidenceTool, ReadingLocationTool, SearchStoryTool, StoryContextTool, StorySessionStateTool)
 
 
 def evidence(order: int, chapter: str = "第一章", work: str = "demo") -> dict:
@@ -42,6 +42,20 @@ class FakeBackend:
 
     def get_unit(self, work_id, unit_id):
         return self.units.get(unit_id)
+
+    def get_reading_locations(self, work_id):
+        return {"work_id": work_id, "source_version": "test", "locations": [
+            {"location_id": "chapter-01", "label": "第一章", "kind": "chapter", "start_order": 1, "end_order": 12, "unit_count": 12}
+        ]}
+
+    def get_recap(self, work_id, *, max_order, recent_limit=5):
+        return {"work_id": work_id, "snapshot_order": max_order, "backdrop": "测试背景", "recent": [{"order": max_order, "summary": "已读事件"}]}
+
+    def get_entity_context(self, work_id, name, *, max_order):
+        return {"work_id": work_id, "name": name, "snapshot_order": max_order, "history": [{"order": 4, "value": "已读"}, {"order": max_order + 1, "value": "未来"}]}
+
+    def get_plotline_context(self, work_id, title, *, max_order):
+        return {"work_id": work_id, "title": title, "snapshot_order": max_order, "history": [{"order": 3, "value": "开始"}]}
 
 
 def request(session: str = "webui:story", sender: str = "user-1") -> RequestContext:
@@ -143,3 +157,20 @@ def test_pipeline_auto_backend_passes_auto_to_frozen_adapter(tmp_path):
     assert backend.retrieval == "auto"
     backend.search("demo", "测试", max_order=1, top_k=1)
     assert created == [(tmp_path / "data", "auto")]
+@pytest.mark.asyncio
+async def test_reader_can_set_chapter_boundary_and_use_structured_context(tmp_path):
+    backend = FakeBackend([evidence(4), evidence(8), evidence(12)])
+    service = StoryMemoryService(backend)
+    location_tool = ReadingLocationTool(tmp_path, service=service)
+    context_tool = StoryContextTool(tmp_path, service=service)
+
+    with request_context(request()):
+        locations = json.loads(await location_tool.execute(action="list", work_id="demo"))
+        assert locations["locations"][0]["label"] == "第一章"
+        selected = json.loads(await location_tool.execute(action="set", work_id="demo", location_id="chapter-01"))
+        assert selected["state"]["max_seen_order"] == 12
+
+        recap = json.loads(await context_tool.execute(kind="recap"))
+        assert recap["snapshot_order"] == 12
+        entity = json.loads(await context_tool.execute(kind="entity", query="测试人物"))
+        assert entity["history"] == [{"order": 4, "value": "已读"}]

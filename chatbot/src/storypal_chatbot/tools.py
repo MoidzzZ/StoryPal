@@ -115,6 +115,64 @@ class StorySessionStateTool(Tool):
             return ToolResult.error(str(exc))
 
 
+@tool_parameters(
+    {
+        "type": "object",
+        "properties": {
+            "action": {"type": "string", "enum": ["list", "set"]},
+            "work_id": {"type": "string", "minLength": 1, "maxLength": 200},
+            "location_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        },
+        "required": ["action", "work_id"],
+        "additionalProperties": False,
+    }
+)
+class ReadingLocationTool(Tool):
+    """Translate reader-friendly chapter choices into a safe session boundary."""
+
+    _plugin_discoverable = True
+
+    def __init__(self, workspace: str | Path, service: StoryMemoryService | None = None) -> None:
+        self.state_store = SessionStateStore(workspace)
+        self.service = service or StoryMemoryService(PipelineStoryMemoryBackend())
+
+    @classmethod
+    def create(cls, ctx: ToolContext) -> Tool:
+        return cls(ctx.workspace)
+
+    @property
+    def name(self) -> str:
+        return "reading_location"
+
+    @property
+    def description(self) -> str:
+        return (
+            "列出或设置用户已完整读完的章节位置。当前《流浪地球》的 work_id 是 wandering_earth。"
+            "先用 action=list 获取可选章节；仅当用户明确说已读完某章节时用 action=set。"
+            "set 会将安全边界设在该章节末尾，用户无需知道内部单元编号。"
+        )
+
+    async def execute(self, action: str, work_id: str, location_id: str | None = None, **_: Any) -> str | ToolResult:
+        try:
+            locations = self.service.reading_locations(work_id=work_id)
+            if action == "list":
+                return json.dumps(locations, ensure_ascii=False)
+            if not location_id:
+                return ToolResult.error("action=set 时必须提供 location_id")
+            selected = next((item for item in locations["locations"] if item["location_id"] == location_id), None)
+            if selected is None:
+                return ToolResult.error(f"未找到阅读位置：{location_id}")
+            session_key, _owner = _request_keys()
+            state = self.state_store.set(
+                session_key,
+                active_work=work_id,
+                current_anchor=selected["label"],
+                max_seen_order=selected["end_order"],
+            )
+            return json.dumps({"state": state, "location": selected}, ensure_ascii=False)
+        except (RuntimeError, StoryMemoryError, StoryProgressRequired, OSError, ValueError) as exc:
+            return ToolResult.error(str(exc))
+
 class _NotesTool(Tool):
     _plugin_discoverable = False
 
@@ -393,6 +451,49 @@ class SearchStoryTool(_StoryEvidenceTool):
             return ToolResult.error(str(exc))
 
 
+@tool_parameters(
+    {
+        "type": "object",
+        "properties": {
+            "kind": {"type": "string", "enum": ["recap", "entity", "plotline"]},
+            "query": {"type": "string", "minLength": 1, "maxLength": 200},
+        },
+        "required": ["kind"],
+        "additionalProperties": False,
+    }
+)
+class StoryContextTool(_StoryEvidenceTool):
+    """Provide boundary-safe structured clues for a reading conversation."""
+
+    _plugin_discoverable = True
+
+    @property
+    def name(self) -> str:
+        return "story_context"
+
+    @property
+    def description(self) -> str:
+        return (
+            "取得当前已读范围内的结构化故事线索，仅供组织回答，不能取代原文证据。"
+            "kind=recap 用于用户断读后问‘之前读到哪了’；kind=entity 用于追问人物、地点或术语的当前状态；"
+            "kind=plotline 用于追问一条情节线进展。entity 和 plotline 必须给 query。"
+            "不要把原始字段或内部编号直接展示给用户；需要解释事实时，仍须用 search_story 或 get_story_evidence 取得原文依据。"
+        )
+
+    async def execute(
+        self, kind: str, query: str | None = None, **_: Any
+    ) -> str | ToolResult:
+        try:
+            state = self._state()
+            context = self.service.structured_context(
+                kind=kind,
+                work_id=state.get("active_work"),
+                max_seen_order=state.get("max_seen_order"),
+                query=query,
+            )
+            return json.dumps(context, ensure_ascii=False)
+        except (StoryMemoryError, StoryProgressRequired, OSError, ValueError) as exc:
+            return ToolResult.error(str(exc))
 @tool_parameters(
     {
         "type": "object",
