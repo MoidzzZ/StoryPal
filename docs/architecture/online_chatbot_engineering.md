@@ -654,7 +654,7 @@ session state after
 
 ## Phase 0：本地审计现有 Chatbot
 
-先运行 `CODEX_CHATBOT_AUDIT.md`。
+先运行 `../research/CODEX_CHATBOT_AUDIT.md`。
 
 ## Phase 1：保留原 Chat Agent
 

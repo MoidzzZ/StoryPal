@@ -27,9 +27,9 @@
 
 | 文档 | 与 Chatbot 相关的确定要求 | 状态 |
 | --- | --- | --- |
-| `online_chatbot_engineering.md` | 单一 Agent loop；Story / Recent / History / Notes 分层；Story、State、Memory、Notes、Web tools；trace 与 20–30 个真实 case | 已读 |
-| `offline_story_pipeline_engineering.md` | Chatbot 只通过本地 `StoryMemory` adapter 读取；暂不依赖内部 schema；evidence 至少包含 `work_id/story_unit_id/order/text/score/metadata` | 已读 |
-| `CODEX_CHATBOT_AUDIT.md` | 先审计现有 Chatbot，再做最小改造；要求输出架构、能力、风险、复用点和开发计划 | 已读；因当前无源码，代码审计待补 |
+| `../architecture/online_chatbot_engineering.md` | 单一 Agent loop；Story / Recent / History / Notes 分层；Story、State、Memory、Notes、Web tools；trace 与 20–30 个真实 case | 已读 |
+| `../architecture/offline_story_pipeline_engineering.md` | Chatbot 只通过本地 `StoryMemory` adapter 读取；暂不依赖内部 schema；evidence 至少包含 `work_id/story_unit_id/order/text/score/metadata` | 已读 |
+| `../research/CODEX_CHATBOT_AUDIT.md` | 先审计现有 Chatbot，再做最小改造；要求输出架构、能力、风险、复用点和开发计划 | 已读；因当前无源码，代码审计待补 |
 
 ## 3. 工作范围
 
@@ -533,7 +533,7 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 - 本地 gateway 已重新启动，PID 29272、端口 18790，WebUI 将使用新规则与参数契约。
 ## 2026-09-05：后续开发规划
 
-- 已创建 `CHATBOT_NEXT_PHASE_PLAN.md`，将下一阶段排序为：工具 allowlist → 向量策略配置与 FTS 降级 → 真实 Luna 轨迹 → 多作品金标与 RRF 离线评估 → HistoryMemory → 陪读功能扩展。
+- 已创建 `../product/CHATBOT_NEXT_PHASE_PLAN.md`，将下一阶段排序为：工具 allowlist → 向量策略配置与 FTS 降级 → 真实 Luna 轨迹 → 多作品金标与 RRF 离线评估 → HistoryMemory → 陪读功能扩展。
 - 再次明确 V0 暂缓独立 Query Analyzer / Router；主 Agent 直接负责上下文消歧与工具选择。
 ## 2026-09-05：工具白名单收敛
 
@@ -545,7 +545,7 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 ## 2026-09-05：首次阅读陪读体验复盘
 
 - 从产品角度确认：现有 `Notes` 只应保存用户明确要求记住的长期偏好；它不适合作品阅读过程中的反应、疑问与猜测，也不应被 Dream 混入人格或故事事实。
-- 已新增 `CHATBOT_FIRST_READING_EXPERIENCE.md`，定义无剧透首次打开、自然陪读循环、独立阅读手账（反应/问题/预测）、预测核验边界与首轮验收场景。
+- 已新增 `../product/CHATBOT_FIRST_READING_EXPERIENCE.md`，定义无剧透首次打开、自然陪读循环、独立阅读手账（反应/问题/预测）、预测核验边界与首轮验收场景。
 - 后续功能优先级调整为：阅读定位友好化 → 已读范围短回顾 → 阅读手账 → 预测核验 → 真实轨迹，再根据真实需求实现 HistoryMemory；检索策略接入仍作为底层并行工作，但不应取代陪读体验验证。
 
 - 已将“初次阅读陪读”准则同步至源码人格模板和运行时 workspace：只讨论已读范围；困惑先用已读文本澄清；情绪先回应；猜测、问题与感受必须经用户确认才记录；不得暗示后续答案。`bootstrap.py` 也会在新配置时写入五项工具白名单。
@@ -558,14 +558,14 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 - 当前 Chatbot 仍显式使用 FTS 后端，因此完整数据已可用但尚未改变线上检索策略。下一项可在 Chatbot 适配层接入协作方的 `auto`（向量优先、FTS 降级）模式，并补充策略可观察性与回归测试。
 ## 2026-09-06：Luna 对完整故事单元的产品审阅
 
-- 已用 GPT-5.6 Luna 审阅完整抽取的 108 个单元、字段样本、向量/FTS 与边界证据；完整原文记录于 `LUNA_STORY_UNIT_REVIEW_2026-09-06.md`。
+- 已用 GPT-5.6 Luna 审阅完整抽取的 108 个单元、字段样本、向量/FTS 与边界证据；完整原文记录于 `../research/LUNA_STORY_UNIT_REVIEW_2026-09-06.md`。
 - 结论与既有产品方向一致：优先支持已读范围内即时解释、阅读反应/问题承接、预测暂存与用户主动核验；阅读手账必须独立于长期 Notes。
 - Luna 明确指出：`summary`、原始人物/地点/关键词仅适合作为内部证据或检索线索，未清洗前不应直接展示；样本中人物字段混入概念，空标签也不能等同于无实体。
 - 新增硬性实现要求：所有手账读取、展示、核验和生成都必须由 `active_work` 与 `order <= max_seen_order` 在数据层共同过滤，不能只依赖提示词。
 
 ## 2026-09-06：完整故事单元内容可用性分析
 
-- 已完成 108 个《流浪地球》单元的字段覆盖、长度、章节分布和标签形态审计，结论记录于 `STORY_UNIT_USABILITY_ANALYSIS_2026-09-06.md`；所有单元均非降级，均具备原文、摘要、近因事件与状态快照。
+- 已完成 108 个《流浪地球》单元的字段覆盖、长度、章节分布和标签形态审计，结论记录于 `../research/STORY_UNIT_USABILITY_ANALYSIS_2026-09-06.md`；所有单元均非降级，均具备原文、摘要、近因事件与状态快照。
 - 可先用于“已读范围解释、定位、带证据回应”；不将原始摘要、人物/地点/关键词、状态快照直接展示。人物字段已有关系组合、群体与组织混入，须先清洗。
 - 新识别的边界风险：用户读到单元中部时，单纯 `order <= max_seen_order` 会放出该单元余下内容。首版阅读位置应只提交“完整读完的单元”，或在后续增加行/段落锚点。
 - 后续按“auto 检索策略与可观察性 → 阅读位置与短回顾 → 独立阅读手账 → 真实轨迹与标签清洗审计”的顺序推进；手账长期锚点需带作品版本/源哈希与锚点文本，不能只存会随切分变化的 `unit_id`。
@@ -579,7 +579,7 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 - 已新增独立 `ReadingNotebookStore` 与两个受限工具：`read_reading_notebook`、`write_reading_notebook`。它们只保存用户明确确认的 `reaction`、`question`、`prediction`，不使用长期 Notes 的文件或语义。
 - 读取时按用户、`active_work` 和 `anchor_order <= max_seen_order` 共同过滤；写入前强制要求已有作品和防剧透边界，并记录当时阅读锚点。当前不做自动核验或自动人格抽取。
 - 已注册为 nanobot 插件并更新运行时 allowlist；网关已重启。全套回归为 18 项通过。
-- 仍不邀请用户做首次阅读体验：现有阅读位置依旧需要内部 `max_seen_order`。已将“章节/位置映射”和“实际检索分支诊断”需求写入 `STORYMEMORY_INTERFACE_REQUEST.md`；待该接口可用后，可补自然语言阅读定位并开始首轮体验。
+- 仍不邀请用户做首次阅读体验：现有阅读位置依旧需要内部 `max_seen_order`。已将“章节/位置映射”和“实际检索分支诊断”需求写入 `../research/STORYMEMORY_INTERFACE_REQUEST.md`；待该接口可用后，可补自然语言阅读定位并开始首轮体验。
 ## 2026-09-06：阅读手账真实 Luna 验收
 
 - 已在独立开发会话 `storypal-notebook-acceptance-20260906` 完成真实 Luna 轨迹：模型按顺序调用 `story_state(set)`、`write_reading_notebook(add)`、`read_reading_notebook`，将“地球停止自转的画面让我很不安”作为 `reaction` 写入并确认读取成功。
