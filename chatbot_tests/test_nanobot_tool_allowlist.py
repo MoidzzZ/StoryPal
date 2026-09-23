@@ -58,15 +58,17 @@ async def test_storypal_runtime_only_exposes_allowlisted_tools() -> None:
     try:
         await loop.process_direct("测试工具可见性", session_key="test:tool-allowlist")
         assert recorder.tool_names == sorted([
-            "story_state",
-            "reading_location",
+            "resolve_reading_location",
+            "set_reading_progress",
             "search_story",
             "get_story_evidence",
             "story_context",
-            "read_notes",
-            "write_note",
-            "read_reading_notebook",
-            "write_reading_notebook",
+            "record_interaction_note",
+            "forget_interaction_note",
+            "search_reading_journal",
+            "save_journal_entry",
+            "search_memory",
+            "write_memory",
         ])
     finally:
         await loop.aclose()

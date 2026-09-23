@@ -1,8 +1,220 @@
 # StoryPal Chatbot 开发进度
 
-> 本文档是 Chatbot 工作的持续维护入口。每次开始或结束一项工作时更新状态、证据、决策、用户核验结果和 TODO。  
-> 最后更新：2026-09-11（Asia/Shanghai）
+> 本文件维护当前事实、阶段结果、用户核验和下一步；历史记录保留在本文后半部分。
+> 最后更新：2026-09-24（Asia/Shanghai）
+> 当前执行顺序：[下一阶段交付](../architecture/STORYPAL_NEXT_DELIVERY.md)；历史完整规格：[StoryPal RAG 与 Memory 强化规格](../architecture/STORYPAL_RAG_MEMORY_SPEC.md)
 
+## 2026-09-23：桌面网页阅读器首版
+
+- 按用户决定先做桌面端：现有 WebUI 聊天页左侧加入《流浪地球》原文阅读器，右侧保留聊天；支持四章跳转、字号调整、浏览器本地续读、划选原文并附行号带入对话。
+- 原文由已登录的只读接口从本地 `story_mem/data/wandering_earth/02_segmented/units.jsonl` 读取，不放进公开前端 bundle；接口不接受任意文件路径，未登录返回 401。当前数据为 108 个单元、4 个章节。
+- 章节末按钮只发送用户明确的“已读完本章”报告；复用现有 `resolve_reading_location` / `set_reading_progress` 跨回合确认，阅读器自身不直接写进度。滚动与划选只影响本地界面，不改变已读范围。
+- 修复网页重连时默认匿名 `client_id` 变化导致用户级进度难以续接的问题：本机浏览器保存随机生成的稳定 ID，初次连接与 token 刷新都使用同一 ID；它不是鉴权凭据。
+- 验证：阅读数据定向测试 2/2、受影响 WebUI 回归 62/62 通过，TypeScript 检查和生产构建通过；本地重启后 gateway 健康 200，接口未登录 401、登录后返回 108 个单元。浏览器自动核验工具初始化失败，排版与真实 Luna 对话仍待用户核验。
+- 下一步：请用户试读开篇并核验划选提问、关闭后续读、章末确认是否自然；若接受，再做引用证据回跳、手账快捷入口和更细的段落进度。
+- 2026-09-24 公开仓库整理：仅提交实现、测试、规划与结果摘要；原文、`story_mem/`、运行配置、用户附件与本地输出均保持 Git 忽略。公开仓库中的阅读器是补丁与适配代码，不包含可直接阅读的小说数据。
+
+## 0. 2026-09-19：RAG / Memory 深化开发窗口
+
+### 2026-09-21 架构调整（已由用户确认）
+
+- 当前主线仍基于 nanobot：复用其 Agent Loop、结构化工具调用、会话锁、checkpoint、滚动摘要与 WebUI；StoryPal 聚焦阅读状态、Note、阅读手账、StoryMemory、工具策略和工作流。
+- `Note.md` 定位为 Agent 自维护、每轮全量注入的热认知工作区：保存非剧情的当前约定、行为约束、认知纠正、偏好、共同目标/结论和开放观察；开放观察允许 Agent 创建新主题，但只能作为待验证弱提示。Note 超长后由 Curator 整理；Dream 将稳定内容进一步吸收到 `SOUL.md` / `USER.md`，不得修改 `AGENTS.md` 或故事记忆。
+- 不再新增独立 ProfileStore。HistoryMemory v0 视为已经完成的存储/隔离技术验证，正式产品语义收敛为 Note、阅读手账和按日情景记忆；现有 `write_memory` / `search_memory` 将在改造时退出目标工具集。
+- 工具按读写副作用拆分，不用统一 `action` 混合查询和写入。目标可见工具为：`resolve_reading_location`、`set_reading_progress`、`search_story`、`get_story_context`、`search_reading_journal`、`save_journal_entry`、`update_journal_entry`、`record_interaction_note`、`recall_interaction_history`。
+- 更新阅读进度与 Agent 主动建议记录手账，首版采用跨回合对话确认；用户明确说“记下来”可视为手账写入授权。WebUI 确认卡片暂不开发，列入后续体验 TODO。
+- 同步工作流首选“更新阅读进度”和“记录阅读手账”；预测校验改为阅读进度更新后的异步/延迟任务。Skill 收敛为“首次阅读陪伴”和“剧情事实核验”。
+
+- 异步维护增加 Note Curator：独立于 Dream 整理 `Note.md`，允许创建新的开放观察主题，但不得提升长期人格或写入故事记忆；Dream 只消费整理后的候选。
+- `Note.md` 同时承载可立即使用的共同目标、长期约定和已确认结论；这些内容可以由 Dream 深化到 `USER.md` / `SOUL.md`，但 Note 在当前对话中仍是较新的热认知视图，不只是候选暂存区。
+- 情景记忆改为与 nanobot 压缩 checkpoint 同源：普通消息先留在活动 context；运行时 checkpoint/Trace 可在工具前后频繁记录但不触发抽取；token 或 idle 压缩捕获稳定消息区间时才抽取重要 episode 到 `memory/YYYY-MM-DD.md`。本阶段不使用 `MEMORY.md`，只列为未来层级汇总 TODO。
+- 不建设独立 ToolMemory。nanobot 的工具调用与原始 Observation 留在 trace/checkpoint；权威写入进入 ReadingState、Note 或阅读手账；只有会持续影响未来交互的结果才成为 episode 候选，且只保存结论和来源引用，不复制原始工具输出。
+- 情景记忆以按日 Markdown 为事实源，派生索引改用独立 LanceDB `episodic_memory` 表与本地 BGE-M3；关键词索引不作为主召回。首版只保证 `occurred_at`、`recorded_at` 和 provenance，不实现通用冲突消解。
+
+- 延迟策略已收敛：用户确认后的 Note/手账/阅读进度采用同步本地原子写，保证回复“已记录”时确已持久化；Note Curator、episode 抽取、embedding 和索引更新后台执行，不为普通对话增加维护型 LLM 往返。
+- nanobot 后端和 WebUI 已具备连续插话：生成中消息进入 pending queue，并在工具后或模型响应边界注入；`/stop` 执行硬取消。该能力属于安全边界 steering，不是 token 级即时抢占，仍需 StoryPal WebUI 实机验收。
+- 检索优化采用按意图选源：Note/USER 常驻，剧情、手账、跨会话 episode 分路检索；普通问题只走一路，混合问题才并行。不同来源不直接做 RRF，统一由 ContextPacker 控制预算与 provenance。
+- Memory Extractor 在压缩边界批量产出 `note_ops` 与 `episodes`；显式与自动 Note 都复用统一 Note Extractor，显式路径同步、自动路径在压缩边界后台执行。阅读手账仍由独立写工具维护。
+- `Note.md` 当前全文无条件注入；临时上下文必须带 scope 和失效条件，每轮只做无模型失效检查，阅读进度变化后检查位置型条件；开放观察在同主题重现、压缩、Note 达阈值或 Dream 前维护。
+- 跨会话经历的 MemoryNeedGate 合并进主 Agent 工具选择：调用 `recall_interaction_history` 即表示需要回忆，其参数同时完成 Query Rewrite；工具只返回 `score >= T_auto` 的最多 2 条候选。多轮 agentic search 仍后置。
+- 写接口明确为阅读进度、手账增删改、Note 记录/遗忘六类原子工具；episode、embedding、Dream 与 checkpoint 写入均为内部 workflow，不向模型暴露通用 `write_memory`。
+
+### 2026-09-23 当前优先级与下一步
+
+用户确认首版以简单、可体验和可验证为目标：情景记忆一次语义检索，只使用 owner 硬隔离、单一相似度阈值与独立 token 预算；不做时间过滤、MMR、二次改写或最多 2 条的固定上限。其他链路同样避免额外 LLM 门控和拟合规则。主 Agent 是否调用 `recall_interaction_history(query)` 就是需要回忆的决策，query 由当前对话自然消歧。旧章节内的复杂设计仅作后备方案，不是首版任务。
+
+1. **M1：先完成可跨会话恢复的用户级阅读进度、文字确认和阅读手账读写。** 预期：重开会话后能继续陪读，明确记录和回看预测，已读边界不因会话切换扩大。需用户用真实首次阅读措辞核验“建议推进、确认推进、记录预测”的对话感受。
+2. **M2：再将 JSON Notes 收敛到每用户 `Note.md`，复用统一抽取逻辑供显式写入和压缩边界自动维护，每轮注入。** 预期：纠正与约定立即生效，压缩后仍有效。需用户核验哪些内容适合进入 Note，尤其开放观察是否过度推断。
+3. **M3：在压缩边界抽取少量有后续意义的共同经历，写入按日 Markdown，建立可重建的 BGE-M3/LanceDB 索引；开放一次按需回忆工具。** 预期：隔天可追溯地回想共同讨论，弱相关记忆不误注入。阈值以中文正例和难负例小样校准，样例不足时保守返回空结果。
+4. **R1/R2：功能稳定后单列检索实验。** 先固定真实 Agent query 与精确检索基线，再用相同语料和金标比较稀疏分词、ANN、Embedding、Reranker 和按失败类型选择的进阶 RAG。性能扩容样本与真实相关性评测分开；仅有可复跑收益才上线。
+
+本轮完成 M1 的核心闭环：用户级进度、跨回合文字确认、手账保存与回看已接入；两个陪读 Skill、手账编辑/删除与 M3 仍待实现；M2 的显式 Note 链路已部分落地，自动压缩维护仍待实现。相关测试采用受影响范围回归，完整回归留给阶段出口。用户需要参与的是阅读交互、Note 准入样例和回忆误召回的验收；数据抽查可交 Luna，正式指标以脚本为准。
+
+### 2026-09-23 实施结果：M1 核心闭环
+
+- 模型分工（2026-09-23）：后续由 Codex 委派的 Luna 数据核验指定 GPT-6 Luna；模拟用户行为时可另建 GPT-5.6 Terra 智能体。StoryPal WebUI 的 Codex OAuth 实时模型目录暂未列出 GPT-6 Luna，因此运行配置仍保留 GPT-5.6 Luna，避免服务不可用；待账号可用后再做独立会话工具调用 smoke test 与配置切换。
+
+- 新增 `ReadingProgressStore`：按用户保存 active work 与每部作品的已确认边界，切换作品后可恢复；旧 `SessionStateStore` 文件只在用户记录尚不存在时迁移，不删除旧数据。
+- `story_state`、`reading_location`、故事检索、阅读手账和 HistoryMemory v0 统一读取用户级边界。首次直接写入前先尝试迁移旧会话，防止覆盖更高的历史已读位置。
+- 新增只读 `resolve_reading_location` 与写入 `set_reading_progress`：propose 后返回确认问题和 pending ID；confirm 必须来自同一用户、同一会话的下一回合，取消不写入，30 分钟后过期。服务端只校验回合与归属，用户话语是否为肯定由主 Agent 判断；这一语义边界需真实对话验收。旧 `story_state` / `reading_location` 写入口保留供兼容，但已从模型白名单移除。
+- 新增 `save_journal_entry` 与 `search_reading_journal`：只在明确要求时写感受、问题或预测；按用户、作品和已读边界读取，简单文本包含过滤，最多返回最近 20 条。旧 action 混合手账工具退出模型白名单。
+- M1 相关定向回归 26/26 通过，覆盖新会话恢复、不同用户隔离、多作品切换、旧进度迁移、防倒退、跨回合确认/取消、手账回看及真实 AgentLoop 工具可见性。未跑全量回归。
+- 本地 gateway 已重新加载新配置；离线恢复 nanobot WebUI 构建后，HTTP 首页返回 200。尚未使用真实模型完成 WebUI 对话验收，不能把页面可访问等同于功能体验通过。
+- 下一步：请用户在 WebUI 核验确认措辞和“明确要求记录”的边界；随后推进 M2 的 `Note.md`、统一抽取与每轮注入。两个陪读 Skill、手账编辑/删除及旧预测校验继续登记为功能 TODO，不阻塞 M2。
+
+### 2026-09-23 实施结果：M1 首读修正与 M2 显式 Note
+
+- Terra 首读者模拟指出：尚未确认任何阅读位置的用户也可能要求先记录预测。已允许 `save_journal_entry(work_id="wandering_earth")` 保存“未确认锚点”的预测；其 `anchor_order=0`，不推进阅读进度，回看时保留 `anchor_status=unconfirmed`。该修正尚待用户在真实 WebUI 对话中核验自然性。
+- 新增每用户 `Note.md` 热笔记，分行为约束、认知修正、偏好设置、共同约定、临时事项、开放观察；首次读取会把旧版 JSON Notes 迁入“旧版明确笔记”，保留原 JSON 不删除。
+- 新模型工具为 `record_interaction_note` 和 `forget_interaction_note`；旧 `read_notes` / `write_note` 保留兼容但退出模型白名单。写入要求 `source_quote` 逐字出自当前用户回合，同时保存来源会话和回合；由主 Agent 完成单条提炼，不额外发起模型调用。当前拒绝非本轮原话来源，剧情信息与敏感推断主要仍依靠人格契约约束，真实误写率尚未测量。
+- `Note.md` 每轮以运行时上下文注入，且明确标为交互约定而非剧情证据。旧笔记迁移、同内容去重、跨会话恢复、不同用户隔离、删除以及非本轮来源拒绝已有单测。
+- 受影响范围回归 **30/30 通过**；未跑全量回归，也未完成真实 Luna 对话轨迹。WebUI 与 gateway 在新配置重启后均返回 HTTP 200。
+- **M2 在该记录时尚未完成；后续自动抽取试作见下节。**
+- 下一步：研究 nanobot checkpoint 的稳定消息边界，接一个有来源引用、可去重的 Note 自动候选流程；先用少量中文正反例验证不会把剧情、猜测或工具原始输出误写成用户约定，再决定是否默认开启。需要用户核验：Note 的六类归属及“用户只是表达偏好但没说记住”时是否应主动询问，而非直接写入。
+
+### 2026-09-23 实施结果：压缩后自动 Note 候选（M2 试作）
+
+- 已确认 nanobot 的 token/idle 压缩都在成功归档后推进 `last_archived`。StoryPal 不修改 nanobot 核心，改为在下一轮构建上下文时观察该已提交水位；只有水位前进才启动后台 Luna 抽取，因此不为每轮对话增加维护型模型等待。自动结果通常从再下一轮开始可见。
+- 会话第一次出现时将当前 owner 的哈希与归档水位绑定；只处理后来新归档、`role=user` 且为纯文本的消息。owner 变化则禁用该会话的自动抽取；共享/身份不明或非 WebUI 回合不运行。助手与工具消息不送入抽取模型。
+- 显式 `record_interaction_note` 与后台自动路径共用 `InteractionNoteStore.apply_candidate`：分类/长度校验、`source_quote` 必须逐字存在于对应用户原话、内容去重与来源会话/回合标记。自动一次最多看 8 条用户消息、每条截到 800 字，最多接收 4 条 `note_ops`。
+- 临时事项没有可靠失效条件，自动候选暂拒绝写入；开放观察自动加“待验证：”，不视为已确认用户属性。显式临时项的失效与开放观察复核仍是 TODO。
+- 修复两个 Note 工具各自注入一遍全文的问题：现在仅 `record_interaction_note` 提供一份运行时 Note 上下文。后台提取失败只告警，不阻断聊天；水位只在成功解析并处理后推进，下一轮可重试。
+- 相关范围回归 **34/34 通过**。隔离的本地 GPT-5.6 Luna 小样本：1 条明确聊天偏好写入，1 条剧情猜测与 1 条引用的工具输出未写；这是 **3 条合成样本的冒烟**，不是误写率评测。GPT-6 Luna 对给定 3 条样本的准入判断认为合理，但因其工具环境故障未能审阅源码；它指出引用内容误认、单次状态泛化和改写丢失作用范围三类风险。WebUI 运行时模型尚未切至 6。
+- 下一步：扩充中文首次阅读正例、难负例和模糊表达，评估写入精确率、漏写、来源引用与类别；若误写明显则将自动路径退为候选待确认。之后再做临时项失效/开放观察维护与 M3 按日情景记忆。需要用户后续核验：自动写入的 Note 是否让后续聊天更自然、有无把猜测或一时情绪当成长效偏好。
+
+### 2026-09-23 中断恢复核验
+
+- 上次执行权限审核额度中断时，`STORYPAL_NEXT_DELIVERY.md` 的状态段落未更新且有一句截断，`result.md` 未写入自动 Note 的数据卡，gateway 未保持运行。本轮已补齐并修复。
+- 以当前代码重新运行同一受影响范围测试，**34/34 通过**（6.95 秒）。本地 gateway 和 WebUI 首页均返回 HTTP 200，运行时工具白名单包含新的 Note 工具，模型仍为当前 WebUI 可用的 GPT-5.6 Luna。
+- 已在隔离合成会话完成真实 nanobot 闲置压缩 → 后台 Luna 抽取 → 下一轮 Note 注入：归档 2 条消息，写入 1 条 Note，实际生成内容在下一轮上下文可见。首次用用户原句作精确匹配得到 false，是模型等义改写导致的断言假阴性；按生成的笔记内容复核为 true。仍未完成正式 WebUI 的自然聊天体验，用户方便时再核验。
+
+### 交互体验 TODO（不阻塞当前核心开发）
+
+- [ ] nanobot WebUI 显示 StoryPal 确认卡片，支持确认、重新选择和取消。
+- [ ] 通过可信 WebSocket 事件传递 `pending_id`，不依赖模型解释按钮文字。
+- [ ] 页面刷新、服务重启后恢复仍待处理的确认卡片。
+- [ ] Telegram/Slack 等渠道复用文字或按钮降级协议。
+
+
+### 2026-09-21 历史状态（不作为当前任务）
+
+- **当前决策点：** Note 热认知视图、压缩边界情景抽取、BGE-M3/LanceDB 语义召回和“无独立 ToolMemory”已确认；`MEMORY.md` 暂停，下一步实现 consolidation hook、准入策略与 PendingAction。
+- **本轮目标：** 在 18 个有效开发小时内完成评测、Hybrid RRF、ContextPacker、HistoryMemory v0 与 rerank 对照/交付整理。
+- **验收原则：** 每阶段均需可复跑结果、相关测试与 0 剧透违规；没有实验数据的方案只能写为计划。
+
+### 已核验基线
+
+| 项目 | 当前事实 |
+| --- | --- |
+| 语料 | 《流浪地球》108 个结构化 StoryUnit；StoryMemory 保持只读事实源 |
+| Dense | 本地 `BAAI/bge-m3`，1024 维，LanceDB cosine；22 条可判定金标 Hit@1/3/5 为 86.4% / 95.5% / 100% |
+| Sparse | SQLite FTS5 / BM25，中文二元词 OR；Hit@1/3/5 为 59.1% / 72.7% / 77.3% |
+| 安全 | 各基线均为 0 剧透违规；`max_seen_order` 是硬过滤 |
+| `auto` | vector → FTS → scan 的降级链，不是 Hybrid/RRF |
+| Context | `ContextPacker` 已提供 Top3 主证据 + 最多 1 条同章相邻补充、预算和 drop diagnostics |
+| 长期记忆 | nanobot checkpoint、Notes/ReadingNotebook 与 SQLite FTS5 HistoryMemory v0 均已有；HistoryMemory 已完成技术验证，但正式产品语义将收敛为 Note 与阅读手账 |
+
+### 阶段 A 实测（2026-09-19，已锁定）
+
+- 评测器已新增 Hit@K、平均 Recall@K、MRR、nDCG@5、P50/P95、类别统计、逐例 diagnostics；新增 4 条 focused regression tests 通过，项目本地临时目录下全量 Chatbot 回归 23/23 通过。
+- 金标已扩为 29 条，其中 27 条有 gold evidence；所有用例均带中文可多选标签。R01 已修正为地点因果，R21/R29 构成边界 56/57 的精确防剧透对照。
+- 对外主口径为 `raw_user`：FTS Hit@1/3/5=48.1%/66.7%/74.1%，MRR=0.586、nDCG@5=0.611、P50/P95=10.4/11.7ms；Vector Hit@1/3/5=81.5%/100%/100%，MRR=0.895、nDCG@5=0.919、P50/P95=57.7/108.8ms；两路均 0 剧透违规。
+- `gold_rewrite` 仅为检索上限对照：FTS Hit@1/3/5=66.7%/77.8%/77.8%，MRR=0.722、nDCG@5=0.708；Vector Hit@1/3/5=92.6%/100%/100%，MRR=0.963、nDCG@5=0.968；两路均 0 剧透违规。
+- 结论：人工改写显著抬高 FTS 指标，Vector 在原始问句下仍能保证 Top3 召回但存在排序空间；Hybrid 的价值应以 raw-user MRR/nDCG 和坏例改善判断，而非只看 Hit@3。
+### 阶段 B 实测（2026-09-19，待上线决策）
+
+- 已在评测器中实现 `hybrid_rrf`，每次显式调用 FTS 与 Vector Top10，以 `k=60` 融合；融合前再次过滤越界证据、按 `unit_id` 去重，并记录每路 rank、融合分数和候选诊断。
+- 这只存在于离线评测，不修改协作方 Adapter，也不改变线上 `auto = vector → FTS → scan`。
+- 主口径 `raw_user`：Hybrid Hit@1/3/5=66.7%/92.6%/96.3%，MRR=0.787、nDCG@5=0.828、P50/P95=71.0/123.1ms、0 剧透违规；低于 Vector 的 81.5%/100%/100%、MRR=0.895、nDCG@5=0.919、P50/P95=57.7/108.8ms。
+- 上限口径 `gold_rewrite`：Hybrid Hit@1/3/5=77.8%/96.3%/100%，MRR=0.861、nDCG@5=0.897、P50/P95=72.3/118.8ms、0 剧透违规；同样低于 Vector。
+- 结论：当前 29 条金标、Top10、RRF k=60 下，融合稀疏结果会扰动已很强的 Dense 排序，且增加延迟；建议保留为面试中的负向消融分析，不进入线上。全量 Chatbot 回归 24/24 通过。
+- 面试可用的独立实验数据卡见根目录
+esult.md；其中区分 raw-user 主口径、gold-rewrite 上限、稳定延迟与首次模型加载峰值。
+### Luna 稀疏检索与 query 链路核验（2026-09-19）
+
+- FTS 采用 `unicode61` + 去标点/逐字停用字过滤 + 去重中文二元词 OR；Vector 对 query 不做该清洗，直接编码 BGE-M3 embedding。
+- `raw_user`/`gold_rewrite` 评测均直接调 adapter，不经过真实 Agent query rewrite；后者只是人工上限，不是线上轨迹。
+- 结论：二元词 OR 可能引入噪声并参与 Hybrid 变差，但当前数据不能证明分词为唯一主因。暂不换 jieba/BM25 库；后续以同金标做二元词、jieba OR、jieba AND/短语的受控稀疏消融后再决定。
+### 用户决策（2026-09-19）
+
+- 用户确认以 `raw_user` 作为对外主指标，`gold_rewrite` 只保留为人工改写后的检索上限对照。
+- 用户确认改写 R01 为“发动机为什么安装在亚洲和美洲大陆”，使问题与 `we-0003` 的地点因果证据一致。
+- 用户确认加入 R25～R29；其中 R21（边界 56、无 gold）与 R29（边界 57、gold `we-0057`）构成只差一个单元的精确防剧透对照。
+### Luna 数据核验（2026-09-19）
+
+- 已完成对 24 条金标及 19 个关联 StoryUnit 的只读抽查；R10/R21 的 `max_order=56` 能正确构成 `we-0057`（order 57）的精确防剧透边界。
+- 发现 R01 问“为什么建造发动机”与现有 gold `we-0003` 不匹配；待用户参与决定是改写为地点因果问题，还是扩展 gold evidence。
+- R13 的 `we-0009` 原文支持概念辨析，但摘要不可靠；后续回答证据必须保留原文，不能只依赖摘要。
+- 发现若直接用 `检索查询` 评测，部分 query 包含用户未说出的答案词，可能高估检索效果。评测器将同时支持 `raw_user` 与 `gold_rewrite` 两种口径；主报告口径待用户确认。
+### 阶段看板
+
+| 阶段 | 预算 | 状态 | 本阶段出口 |
+| --- | ---: | --- | --- |
+| A. 评测与失败归因 | 2.5h | 已完成 | 29 条金标、双口径基线、标签与逐例诊断 |
+| B. Hybrid RRF | 3h | 结果完成，待用户确认 | 负向消融；不改变 `auto` 语义或线上策略 |
+| C. ContextPacker | 3h | 已完成 | 3 主证据、2400 估算 token、最多 1 条同章相邻补充；需后续 provider token 校准 |
+| D. HistoryMemory v0 | 5h | 技术原型完成，进入产品语义收敛 | 复用隔离、FTS5 与幂等能力；退出通用 Memory 用户概念，合并到 Note/阅读手账 |
+| E. Rerank 与交付整理 | 4h | 模型后台下载中 | Qwen3-Reranker-0.6B 下载完成后做候选池/重排对照、数据卡、bad-case taxonomy、全量回归 |
+| **总计** | **17.5h** |  | 留 0.5h 用于阶段交接和记录 |
+
+### 推进与核验约定
+
+- 每次启动阶段前，先向用户同步：**接下来做什么、预期结果、需要用户核验的点**；完成后同步真实结果与下一步。
+- StoryUnit、金标、阅读边界与失败样本的查验优先交由 Luna 做独立只读审阅；审阅结论仍需结合实际测试与安全约束复核。
+- 用户参与决定：金标是否贴合首次阅读、Hybrid 是否上线、上下文展示/预算、长期记忆写入范围、对外项目表述。
+- 纯内部评测、测试、重构和安全回归可连续推进；涉及用户可见体验、记忆/隐私、工具权限或协作接口的修改先形成方案并请用户参与。
+### 阶段 C 实现（2026-09-19，待产品默认值核验）
+
+- 已新增 `context_packer.py`：检索结果先做作品/`max_seen_order` 硬过滤、unit/内容去重；再选择最多 3 条主证据，仅对主证据的同章相邻候选扩展。
+- 默认使用 2400 个**估算** token（按字符估算，非 provider 精确 token）；证据超预算、重复、越界或非相邻时分别记录 `token_budget`、`duplicate`、`spoiler_boundary`、`not_adjacent` 等原因。
+- `search_story` 保持 `anchors` 与 `adjacent_context` 兼容字段，新增 `context_diagnostics`：selected source anchors、dropped reason 与 token estimate，可用于 trace/评测而非直接面向读者展示。
+- 新增 ContextPacker 单测，覆盖剧透过滤、去重、同章邻接、跨章拒绝、token budget；全量 Chatbot 回归 26/26 通过。
+- 待用户参与：默认保留三条主证据是否合适；2400 估算 token 是否保守；相邻补充是否只允许同章且 order 差 1（当前默认）。
+### 阶段 C / D 实施与核验（2026-09-20）
+
+- 用户确认 ContextPacker 默认策略：**最多 3 条主证据、2400 个估算 token、最多 1 条同章且 `order` 差 1 的低优先级相邻补充**。Luna 审阅提醒：2400 为字符估算而非 provider 精确 token，且相邻不等于语义相关；已收紧为最多一条，并登记 provider token 校准和渐进式单元近重复压缩为后续项。
+- ContextPacker + StoryMemory 定向回归 **11/11 通过**；此次只跑受影响模块，符合“日常定向、阶段交付全量”的测试规则。
+- HistoryMemory v0 已采用 SQLite + FTS5，存储在运行时 `.storypal/history_memory/memories.sqlite3`；`search_memory`/`write_memory` 已加入 nanobot 显式白名单并重新安装到 `storypal-chatbot` Conda 环境。
+- HistoryMemory 定向回归 **22/22 通过**（工具、配置、Context、StoryMemory），运行时工具发现与 allowlist 回归 **2/2 通过**。覆盖跨会话找回、用户/作品/阅读边界隔离、来源引用、幂等重试、删除和失败防污染。
+- 自动抽取仍未开启：当前只在用户明确要求保存预测、感想、偏好或讨论结论时写入；原始聊天、工具返回、失败和重试不会进入记忆库。
+
+### 阶段 E 环境核验（2026-09-20）
+
+- 本机仅有 `D:\models\BAAI\bge-m3`，没有可用于 cross-encoder 的 reranker；协作方代码也没有可直接复用的 rerank 实现。
+- ModelScope 上已确认官方路径：`Qwen/Qwen3-Reranker-0.6B`、`BAAI/bge-reranker-v2-m3`。当前已在后台从 ModelScope 下载前者至 `D:\models\Qwen\Qwen3-Reranker-0.6B`，不轮询下载过程；完成后做离线 Vector/Hybrid Top10 重排，仍不改线上 `auto`。BGE v2-m3 保留作后续公平对照候选。
+### 测试执行规则
+
+- 日常代码修改：先运行受影响模块的定向测试，并记录范围与结果；避免无必要地重复全量回归。
+- 工具注册、配置、存储格式、安全边界或阶段交付：追加相关集成测试；在阶段 E 交付/发布前统一跑一次完整 Chatbot 回归。
+### 已登记的后续检索优化
+
+- **真实 Agent query 改写评测：** 后续记录“用户原话、可见上下文、Luna 实际 tool-call query、命中证据、最终回答”，以区分人工 `gold_rewrite` 上限和真实 Agent 效果。
+- **中文分词消融：** 后续在同一 `raw_user` 金标上比较现有二元词 OR、jieba 词项 OR、jieba 词项 AND/短语；稳定改善稀疏排序后才重新评估 Hybrid。
+- 以上均为后续优化，不作为当前线上已实现能力，也不阻塞 ContextPacker。
+### 当前技术决策
+
+- 先修评测，再决定 Hybrid、rerank 或 jieba；不凭单一案例切换线上检索。
+- HistoryMemory v0 只作为已完成的存储实验保留；正式链路由 EpisodeAdmissionPolicy 将高价值非剧情事件写入按日情景记忆，原始 tool trace 仅用于恢复、审计与重放。
+- StoryMemory、ReadingState、Note、阅读手账与情景记忆保持语义边界；工具结果通过明确的 `memory_effect` 路由，不另建 ToolMemory。
+- ANN/Milvus 与 Pi Agent 迁移不进入本轮；它们分别在大规模 benchmark 与独立 spike 中评估。
+
+### 本轮 TODO
+
+- [ ] 实现并运行阶段 A 的评测扩展，提交基线报告与失败分类。
+- [ ] 以离线模式实现 Hybrid RRF，并同表评测三路检索。
+- [x] 实现 ContextPacker 与安全/预算/相邻扩展回归测试。
+- [x] 实现 HistoryMemory v0、`search_memory` 和跨会话场景测试（技术验证完成）。
+- [ ] 将通用 HistoryMemory 产品入口收敛为 Note 与阅读手账，并保留必要迁移兼容。
+- [ ] 完成 rerank 对照；若环境不足，记录可复现阻塞原因。
+- [ ] 汇总实验表、架构图、bad-case taxonomy，并更新项目数据卡。
+
+### 用户核验记录
+
+- 2026-09-19：用户确认以“RAG / Memory / Context 算法闭环”为当前开发重点，并要求以 18 小时为主要交付窗口。
+- 2026-09-20：用户确认 ContextPacker 的保守默认策略，并确认日常修改优先跑受影响范围的测试。
+- 尚无本轮功能验收结果；完成每一阶段后再记录真实测试结论。
+
+## 历史记录（仅供追溯，不作为当前规划）
 ## 0. 2026-09-11：结构化陪读记忆接入
 
 - 已接入协作方 `StoryMemory` 的安全章节位置、断读回顾、人物／术语状态和情节线状态接口；所有请求均携带 `max_seen_order`，不能借结构化字段越过防剧透边界。
@@ -529,7 +741,7 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 
 - 复核工程文档后确认：V0 不新增独立 Query Analyzer / Router / State Tracker。检索词由主 Agent 根据最近对话、阅读状态和工具结果直接组织；本轮未增加第二次模型调用。
 - 已在源人格规则及运行时 workspace 增加中文检索决策契约：何时检索、如何消歧口语化指代、何时先共情/澄清、检索结果仅作证据、禁止借检索探查未读剧情。引导测试固定该约束。
-- 真实 Luna 隔离会话验收：阅读边界为 26 时，用户问“老师刚才说的五步怎么排”；Luna 将其改写为包含“人类逃亡五步、刹车、加速、逃逸、减速”的查询，调用一次 `search_story`，并正确依据 `we-0023` 给出五步。此前发现模型将阅读进度误填为 `chapter` 条件；已移除当前不必要的公开 `chapter` 参数，避免空检索。 
+- 真实 Luna 隔离会话验收：阅读边界为 26 时，用户问“老师刚才说的五步怎么排”；Luna 将其改写为包含“人类逃亡五步、刹车、加速、逃逸、减速”的查询，调用一次 `search_story`，并正确依据 `we-0023` 给出五步。此前发现模型将阅读进度误填为 `chapter` 条件；已移除当前不必要的公开 `chapter` 参数，避免空检索。
 - 本地 gateway 已重新启动，PID 29272、端口 18790，WebUI 将使用新规则与参数契约。
 ## 2026-09-05：后续开发规划
 
@@ -584,3 +796,35 @@ Dream 仍可在 workspace 的 `skills/` 下整理真正重复出现的非故事�
 
 - 已在独立开发会话 `storypal-notebook-acceptance-20260906` 完成真实 Luna 轨迹：模型按顺序调用 `story_state(set)`、`write_reading_notebook(add)`、`read_reading_notebook`，将“地球停止自转的画面让我很不安”作为 `reaction` 写入并确认读取成功。
 - 这是 Agent 对真实工具注册、白名单、运行时状态与存储隔离的联合验收；不使用用户会话，也不改变故事事实或正式阅读进度。
+
+## 2026-09-22 记忆触发与工具编排设计更新
+
+### 本轮已核验
+
+- 当前 `StorySessionState` 将阅读状态原子保存到 `.storypal/session_state/<session_key 哈希>.json`，同一 session 下服务重启可恢复。
+- 当前状态键是 `session_key`，不是 `owner_id + work_id`；因此新会话不能可靠恢复同一用户的阅读进度，用户级绑定尚未实现。
+- nanobot 的 `ToolRegistry` 已支持注册/注销和受限 registry，Agent runner 也能接收本回合工具视图；可在 StoryPal 扩展层实现动态工具组，无需迁移到 LangGraph。
+- 2026-09-22 已核对 TypeSafe Jev 官方资料：`jev-latest` 当前示例解析为 `jev-1.13.0`，提供 Choice/Score/Noul 类型化判断与概率，适合 Gate/Router 而不负责生成 Query 或回答。它是外部独立模型服务，直接上线会突破当前 Luna-only 与数据边界；只保留为未来与主 Agent 工具选择的离线对照，不进入首版关键路径。
+- 动态工具定义必须在一个回合内保持稳定，并随 runtime checkpoint 恢复，否则会破坏待执行 tool call 和 provider 对话状态。
+
+### 已确认设计
+
+1. 主动要求写 Note 和自动检测 Note 都调用同一个 Note Extractor。主动路径同步执行并立即应用；自动路径仅在压缩边界后台批量执行。两者的区别只是授权来源、触发时机与是否阻塞回复，不允许 Agent 直接拼接 `Note.md`。
+2. 临时项每轮注入前只做无模型失效检查，并在阅读进度变化后检查位置型失效条件；模糊判断留给压缩边界的 Note Curator。开放观察在同主题再次出现、压缩、Note 达阈值或 Dream 前维护，不每轮增加 LLM 延迟。
+3. 情景记忆首版采用 `主 Agent 工具选择/Query Rewrite -> recall_interaction_history -> BGE-M3/LanceDB -> T_auto -> Agent`。不训练独立 Gate 分类器，也不增加独立 Query Rewrite 模型调用。
+4. 不再标定独立 Gate 阈值；只标定候选返回阈值 `T_auto`。建立中文真实对话集，考察 Agent 工具选择精确率/召回率、有效记忆返回率、错误干扰率、TopK Recall/nDCG、回答增益、上下文 token 和 P50/P95。
+5. 阅读进度迁移到 `ReadingProgressStore(owner_id, work_id)`；session state 只保留当前作品指针。保存版本、更新时间、来源 session，默认单调推进，纠正/重置需明确确认。
+6. 工具按 `core_recall`、`progress`、`story`、`journal`、`interaction_memory`、`meta` 分组，采用“进程级静态注册 + 每回合 allowlist 动态暴露”。`core_recall` 始终可见；首版不启用 `load_tool_group`，多轮 agentic search 后置。
+
+### 下一步与预期结果
+
+1. 先实现用户级 `ReadingProgressStore` 与旧 session 状态的一次性安全迁移。预期：同一用户创建新会话、重启服务后仍恢复同一作品的阅读边界，且不会串用户/串作品。
+2. 实现统一 Note Extractor 接口和显式 Note 同步链路，再接压缩边界自动链路。预期：两条路径输出完全相同的 `note_ops` schema，可做幂等、去重和来源审计。
+3. 实现 `ToolGroupResolver` 和每回合过滤 registry。预期：常规闲聊不携带 Story 工具 schema；剧情核验只出现 story/progress 工具；首版漏选按保守失败处理，不在回合中动态增删全局 registry。
+4. 构造“是否应调用回忆工具 + 改写 query + 应命中 episode”的中文金标，先评测 Luna 工具选择，再选择 `T_auto`，不训练独立分类器。
+
+### 需要用户后续核验
+
+- Note Extractor 可以压缩和规范化用户原话，但不得改变语义；存在歧义时应追问，不自行补全。
+- 用户已认可把“Agent 是否需要回忆”交给结构化工具选择；首版允许一次 `recall_interaction_history` 调用，但 `load_tool_group`、Observation 后再次改写和多轮深搜继续后置。
+- 新会话自动恢复唯一的 active work；若同一用户有多个在读作品，则先让用户选择，不擅自切换。

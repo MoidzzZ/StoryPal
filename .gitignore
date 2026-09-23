@@ -19,3 +19,10 @@ __pycache__/
 node_modules/
 dist/
 coverage/
+
+# Local evaluations, exports, and reference attachments (not for the public repo)
+/tmp/
+/output/
+/*.pdf
+/*.docx
+/Agent_Harness_v2_*.md

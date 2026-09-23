@@ -7,6 +7,7 @@ import pytest
 from nanobot import RequestContext
 from nanobot.agent.tools.context import request_context
 
+from storypal_chatbot.storage import ReadingProgressStore
 from storypal_chatbot.story_memory import (
     PipelineFtsBackend,
     PipelineStoryMemoryBackend,
@@ -14,7 +15,7 @@ from storypal_chatbot.story_memory import (
     StoryMemoryService,
     StoryProgressRequired,
 )
-from storypal_chatbot.tools import (GetStoryEvidenceTool, ReadingLocationTool, SearchStoryTool, StoryContextTool, StorySessionStateTool)
+from storypal_chatbot.tools import (GetStoryEvidenceTool, ReadingLocationTool, ResolveReadingLocationTool, SearchStoryTool, SetReadingProgressTool, StoryContextTool, StorySessionStateTool)
 
 
 def evidence(order: int, chapter: str = "第一章", work: str = "demo") -> dict:
@@ -70,7 +71,7 @@ def test_search_returns_three_anchors_and_only_rank_4_5_neighbors():
     result = StoryMemoryService(backend).search(work_id="demo", query="为什么", max_seen_order=30)
 
     assert [item["order"] for item in result.anchors] == [10, 20, 30]
-    assert [item["order"] for item in result.adjacent_context] == [11, 29]
+    assert [item["order"] for item in result.adjacent_context] == [11]
     assert backend.calls == [{"work_id": "demo", "query": "为什么", "max_order": 30, "top_k": 5, "filters": None}]
     assert result.retrieval == "fake"
 
@@ -113,7 +114,7 @@ async def test_native_story_tools_use_session_state_without_advancing_it(tmp_pat
         await state_tool.execute(action="set", active_work="demo", max_seen_order=12)
         response = json.loads(await search_tool.execute(query="发动机"))
         assert [item["order"] for item in response["anchors"]] == [4, 8, 12]
-        assert [item["order"] for item in response["adjacent_context"]] == [5, 9]
+        assert [item["order"] for item in response["adjacent_context"]] == [5]
         assert json.loads(await state_tool.execute(action="get"))["max_seen_order"] == 12
         blocked = await evidence_tool.execute(unit_id="d-0013")
         assert blocked.is_error
@@ -174,3 +175,78 @@ async def test_reader_can_set_chapter_boundary_and_use_structured_context(tmp_pa
         assert recap["snapshot_order"] == 12
         entity = json.loads(await context_tool.execute(kind="entity", query="测试人物"))
         assert entity["history"] == [{"order": 4, "value": "已读"}]
+
+@pytest.mark.asyncio
+async def test_reading_progress_requires_another_user_turn_and_is_session_bound(tmp_path):
+    service = StoryMemoryService(FakeBackend([evidence(12)]))
+    resolver = ResolveReadingLocationTool(tmp_path, service=service)
+    writer = SetReadingProgressTool(tmp_path, service=service)
+    progress = ReadingProgressStore(tmp_path)
+
+    first = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:first",
+        sender_id="alice", turn_id="turn-1", original_user_text="我大概读到第一章末了",
+    )
+    with request_context(first):
+        locations = json.loads(await resolver.execute(work_id="demo"))
+        assert locations["locations"][0]["location_id"] == "chapter-01"
+        proposal = json.loads(
+            await writer.execute(action="propose", work_id="demo", location_id="chapter-01")
+        )
+        assert proposal["status"] == "confirmation_required"
+        assert progress.get("alice")["max_seen_order"] is None
+        same_turn = await writer.execute(action="confirm", pending_id=proposal["pending_id"])
+        assert same_turn.is_error
+
+    other_session = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:other",
+        sender_id="alice", turn_id="turn-2", original_user_text="对，读完了",
+    )
+    with request_context(other_session):
+        wrong_session = await writer.execute(action="confirm", pending_id=proposal["pending_id"])
+        assert wrong_session.is_error
+
+    other_user = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:first",
+        sender_id="bob", turn_id="turn-2", original_user_text="对，读完了",
+    )
+    with request_context(other_user):
+        wrong_user = await writer.execute(action="confirm", pending_id=proposal["pending_id"])
+        assert wrong_user.is_error
+
+    confirmed_turn = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:first",
+        sender_id="alice", turn_id="turn-2", original_user_text="对，我读完第一章了",
+    )
+    with request_context(confirmed_turn):
+        confirmed = json.loads(await writer.execute(action="confirm", pending_id=proposal["pending_id"]))
+        assert confirmed["status"] == "confirmed"
+        assert confirmed["state"]["max_seen_order"] == 12
+        repeated = await writer.execute(action="confirm", pending_id=proposal["pending_id"])
+        assert repeated.is_error
+
+    assert progress.get("alice")["max_seen_order"] == 12
+    block = await resolver.runtime_context_provider()(confirmed_turn)
+    assert block is not None and '"max_seen_order": 12' in block.content
+    assert progress.get("bob")["active_work"] is None
+
+
+@pytest.mark.asyncio
+async def test_reading_progress_cancel_does_not_write(tmp_path):
+    service = StoryMemoryService(FakeBackend([evidence(12)]))
+    writer = SetReadingProgressTool(tmp_path, service=service)
+    progress = ReadingProgressStore(tmp_path)
+    first = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:cancel",
+        sender_id="alice", turn_id="turn-1", original_user_text="是第一章吗",
+    )
+    with request_context(first):
+        proposal = json.loads(await writer.execute(action="propose", work_id="demo", location_id="chapter-01"))
+    second = RequestContext(
+        channel="websocket", chat_id="story", session_key="webui:cancel",
+        sender_id="alice", turn_id="turn-2", original_user_text="不，还没读完",
+    )
+    with request_context(second):
+        cancelled = json.loads(await writer.execute(action="cancel", pending_id=proposal["pending_id"]))
+        assert cancelled["status"] == "cancelled"
+        assert progress.get("alice")["active_work"] is None

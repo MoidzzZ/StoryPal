@@ -1,17 +1,15 @@
-# nanobot patches
+# nanobot 补丁
 
-Keep this directory minimal. StoryPal maintains three replayable nanobot patches:
+本目录只保留可重放的 nanobot 最小补丁及说明。目前有四组：
 
-- `storypal-persona-view.patch`: a read-only WebUI viewer for `SOUL.md`, `AGENTS.md`, and `USER.md`;
-- `persona-view.md`: provenance, safety boundary, and replay instructions;
-- `storypal-dream-write-allowlist.patch`: configurable Dream durable-file writes;
-- `dream-write-allowlist.md`: StoryPal's two-file policy and regression-test notes;
-- `storypal-tool-allowlist.patch`: per-turn configuration-driven tool allowlist;
-- `tool-allowlist.md`: allowlist policy, replay steps and regression-test notes.
+- `storypal-persona-view.patch` / `persona-view.md`：网页只读浏览 `SOUL.md`、`AGENTS.md`、`USER.md`；
+- `storypal-dream-write-allowlist.patch` / `dream-write-allowlist.md`：限制 Dream 的持久文件写入；
+- `storypal-tool-allowlist.patch` / `tool-allowlist.md`：按配置收紧每轮可见工具；
+- `storypal-reader.patch` / `reader.md`：桌面阅读器、鉴权原文接口及本机用户标识。
 
-Before adding a patch:
+增加补丁前需确认：
 
-1. demonstrate that configuration, the Python SDK, native tools, hooks, or runtime context cannot implement the requirement;
-2. add a StoryPal regression test;
-3. record the upstream commit and reason;
-4. keep the change minimal and update `THIRD_PARTY_NOTICES.md`.
+1. 配置、Python SDK、原生工具、Hook 或运行时上下文均不足以实现需求；
+2. 增加 StoryPal 回归测试；
+3. 记录上游 commit 和修改原因；
+4. 保持补丁最小，并更新 `THIRD_PARTY_NOTICES.md`。

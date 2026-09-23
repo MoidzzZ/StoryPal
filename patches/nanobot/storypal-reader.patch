@@ -1,0 +1,444 @@
+diff --git a/nanobot/webui/ws_http.py b/nanobot/webui/ws_http.py
+index 16d2f80..e75271d 100644
+--- a/nanobot/webui/ws_http.py
++++ b/nanobot/webui/ws_http.py
+@@ -1147,6 +1147,18 @@ class GatewayHTTPHandler:
+     async def _dispatch_misc_routes(
+         self, connection: Any, request: WsRequest, got: str
+     ) -> Response | None:
++        if got == "/api/webui/storypal-reader":
++            if not self.check_api_token(request):
++                return _http_error(401, "Unauthorized")
++            try:
++                from storypal_chatbot.reader import reading_document
++
++                return _http_json_response(
++                    reading_document(), extra_headers=_NO_STORE_HEADERS
++                )
++            except Exception:
++                self._log.exception("StoryPal reader document unavailable")
++                return _http_error(503, "阅读器原文暂时不可用")
+         if got == "/api/sessions":
+             return await self._handle_sessions_list(request)
+         if got == "/api/commands":
+diff --git a/webui/src/App.tsx b/webui/src/App.tsx
+index 5eafb13..6944578 100644
+--- a/webui/src/App.tsx
++++ b/webui/src/App.tsx
+@@ -8,13 +8,14 @@ import {
+   useState,
+   type ReactNode,
+ } from "react";
+-import { Eye, EyeOff, Moon, PanelLeft, ShieldCheck, Sun, X } from "lucide-react";
++import { BookOpen, Eye, EyeOff, Moon, PanelLeft, ShieldCheck, Sun, X } from "lucide-react";
+ import { useTranslation } from "react-i18next";
+ import { channelUiPresentation } from "@/channel-plugins/registry";
+ import { Sidebar } from "@/components/Sidebar";
+ import type { SidebarDeleteItem } from "@/components/ChatList";
+ import type { SettingsSectionKey } from "@/components/settings/SettingsView";
+ import { ThreadShell } from "@/components/thread/ThreadShell";
++import { StoryReaderPane } from "@/components/StoryReaderPane";
+ import { PaneWorkbench } from "@/components/workbench/PaneWorkbench";
+ import {
+   MAX_WORKBENCH_PANES,
+@@ -58,6 +59,7 @@ import {
+ import { displayTitle, sortSessions } from "@/lib/chat-groups";
+ import { deriveTitle } from "@/lib/format";
+ import { NanobotClient } from "@/lib/nanobot-client";
++import { withStoryPalClientId } from "@/lib/storypal-client-id";
+ import { ClientProvider, useClient } from "@/providers/ClientProvider";
+ import type {
+   BootstrapResponse,
+@@ -814,7 +816,7 @@ export default function App() {
+   const refreshReadyClient = useCallback(
+     async (client: NanobotClient, fallbackSurface: RuntimeSurface) => {
+       const boot = await fetchBootstrap("", bootstrapSecretRef.current);
+-      const url = deriveWsUrl(boot.ws_path, boot.token, boot.ws_url);
++      const url = withStoryPalClientId(deriveWsUrl(boot.ws_path, boot.token, boot.ws_url));
+       const runtimeSurface = boot.runtime_surface
+         ? toRuntimeSurface(boot.runtime_surface)
+         : fallbackSurface;
+@@ -854,7 +856,7 @@ export default function App() {
+           const boot = await fetchBootstrap("", secret);
+           if (cancelled) return;
+           if (secret) saveSecret(secret);
+-          const url = deriveWsUrl(boot.ws_path, boot.token, boot.ws_url);
++          const url = withStoryPalClientId(deriveWsUrl(boot.ws_path, boot.token, boot.ws_url));
+           const runtimeSurface = toRuntimeSurface(boot.runtime_surface);
+           const runtimeHost = createRuntimeHost(runtimeSurface, boot.runtime_capabilities);
+           const client = new NanobotClient({
+@@ -1050,6 +1052,7 @@ function Shell({
+     initialRouteRef.current.activeKey,
+   );
+   const [view, setView] = useState<ShellView>(initialRouteRef.current.view);
++  const [readerOpen, setReaderOpen] = useState(false);
+   const [temporarySessions, setTemporarySessions] = useState<Record<string, ChatSummary>>({});
+   const [temporaryChatEnabled, setTemporaryChatEnabled] = useState(false);
+   const [settingsInitialSection, setSettingsInitialSection] =
+@@ -1060,6 +1063,7 @@ function Shell({
+   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+   const [sessionSearchOpen, setSessionSearchOpen] = useState(false);
+   const mobileWorkbench = useMediaQuery("(max-width: 767px)");
++  const desktopReader = useMediaQuery("(min-width: 1024px)");
+   const workbenchState = sidebarState.workbench;
+   const updateWorkbenchState = useCallback((
+     updater: (current: WorkbenchState) => WorkbenchState,
+@@ -2727,6 +2731,34 @@ function Shell({
+                 view !== "chat" && "hidden",
+               )}
+             >
++              {!readerOpen && desktopReader && (
++                <Button type="button" variant="outline" size="sm" className="absolute right-20 top-3 z-30 gap-1.5" onClick={() => setReaderOpen(true)}>
++                  <BookOpen className="h-4 w-4" /> 阅读原文
++                </Button>
++              )}
++              <div className="flex min-h-0 flex-1">
++              {readerOpen && desktopReader && (
++                <div className="h-full w-[47%] min-w-[360px] max-w-[760px] shrink-0">
++                  <StoryReaderPane
++                    getToken={getToken}
++                    onClose={() => setReaderOpen(false)}
++                    chatBusy={activeChatRunning}
++                    onAsk={async (selected, question) => {
++                      const chatId = activeSession?.chatId ?? await onCreateChat();
++                      if (!chatId) throw new Error("无法创建聊天，请稍后重试。");
++                      const span = selected.unit.unit_id === selected.endUnit.unit_id ? selected.unit.unit_id : `${selected.unit.unit_id} 至 ${selected.endUnit.unit_id}`;
++                      const prompt = `我正在阅读《流浪地球》「${selected.unit.chapter_name}」，选中原文 ${span}（第 ${selected.unit.start_line}—${selected.endUnit.end_line} 行）：“${selected.text}”。${question ? `我的问题：${question}` : "想和你聊聊这段。"}请只讨论这段和我已确认的阅读范围，不预告后文。`;
++                      client.sendMessage(chatId, prompt, undefined, { turnId: crypto.randomUUID() });
++                    }}
++                    onReportChapter={async (chapter) => {
++                      const chatId = activeSession?.chatId ?? await onCreateChat();
++                      if (!chatId) throw new Error("无法创建聊天，请稍后重试。");
++                      client.sendMessage(chatId, `我已经读完《流浪地球》的「${chapter.label}」。请按阅读进度确认流程处理，不要自行跳过确认。`, undefined, { turnId: crypto.randomUUID() });
++                    }}
++                  />
++                </div>
++              )}
++              <div className="min-w-0 flex-1">
+               <PaneWorkbench
+                 panes={renderedWorkbenchPanes}
+                 activePaneKey={renderedActivePaneKey}
+@@ -2856,6 +2888,8 @@ function Shell({
+                   );
+                 }}
+               />
++              </div>
++              </div>
+             </div>
+             {view !== "chat" && (
+               <div className="absolute inset-0 flex flex-col">
+diff --git a/webui/src/components/StoryReaderPane.tsx b/webui/src/components/StoryReaderPane.tsx
+new file mode 100644
+index 0000000..4077f30
+--- /dev/null
++++ b/webui/src/components/StoryReaderPane.tsx
+@@ -0,0 +1,181 @@
++import { useEffect, useMemo, useRef, useState } from "react";
++import { BookOpen, ChevronDown, Minus, Plus, X } from "lucide-react";
++import { Button } from "@/components/ui/button";
++
++type ReaderUnit = {
++  unit_id: string;
++  order: number;
++  chapter_name: string;
++  start_line: number;
++  end_line: number;
++  text: string;
++};
++
++type ReaderLocation = {
++  location_id: string;
++  label: string;
++  start_order: number;
++  end_order: number;
++};
++
++type ReaderDocument = {
++  work_id: string;
++  title: string;
++  source_version: string | null;
++  locations: ReaderLocation[];
++  units: ReaderUnit[];
++};
++
++type Selection = { text: string; unit: ReaderUnit; endUnit: ReaderUnit };
++
++export function StoryReaderPane({
++  getToken,
++  onClose,
++  onAsk,
++  onReportChapter,
++  chatBusy,
++}: {
++  getToken: () => string;
++  onClose: () => void;
++  onAsk: (selection: Selection, question: string) => Promise<void>;
++  onReportChapter: (location: ReaderLocation) => Promise<void>;
++  chatBusy: boolean;
++}) {
++  const [document, setDocument] = useState<ReaderDocument | null>(null);
++  const [error, setError] = useState<string | null>(null);
++  const [selection, setSelection] = useState<Selection | null>(null);
++  const [question, setQuestion] = useState("");
++  const [sending, setSending] = useState(false);
++  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem("storypal.reader.font-size") || 17));
++  const articleRef = useRef<HTMLDivElement | null>(null);
++
++  useEffect(() => {
++    const controller = new AbortController();
++    fetch("/api/webui/storypal-reader", {
++      headers: { Authorization: `Bearer ${getToken()}` },
++      credentials: "same-origin",
++      signal: controller.signal,
++    }).then(async (response) => {
++      if (!response.ok) throw new Error("原文暂时无法加载，请确认本地故事数据已就绪。");
++      return response.json() as Promise<ReaderDocument>;
++    }).then(setDocument).catch((cause: unknown) => {
++      if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "原文暂时无法加载。");
++    });
++    return () => controller.abort();
++  }, [getToken]);
++
++  const chapters = useMemo(() => document?.locations ?? [], [document]);
++  const resumeKey = `storypal.reader.resume.${document?.work_id ?? "wandering_earth"}.${document?.source_version ?? "local"}`;
++
++  useEffect(() => {
++    if (!document || !articleRef.current) return;
++    const saved = Number(localStorage.getItem(resumeKey) || 1);
++    const target = articleRef.current.querySelector<HTMLElement>(`[data-order="${saved}"]`);
++    target?.scrollIntoView({ block: "start" });
++  }, [document, resumeKey]);
++
++  const jumpTo = (order: number) => {
++    articleRef.current?.querySelector<HTMLElement>(`[data-order="${order}"]`)?.scrollIntoView({ block: "start", behavior: "smooth" });
++  };
++
++  const rememberPosition = () => {
++    const container = articleRef.current;
++    if (!container) return;
++    const top = container.getBoundingClientRect().top + 65;
++    const visible = Array.from(container.querySelectorAll<HTMLElement>("[data-order]"))
++      .find((node) => node.getBoundingClientRect().bottom > top);
++    if (visible) localStorage.setItem(resumeKey, visible.dataset.order || "1");
++  };
++
++  const captureSelection = () => {
++    const selected = window.getSelection();
++    const text = selected?.toString().trim() ?? "";
++    if (!selected?.anchorNode || !text || text.length > 1200 || !articleRef.current?.contains(selected.anchorNode)) {
++      setSelection(null);
++      return;
++    }
++    const element = selected.anchorNode instanceof Element ? selected.anchorNode : selected.anchorNode.parentElement;
++    const focusElement = selected.focusNode instanceof Element ? selected.focusNode : selected.focusNode?.parentElement;
++    const anchorOrder = Number(element?.closest<HTMLElement>("[data-order]")?.dataset.order);
++    const focusOrder = Number(focusElement?.closest<HTMLElement>("[data-order]")?.dataset.order);
++    const unit = document?.units.find((item) => item.order === Math.min(anchorOrder, focusOrder));
++    const endUnit = document?.units.find((item) => item.order === Math.max(anchorOrder, focusOrder));
++    setSelection(unit && endUnit ? { text, unit, endUnit } : null);
++  };
++
++  const submitAsk = async () => {
++    if (!selection || sending || chatBusy) return;
++    setSending(true);
++    try {
++      await onAsk(selection, question.trim());
++      setSelection(null);
++      setQuestion("");
++      window.getSelection()?.removeAllRanges();
++    } catch (cause) {
++      setError(cause instanceof Error ? cause.message : "提交问题失败，请稍后重试。");
++    } finally {
++      setSending(false);
++    }
++  };
++
++  const submitChapter = async (location: ReaderLocation) => {
++    if (sending || chatBusy) return;
++    setSending(true);
++    try {
++      await onReportChapter(location);
++    } catch (cause) {
++      setError(cause instanceof Error ? cause.message : "提交阅读进度失败，请稍后重试。");
++    } finally {
++      setSending(false);
++    }
++  };
++
++  const changeFontSize = (delta: number) => {
++    setFontSize((current) => {
++      const next = Math.max(15, Math.min(23, current + delta));
++      localStorage.setItem("storypal.reader.font-size", String(next));
++      return next;
++    });
++  };
++
++  return (
++    <section className="flex h-full min-w-[360px] flex-col border-r border-border bg-[#faf8f3] text-[#292822] dark:bg-[#1d1c19] dark:text-[#ede9df]" aria-label="流浪地球阅读器">
++      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-black/10 px-4 dark:border-white/10">
++        <BookOpen className="h-4 w-4" />
++        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{document?.title ?? "流浪地球"}</span>
++        <Button variant="ghost" size="icon" aria-label="缩小字号" onClick={() => changeFontSize(-1)}><Minus className="h-4 w-4" /></Button>
++        <Button variant="ghost" size="icon" aria-label="放大字号" onClick={() => changeFontSize(1)}><Plus className="h-4 w-4" /></Button>
++        <Button variant="ghost" size="icon" aria-label="关闭阅读器" onClick={onClose}><X className="h-4 w-4" /></Button>
++      </header>
++      <div className="flex shrink-0 items-center gap-2 border-b border-black/10 px-4 py-2 text-xs dark:border-white/10">
++        <label htmlFor="storypal-reader-chapter" className="shrink-0">跳转章节</label>
++        <span className="relative min-w-0 flex-1">
++          <select id="storypal-reader-chapter" className="w-full appearance-none rounded border border-black/10 bg-transparent py-1.5 pl-2 pr-7 dark:border-white/15" defaultValue="" onChange={(event) => jumpTo(Number(event.target.value))}>
++            <option value="" disabled>选择章节</option>
++            {chapters.map((chapter) => <option key={chapter.location_id} value={chapter.start_order}>{chapter.label}</option>)}
++          </select>
++          <ChevronDown className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5" />
++        </span>
++      </div>
++      <div ref={articleRef} onScroll={rememberPosition} onMouseUp={captureSelection} className="min-h-0 flex-1 overflow-y-auto px-7 py-9 selection:bg-amber-300/60 dark:selection:bg-amber-700/60">
++        {error && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{error}</p>}
++        {!document && !error && <p className="text-sm opacity-70">正在加载原文……</p>}
++        {document?.units.map((unit) => {
++          const first = chapters.find((chapter) => chapter.start_order === unit.order);
++          const last = chapters.find((chapter) => chapter.end_order === unit.order);
++          return (
++            <div key={unit.unit_id} data-order={unit.order} className="scroll-mt-5">
++              {first && <h2 className="mb-8 mt-10 border-b border-black/10 pb-4 text-center text-xl font-semibold dark:border-white/10">{first.label}</h2>}
++              {unit.text.split("\n").map((paragraph, index) => <p key={index} className="mb-5 whitespace-pre-wrap leading-[1.95]" style={{ fontSize }}>{paragraph}</p>)}
++              {last && <div className="my-10 border-t border-black/10 pt-5 text-center dark:border-white/10"><Button variant="outline" disabled={sending || chatBusy} onClick={() => void submitChapter(last)}>我已读完本章</Button><p className="mt-2 text-xs opacity-60">会在聊天中请你确认，滚动页面不会更新已读范围。</p></div>}
++            </div>
++          );
++        })}
++      </div>
++      {selection && <div className="shrink-0 border-t border-black/10 bg-[#f3f0e8] p-3 dark:border-white/10 dark:bg-[#292720]">
++        <p className="mb-2 line-clamp-2 text-xs opacity-75">已选中：{selection.text}</p>
++        <div className="flex gap-2"><input value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void submitAsk(); }} placeholder="想问什么？留空则聊聊这段" className="min-w-0 flex-1 rounded border border-black/15 bg-white px-2 py-1.5 text-sm text-black dark:border-white/15" /><Button disabled={sending || chatBusy} onClick={() => void submitAsk()}>带入聊天</Button></div>
++      </div>}
++    </section>
++  );
++}
+diff --git a/webui/src/lib/storypal-client-id.ts b/webui/src/lib/storypal-client-id.ts
+new file mode 100644
+index 0000000..f43b752
+--- /dev/null
++++ b/webui/src/lib/storypal-client-id.ts
+@@ -0,0 +1,27 @@
++const STORAGE_KEY = "storypal.webui.client-id.v1";
++let cachedClientId: string | null = null;
++
++/** Keep the WebUI sender ID stable so StoryPal's owner-scoped state survives reloads. */
++export function withStoryPalClientId(url: string): string {
++  if (typeof window === "undefined") return url;
++  const parsed = new URL(url, window.location.href);
++  if (!(["ws:", "wss:"].includes(parsed.protocol)) || parsed.searchParams.has("client_id")) return url;
++
++  if (!cachedClientId) {
++    try {
++      cachedClientId = window.localStorage.getItem(STORAGE_KEY);
++    } catch {
++      // Private storage modes may be unavailable; retain one ID for this page.
++    }
++    if (!cachedClientId) {
++      cachedClientId = `storypal-web-${crypto.randomUUID()}`;
++      try {
++        window.localStorage.setItem(STORAGE_KEY, cachedClientId);
++      } catch {
++        // Cross-reload persistence is unavailable when the browser blocks storage.
++      }
++    }
++  }
++  parsed.searchParams.set("client_id", cachedClientId);
++  return parsed.toString();
++}
+diff --git a/webui/src/tests/app-layout.test.tsx b/webui/src/tests/app-layout.test.tsx
+index 3bf2c80..a084610 100644
+--- a/webui/src/tests/app-layout.test.tsx
++++ b/webui/src/tests/app-layout.test.tsx
+@@ -3758,7 +3758,10 @@ describe("App layout", () => {
+     });
+ 
+     expect(fetchBootstrap).toHaveBeenCalledTimes(2);
+-    expect(updateUrlSpy).toHaveBeenCalledWith("ws://test?token=tok-2");
++    expect(updateUrlSpy).toHaveBeenCalledTimes(1);
++    const refreshedUrl = new URL(String(updateUrlSpy.mock.calls[0]?.[0]));
++    expect(refreshedUrl.searchParams.get("token")).toBe("tok-2");
++    expect(refreshedUrl.searchParams.get("client_id")).toMatch(/^storypal-web-/);
+     unmount();
+   });
+ 
+diff --git a/webui/src/tests/story-reader-pane.test.tsx b/webui/src/tests/story-reader-pane.test.tsx
+new file mode 100644
+index 0000000..377c83c
+--- /dev/null
++++ b/webui/src/tests/story-reader-pane.test.tsx
+@@ -0,0 +1,47 @@
++import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
++import { afterEach, describe, expect, it, vi } from "vitest";
++
++import { StoryReaderPane } from "@/components/StoryReaderPane";
++
++afterEach(() => {
++  cleanup();
++  vi.unstubAllGlobals();
++  localStorage.clear();
++});
++
++describe("桌面阅读器", () => {
++  it("只在点击章末按钮后报告已读，滚动不会推进", async () => {
++    const fetchMock = vi.fn().mockResolvedValue({
++      ok: true,
++      json: async () => ({
++        work_id: "wandering_earth",
++        title: "流浪地球",
++        source_version: "v1",
++        locations: [{ location_id: "chapter-01", label: "第一章", start_order: 1, end_order: 1 }],
++        units: [{ unit_id: "we-0001", order: 1, chapter_name: "第一章", start_line: 5, end_line: 7, text: "开篇原文" }],
++      }),
++    });
++    vi.stubGlobal("fetch", fetchMock);
++    Element.prototype.scrollIntoView = vi.fn();
++    const onReportChapter = vi.fn().mockResolvedValue(undefined);
++
++    const { container } = render(
++      <StoryReaderPane
++        getToken={() => "test-token"}
++        onClose={vi.fn()}
++        onAsk={vi.fn()}
++        onReportChapter={onReportChapter}
++        chatBusy={false}
++      />,
++    );
++
++    await screen.findByText("开篇原文");
++    expect(fetchMock).toHaveBeenCalledWith("/api/webui/storypal-reader", expect.objectContaining({
++      headers: { Authorization: "Bearer test-token" },
++    }));
++    fireEvent.scroll(container.querySelector("[data-order='1']")!.parentElement!);
++    expect(onReportChapter).not.toHaveBeenCalled();
++    fireEvent.click(screen.getByRole("button", { name: "我已读完本章" }));
++    await waitFor(() => expect(onReportChapter).toHaveBeenCalledWith(expect.objectContaining({ location_id: "chapter-01" })));
++  });
++});
+diff --git a/webui/src/tests/storypal-client-id.test.ts b/webui/src/tests/storypal-client-id.test.ts
+new file mode 100644
+index 0000000..38f7a95
+--- /dev/null
++++ b/webui/src/tests/storypal-client-id.test.ts
+@@ -0,0 +1,20 @@
++import { beforeEach, describe, expect, it, vi } from "vitest";
++
++describe("StoryPal 网页用户标识", () => {
++  beforeEach(() => {
++    vi.resetModules();
++    localStorage.clear();
++  });
++
++  it("刷新模块后保留相同 ID，且不改动已有的 ID", async () => {
++    const first = await import("@/lib/storypal-client-id");
++    const url = first.withStoryPalClientId("ws://127.0.0.1:8765/?token=abc");
++    const id = new URL(url).searchParams.get("client_id");
++    expect(id).toMatch(/^storypal-web-/);
++
++    vi.resetModules();
++    const second = await import("@/lib/storypal-client-id");
++    expect(new URL(second.withStoryPalClientId("ws://127.0.0.1:8765/?token=xyz")).searchParams.get("client_id")).toBe(id);
++    expect(second.withStoryPalClientId("ws://127.0.0.1:8765/?client_id=external")).toBe("ws://127.0.0.1:8765/?client_id=external");
++  });
++});

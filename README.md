@@ -2,6 +2,8 @@
 
 ## 启动本机 Chatbot
 
+以下命令针对已配置的本地开发环境。公开仓库不包含 `.runtime/`、`.reference/`、`story_mem/` 或小说原文；新克隆需要先准备 nanobot 基座、应用 [StoryPal 补丁](patches/nanobot/README.md)，并按 [StoryMemory 接入说明](chatbot/STORY_PIPELINE_INTEGRATION.md) 放置本地数据。
+
 在 PowerShell 中执行：
 
 ```powershell
@@ -11,6 +13,8 @@ nanobot webui --yes --config D:\StoryPal\.runtime\nanobot\storypal\config.json -
 ```
 
 浏览器打开 http://127.0.0.1:8765 。
+
+在桌面浏览器的聊天页点击右上角「阅读原文」，可在同一页阅读《流浪地球》并划选段落带入聊天。滚动位置仅保存在本机浏览器，用于下次续读；浏览器也保留一个本机标识，让聊天侧已确认进度在刷新后仍对应同一用户。滚动和选中原文不会更改防剧透边界。读完一章可点「我已读完本章」，然后在聊天中完成进度确认。首版暂不适配手机。
 
 WebUI 的登录密码不写入项目文档；本机配置位置是：
 

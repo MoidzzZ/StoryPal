@@ -12,13 +12,21 @@ dependencies = ["nanobot-ai==0.3.0"]
 [project.entry-points."nanobot.tools"]
 story_state = "storypal_chatbot.tools:StorySessionStateTool"
 reading_location = "storypal_chatbot.tools:ReadingLocationTool"
+resolve_reading_location = "storypal_chatbot.tools:ResolveReadingLocationTool"
+set_reading_progress = "storypal_chatbot.tools:SetReadingProgressTool"
 read_notes = "storypal_chatbot.tools:ReadNotesTool"
 write_note = "storypal_chatbot.tools:WriteNoteTool"
+record_interaction_note = "storypal_chatbot.tools:RecordInteractionNoteTool"
+forget_interaction_note = "storypal_chatbot.tools:ForgetInteractionNoteTool"
 read_reading_notebook = "storypal_chatbot.tools:ReadReadingNotebookTool"
 write_reading_notebook = "storypal_chatbot.tools:WriteReadingNotebookTool"
+search_reading_journal = "storypal_chatbot.tools:SearchReadingJournalTool"
+save_journal_entry = "storypal_chatbot.tools:SaveJournalEntryTool"
 search_story = "storypal_chatbot.tools:SearchStoryTool"
 story_context = "storypal_chatbot.tools:StoryContextTool"
 get_story_evidence = "storypal_chatbot.tools:GetStoryEvidenceTool"
+search_memory = "storypal_chatbot.tools:SearchHistoryMemoryTool"
+write_memory = "storypal_chatbot.tools:WriteHistoryMemoryTool"
 
 [project.scripts]
 storypal-chatbot-configure = "storypal_chatbot.bootstrap:main"

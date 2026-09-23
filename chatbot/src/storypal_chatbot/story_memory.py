@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+from .context_packer import ContextPacker
+
 
 class StoryMemoryError(RuntimeError):
     """StoryPal 故事检索的基础错误。"""
@@ -149,6 +151,7 @@ class StorySearchResult:
     retrieval: str
     anchors: list[dict[str, Any]]
     adjacent_context: list[dict[str, Any]]
+    context_diagnostics: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -157,14 +160,16 @@ class StorySearchResult:
             "max_seen_order": self.max_seen_order,
             "anchors": self.anchors,
             "adjacent_context": self.adjacent_context,
+            "context_diagnostics": self.context_diagnostics,
         }
 
 
 class StoryMemoryService:
     """在任意后端之上执行 StoryPal 的安全与证据包规则。"""
 
-    def __init__(self, backend: StoryMemoryBackend) -> None:
+    def __init__(self, backend: StoryMemoryBackend, context_packer: ContextPacker | None = None) -> None:
         self.backend = backend
+        self.context_packer = context_packer or ContextPacker()
 
     @staticmethod
     def _safe_evidence(
@@ -198,31 +203,18 @@ class StoryMemoryService:
         raw_hits = self.backend.search(
             work_id, query.strip(), max_order=max_seen_order, top_k=5, filters=filters
         )
-        hits = [
-            safe
-            for item in raw_hits
-            if (safe := self._safe_evidence(item, work_id, max_seen_order)) is not None
-        ]
-        anchors = hits[:3]
-        anchor_keys = {
-            (int(hit["order"]), str(hit.get("metadata", {}).get("chapter", "")))
-            for hit in anchors
-        }
-        adjacent: list[dict[str, Any]] = []
-        for candidate in hits[3:5]:
-            chapter_name = str(candidate.get("metadata", {}).get("chapter", ""))
-            candidate_order = int(candidate["order"])
-            if any(
-                chapter_name == anchor_chapter and abs(candidate_order - anchor_order) == 1
-                for anchor_order, anchor_chapter in anchor_keys
-            ):
-                adjacent.append(candidate)
+        packed = self.context_packer.pack(
+            raw_hits,
+            work_id=work_id,
+            max_seen_order=max_seen_order,
+        )
         return StorySearchResult(
             work_id=work_id,
             max_seen_order=max_seen_order,
             retrieval=str(getattr(self.backend, "retrieval", "unknown")),
-            anchors=anchors,
-            adjacent_context=adjacent,
+            anchors=packed.anchors,
+            adjacent_context=packed.adjacent_context,
+            context_diagnostics=packed.diagnostics(),
         )
 
     def reading_locations(self, *, work_id: str | None) -> dict[str, Any]:
