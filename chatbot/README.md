@@ -96,22 +96,26 @@ Browser WebUI
 
 1. `AGENTS.md`, `SOUL.md`, and `USER.md` are stable prompt layers rebuilt for
    each turn. They are not replaced by conversation summaries.
-2. `active_work`, `current_anchor`, and `max_seen_order` are per-session StoryPal
-   state injected as data-only runtime context. The last field is the spoiler
-   boundary.
+2. `active_work`, `current_anchor`, and `max_seen_order` are persisted by user
+   and work, then injected as data-only runtime context. The last field is the
+   confirmed spoiler boundary; browser scrolling never advances it.
 3. The current session stores its raw message/tool history. The active prompt uses
    a recent verbatim tail plus a rolling checkpoint when older turns are compacted.
 4. Idle compaction is configured after 15 minutes. The verified replay tail is 8
    messages (4 user/assistant rounds); the original JSONL transcript remains on
    disk and is not overwritten by the summary.
-5. Explicit Notes are user-scoped and durable across sessions. They are not
-   injected automatically: Luna sees matching note text only after the user asks
-   for recall and the model calls `read_notes`. `write_note` is reserved for an
-   explicit "remember this" request.
+5. Each user has an editable `Note.md` for non-story interaction agreements.
+   Explicit note and forget requests take effect across sessions; the current
+   Note is injected once per turn. Archived user messages may also be processed
+   in the background for Note candidates, with source checks; this automatic
+   path still needs real-conversation false-write evaluation. The reading
+   journal separately stores reactions, questions, and predictions by work.
 6. Dream runs under a constrained prompt and may update only `SOUL.md` and
    `USER.md`. It cannot modify `MEMORY.md`, notes, StoryPal state, or story
    storage.
 
-Not implemented yet: semantic retrieval over old conversations, automatic durable
-profile extraction, and the real Story Store. Old-session search is therefore not
-yet a reliable substitute for explicit Notes.
+Not implemented yet: the planned daily episodic memory and semantic recall of
+shared experiences. Existing session history and checkpoint do not provide that
+cross-session behavior. Story retrieval already uses the local StoryMemory
+adapter with a confirmed reading boundary; its private source data is not
+included in the public repository.

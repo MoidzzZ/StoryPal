@@ -7,6 +7,7 @@
 - 想运行本地 Chatbot：返回根目录 [README](../README.md)。
 - 想了解当前做到哪里：查看 [开发进度](operations/CHATBOT_DEVELOPMENT_PROGRESS.md)。
 - 想体验或设计陪读：从 [初次阅读体验](product/CHATBOT_FIRST_READING_EXPERIENCE.md) 开始。
+- 想按真实用户行为验收桌面版：查看 [首次阅读行为验收规范](operations/FIRST_READING_ACCEPTANCE.md)。
 - 想了解桌面阅读器的复用补丁：查看 [阅读器补丁说明](../patches/nanobot/reader.md)。
 - 想了解接下来做什么：查看 [下一阶段交付](architecture/STORYPAL_NEXT_DELIVERY.md) 和 [RAG/Memory 规格](architecture/STORYPAL_RAG_MEMORY_SPEC.md)。
 - 想引用可复跑的实验数字：查看 [结果记录](../result.md)，不要将功能回归等同于真实读者体验。
