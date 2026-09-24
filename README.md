@@ -4,6 +4,8 @@
 
 以下命令针对已配置的本地开发环境。公开仓库不包含 `.runtime/`、`.reference/`、`story_mem/` 或小说原文；新克隆需要先准备 nanobot 基座、应用 [StoryPal 补丁](patches/nanobot/README.md)，并按 [StoryMemory 接入说明](chatbot/STORY_PIPELINE_INTEGRATION.md) 放置本地数据。
 
+启动前确认 Conda 中的 `nanobot-ai` 是从**已应用全部 StoryPal 补丁的源码副本**安装，而非仅从上游参考目录安装。只更新网页资源、不切换 Python 安装源，会导致“人格与规则”页面有三个卡片却无法显示文档。当前本机补丁副本为 `.runtime/nanobot/source-build/`；其准备与安装顺序见补丁说明。
+
 在 PowerShell 中执行：
 
 ```powershell

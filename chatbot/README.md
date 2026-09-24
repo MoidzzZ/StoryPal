@@ -13,9 +13,12 @@ Planned responsibilities:
 - nanobot tool entry points, so no upstream patch is required.
 
 Current PoC environment: Conda environment `storypal-chatbot` (Python 3.12).
-The minimal environment declaration is `environment.yml`. nanobot is installed
-separately from the fixed `.reference/nanobot` source so a same-numbered PyPI
-release cannot silently replace the audited commit.
+The minimal environment declaration is `environment.yml`. `.reference/nanobot`
+is the fixed upstream baseline. The running Conda environment must install an
+editable copy with all StoryPal patches applied (locally,
+`.runtime/nanobot/source-build`), not the unpatched baseline or a same-version
+PyPI release. Otherwise the WebUI may render persona tabs without receiving
+their document data from the backend.
 
 Install this integration in editable mode:
 

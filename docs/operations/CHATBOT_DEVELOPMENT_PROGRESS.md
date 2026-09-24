@@ -4,6 +4,12 @@
 > 最后更新：2026-09-24（Asia/Shanghai）
 > 当前执行顺序：[下一阶段交付](../architecture/STORYPAL_NEXT_DELIVERY.md)；历史完整规格：[StoryPal RAG 与 Memory 强化规格](../architecture/STORYPAL_RAG_MEMORY_SPEC.md)
 
+## 2026-09-24：WebUI 人格文档与阅读入口修复
+
+- 根因：当前 Conda 服务加载了 `.reference/nanobot`，其中有阅读器接口，但缺少人格文档设置接口；网页构建来自另一份已打补丁源码，所以三个卡片存在而正文没有数据。三份工作区 Markdown 文件本身均存在。
+- 将全部既有补丁合并至 `.runtime/nanobot/source-build/` 并把 Conda 的 editable 安装切到该副本；服务重启后，受保护 `/api/settings` 实际返回 `SOUL.md`、`AGENTS.md`、`USER.md`，三者 `available=true`。接口核验不输出正文或凭据。
+- 将“阅读原文”从聊天顶部绝对定位改为独立工具栏，避免与原按钮重叠；补丁已同步。候选源码后端定向回归 **110/110**、WebUI 定向回归 **62/62**、TypeScript 检查及生产构建通过。本机服务首页 200 且已使用新资源；真实视觉操作因浏览器自动化通道故障仍待用户核验。
+
 ## 2026-09-24：首次阅读小规模自动验收
 
 - 建立 [首次阅读行为验收规范](FIRST_READING_ACCEPTANCE.md)：由 GPT-5.6 Terra 模拟读者设计 7 个场景，明确程序契约、真实 Luna 表现和真人阅读体验的不同验收口径；不调用模型、不修改真实用户进度或输出原文。

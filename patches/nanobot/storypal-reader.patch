@@ -83,14 +83,16 @@ index 5eafb13..6944578 100644
    const workbenchState = sidebarState.workbench;
    const updateWorkbenchState = useCallback((
      updater: (current: WorkbenchState) => WorkbenchState,
-@@ -2727,6 +2731,34 @@ function Shell({
+@@ -2727,6 +2731,36 @@ function Shell({
                  view !== "chat" && "hidden",
                )}
              >
-+              {!readerOpen && desktopReader && (
-+                <Button type="button" variant="outline" size="sm" className="absolute right-20 top-3 z-30 gap-1.5" onClick={() => setReaderOpen(true)}>
-+                  <BookOpen className="h-4 w-4" /> 阅读原文
-+                </Button>
++              {desktopReader && (
++                <div className="flex h-11 shrink-0 items-center justify-end border-b border-border/55 px-4">
++                  <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setReaderOpen((open) => !open)}>
++                    <BookOpen className="h-4 w-4" /> {readerOpen ? "收起原文" : "阅读原文"}
++                  </Button>
++                </div>
 +              )}
 +              <div className="flex min-h-0 flex-1">
 +              {readerOpen && desktopReader && (
@@ -118,7 +120,7 @@ index 5eafb13..6944578 100644
                <PaneWorkbench
                  panes={renderedWorkbenchPanes}
                  activePaneKey={renderedActivePaneKey}
-@@ -2856,6 +2888,8 @@ function Shell({
+@@ -2856,6 +2890,8 @@ function Shell({
                    );
                  }}
                />
