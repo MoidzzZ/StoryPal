@@ -250,3 +250,48 @@ async def test_reading_progress_cancel_does_not_write(tmp_path):
         cancelled = json.loads(await writer.execute(action="cancel", pending_id=proposal["pending_id"]))
         assert cancelled["status"] == "cancelled"
         assert progress.get("alice")["active_work"] is None
+
+
+@pytest.mark.asyncio
+async def test_paragraph_mark_requires_confirmation_and_preserves_partial_boundary(tmp_path):
+    work = tmp_path / "wandering_earth"
+    segmented = work / "02_segmented"
+    segmented.mkdir(parents=True)
+    (segmented / "units.jsonl").write_text(json.dumps({
+        "work_id": "wandering_earth", "unit_id": "we-0001", "order": 1,
+        "chapter_name": "第一章", "start_line": 3, "end_line": 7,
+        "text": "第一段。\n死亡。\n第三段。",
+    }, ensure_ascii=False), encoding="utf-8")
+    normalized = work / "01_normalized"
+    normalized.mkdir()
+    (normalized / "meta.json").write_text(json.dumps({"body_line_numbers": [3, 5, 7]}), encoding="utf-8")
+    (normalized / "text.txt").write_text("第一段。\n死亡。\n第三段。\n", encoding="utf-8")
+
+    class ParagraphBackend(FakeBackend):
+        data_root = tmp_path
+
+        def get_reading_locations(self, work_id):
+            return {"source_version": "test", "locations": []}
+
+    service = StoryMemoryService(ParagraphBackend([]))
+    resolver = ResolveReadingLocationTool(tmp_path, service=service)
+    writer = SetReadingProgressTool(tmp_path, service=service)
+    progress = ReadingProgressStore(tmp_path)
+    first = RequestContext(channel="websocket", chat_id="story", session_key="webui:para",
+                           sender_id="alice", turn_id="turn-1", original_user_text="我读到死亡。这里")
+    with request_context(first):
+        locations = json.loads(await resolver.execute(work_id="wandering_earth", source_quote="死亡。", source_line=5))
+        assert locations["locations"][0]["end_order"] == 0
+        proposal = json.loads(await writer.execute(action="propose", work_id="wandering_earth",
+                                                   location_id="paragraph:we-0001:5"))
+        assert proposal["status"] == "confirmation_required"
+        assert progress.get("alice")["active_work"] is None
+        assert (await writer.execute(action="confirm", pending_id=proposal["pending_id"])).is_error
+        assert (await resolver.execute(work_id="wandering_earth", source_quote="第三段。")).is_error
+    second = RequestContext(channel="websocket", chat_id="story", session_key="webui:para",
+                            sender_id="alice", turn_id="turn-2", original_user_text="确认，就读到这里")
+    with request_context(second):
+        confirmed = json.loads(await writer.execute(action="confirm", pending_id=proposal["pending_id"]))
+        assert confirmed["state"]["max_seen_order"] == 0
+        assert confirmed["state"]["reader_position"]["line"] == 5
+    assert progress.get("alice")["reader_position"]["location_id"] == "paragraph:we-0001:5"

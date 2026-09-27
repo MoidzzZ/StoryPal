@@ -242,6 +242,19 @@ class StoryMemoryService:
             })
         return {"work_id": work_id, "source_version": raw.get("source_version"), "locations": safe_locations}
 
+    def paragraph_locations(
+        self, *, work_id: str | None, source_quote: str | None = None,
+        source_line: int | None = None, location_id: str | None = None,
+    ) -> dict[str, Any]:
+        if not work_id:
+            raise StoryProgressRequired("请选择作品后再定位段落。")
+        from .reader import paragraph_locations
+
+        return paragraph_locations(
+            work_id, self.backend, source_quote=source_quote,
+            source_line=source_line, location_id=location_id,
+        )
+
     def structured_context(
         self,
         *,

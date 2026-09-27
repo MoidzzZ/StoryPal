@@ -1,0 +1,122 @@
+diff --git a/webui/src/App.tsx b/webui/src/App.tsx
+index 4292f6f..bd966a9 100644
+--- a/webui/src/App.tsx
++++ b/webui/src/App.tsx
+@@ -2757,6 +2757,12 @@ function Shell({
+                       if (!chatId) throw new Error("无法创建聊天，请稍后重试。");
+                       client.sendMessage(chatId, `我已经读完《流浪地球》的「${chapter.label}」。请按阅读进度确认流程处理，不要自行跳过确认。`, undefined, { turnId: crypto.randomUUID() });
+                     }}
++                    onMarkParagraph={async (unit, paragraph) => {
++                      const chatId = activeSession?.chatId ?? await onCreateChat();
++                      if (!chatId) throw new Error("无法创建聊天，请稍后重试。");
++                      const quote = paragraph.text.slice(-100);
++                      client.sendMessage(chatId, `我读到《流浪地球》「${unit.chapter_name}」第 ${paragraph.line} 行的段尾。原文定位：“${quote}”。请先按原文片段和行号定位，再向我确认是否更新阅读进度，不要直接推进。`, undefined, { turnId: crypto.randomUUID() });
++                    }}
+                   />
+                 </div>
+               )}
+diff --git a/webui/src/components/StoryReaderPane.tsx b/webui/src/components/StoryReaderPane.tsx
+index 4077f30..be8dd52 100644
+--- a/webui/src/components/StoryReaderPane.tsx
++++ b/webui/src/components/StoryReaderPane.tsx
+@@ -9,6 +9,14 @@ type ReaderUnit = {
+   start_line: number;
+   end_line: number;
+   text: string;
++  paragraphs: ReaderParagraph[];
+ };
+-
++
++type ReaderParagraph = {
++  text: string;
++  line: number;
++  location_id: string;
++  end_order: number;
++};
++
+ type ReaderLocation = {
+@@ -33,11 +41,13 @@ export function StoryReaderPane({
+   onClose,
+   onAsk,
+   onReportChapter,
++  onMarkParagraph,
+   chatBusy,
+ }: {
+   getToken: () => string;
+   onClose: () => void;
+   onAsk: (selection: Selection, question: string) => Promise<void>;
+   onReportChapter: (location: ReaderLocation) => Promise<void>;
++  onMarkParagraph: (unit: ReaderUnit, paragraph: ReaderParagraph) => Promise<void>;
+   chatBusy: boolean;
+ }) {
+@@ -130,4 +140,16 @@ export function StoryReaderPane({
+     }
+   };
+-
++
++  const submitParagraph = async (unit: ReaderUnit, paragraph: ReaderParagraph) => {
++    if (sending || chatBusy) return;
++    setSending(true);
++    try {
++      await onMarkParagraph(unit, paragraph);
++    } catch (cause) {
++      setError(cause instanceof Error ? cause.message : "提交段落标记失败，请稍后重试。");
++    } finally {
++      setSending(false);
++    }
++  };
++
+   const changeFontSize = (delta: number) => {
+@@ -166,7 +188,10 @@ export function StoryReaderPane({
+           return (
+             <div key={unit.unit_id} data-order={unit.order} className="scroll-mt-5">
+               {first && <h2 className="mb-8 mt-10 border-b border-black/10 pb-4 text-center text-xl font-semibold dark:border-white/10">{first.label}</h2>}
+-              {unit.text.split("\n").map((paragraph, index) => <p key={index} className="mb-5 whitespace-pre-wrap leading-[1.95]" style={{ fontSize }}>{paragraph}</p>)}
++              {unit.paragraphs.map((paragraph) => <p key={paragraph.location_id} data-line={paragraph.line} className="group mb-5 whitespace-pre-wrap leading-[1.95]" style={{ fontSize }}>
++                {paragraph.text}
++                <button type="button" disabled={sending || chatBusy} onClick={() => void submitParagraph(unit, paragraph)} aria-label={`读到第 ${paragraph.line} 行段尾`} className="ml-2 inline-flex rounded px-1.5 py-0.5 align-middle text-xs text-amber-800 opacity-45 hover:bg-amber-100 hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed dark:text-amber-300 dark:hover:bg-amber-900/30">读到这里</button>
++              </p>)}
+               {last && <div className="my-10 border-t border-black/10 pt-5 text-center dark:border-white/10"><Button variant="outline" disabled={sending || chatBusy} onClick={() => void submitChapter(last)}>我已读完本章</Button><p className="mt-2 text-xs opacity-60">会在聊天中请你确认，滚动页面不会更新已读范围。</p></div>}
+             </div>
+           );
+diff --git a/webui/src/tests/story-reader-pane.test.tsx b/webui/src/tests/story-reader-pane.test.tsx
+index 377c83c..c5fb666 100644
+--- a/webui/src/tests/story-reader-pane.test.tsx
++++ b/webui/src/tests/story-reader-pane.test.tsx
+@@ -18,12 +18,13 @@ describe("桌面阅读器", () => {
+         title: "流浪地球",
+         source_version: "v1",
+         locations: [{ location_id: "chapter-01", label: "第一章", start_order: 1, end_order: 1 }],
+-        units: [{ unit_id: "we-0001", order: 1, chapter_name: "第一章", start_line: 5, end_line: 7, text: "开篇原文" }],
++        units: [{ unit_id: "we-0001", order: 1, chapter_name: "第一章", start_line: 5, end_line: 7, text: "开篇原文", paragraphs: [{ text: "开篇原文", line: 7, location_id: "paragraph:we-0001:7", end_order: 1 }] }],
+       }),
+     });
+     vi.stubGlobal("fetch", fetchMock);
+     Element.prototype.scrollIntoView = vi.fn();
+     const onReportChapter = vi.fn().mockResolvedValue(undefined);
++    const onMarkParagraph = vi.fn().mockResolvedValue(undefined);
+-
++
+     const { container } = render(
+       <StoryReaderPane
+@@ -31,6 +32,7 @@ describe("桌面阅读器", () => {
+         onClose={vi.fn()}
+         onAsk={vi.fn()}
+         onReportChapter={onReportChapter}
++        onMarkParagraph={onMarkParagraph}
+         chatBusy={false}
+       />,
+     );
+@@ -41,6 +43,12 @@ describe("桌面阅读器", () => {
+     }));
+     fireEvent.scroll(container.querySelector("[data-order='1']")!.parentElement!);
+     expect(onReportChapter).not.toHaveBeenCalled();
++    expect(onMarkParagraph).not.toHaveBeenCalled();
++    fireEvent.click(screen.getByRole("button", { name: "读到第 7 行段尾" }));
++    await waitFor(() => expect(onMarkParagraph).toHaveBeenCalledWith(
++      expect.objectContaining({ unit_id: "we-0001" }),
++      expect.objectContaining({ location_id: "paragraph:we-0001:7" }),
++    ));
+     fireEvent.click(screen.getByRole("button", { name: "我已读完本章" }));
+     await waitFor(() => expect(onReportChapter).toHaveBeenCalledWith(expect.objectContaining({ location_id: "chapter-01" })));
+   });

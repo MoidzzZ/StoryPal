@@ -107,7 +107,7 @@ class ReadingProgressStore:
 
     @staticmethod
     def _empty() -> dict[str, Any]:
-        return {"active_work": None, "current_anchor": None, "max_seen_order": None}
+        return {"active_work": None, "current_anchor": None, "max_seen_order": None, "reader_position": None}
 
     def _document(self, owner_key: str) -> dict[str, Any]:
         value = _read_json(self._path(owner_key), {})
@@ -143,6 +143,7 @@ class ReadingProgressStore:
             "active_work": active_work,
             "current_anchor": state.get("current_anchor"),
             "max_seen_order": state.get("max_seen_order"),
+            "reader_position": state.get("reader_position"),
         }
 
     def set(
@@ -152,6 +153,7 @@ class ReadingProgressStore:
         active_work: str | None = None,
         current_anchor: str | None = None,
         max_seen_order: int | None = None,
+        reader_position: dict[str, Any] | None = None,
         source_session_key: str | None = None,
     ) -> dict[str, Any]:
         document = self._document(owner_key)
@@ -162,10 +164,21 @@ class ReadingProgressStore:
         previous = works.get(work_id)
         state = dict(previous) if isinstance(previous, dict) else {}
         old_order = state.get("max_seen_order")
+        old_position = state.get("reader_position")
         if max_seen_order is not None:
             if old_order is not None and max_seen_order < old_order:
                 raise ValueError("max_seen_order cannot move backwards; clear the state first")
             state["max_seen_order"] = max_seen_order
+        if reader_position is not None:
+            new_key = (int(reader_position["unit_order"]), int(reader_position["line"]))
+            if isinstance(old_position, dict):
+                old_key = (int(old_position["unit_order"]), int(old_position["line"]))
+                if new_key < old_key:
+                    raise ValueError("段落位置不能倒退；如需纠正，请先明确重置")
+            state["reader_position"] = reader_position
+        elif max_seen_order is not None and isinstance(old_position, dict):
+            if max_seen_order >= int(old_position["unit_order"]):
+                state["reader_position"] = None
         if current_anchor is not None:
             state["current_anchor"] = current_anchor
         state["updated_at"] = datetime.now(UTC).isoformat()
@@ -203,6 +216,8 @@ class PendingReadingProgressStore:
         location_id: str,
         label: str,
         end_order: int,
+        reader_position: dict[str, Any] | None = None,
+        source_version: str | None = None,
         source_turn_id: str,
     ) -> dict[str, Any]:
         pending = {
@@ -212,6 +227,8 @@ class PendingReadingProgressStore:
             "location_id": location_id,
             "label": label,
             "end_order": end_order,
+            "reader_position": reader_position,
+            "source_version": source_version,
             "source_turn_id": source_turn_id,
             "created_at": datetime.now(UTC).isoformat(),
         }
