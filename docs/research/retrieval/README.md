@@ -9,6 +9,15 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.re
 D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.replay replay --query-source raw_user --strategy vector --output .runtime/retrieval-experiments/vector-raw.json
 ```
 
+jieba 单因素对照仅写隔离索引。首次准备依赖：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pip install --disable-pip-version-check --no-input --target .runtime/retrieval-experiments/vendor jieba==0.42.1
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.replay replay --query-source raw_user --strategy jieba_or --output .runtime/retrieval-experiments/jieba-or.json
+```
+
+将 `jieba_or` 改为 `jieba_and`、`jieba_phrase` 即可在同一隔离索引上对照。严格现有 FTS5 可用 `fts_strict`；`fts` 是含 Python 扫描回退的实际 StoryMem 路径。结果只存编号、来源哈希、查询哈希及耗时，不存故事文本。
+
 真实查询需先用独立、经审核的 JSONL 事件输入 `capture`。首版每例只采首次检索决策或首次 `search_story` 调用；后续重试另行分析，不静默挑最优查询。每行示意：
 
 ```json

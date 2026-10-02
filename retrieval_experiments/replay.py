@@ -107,6 +107,9 @@ class StrictFtsAdapter:
 
 
 def _adapter(strategy: str, candidate_k: int) -> Any:
+    if strategy.startswith("jieba_"):
+        from .sparse import JiebaFtsAdapter
+        return JiebaFtsAdapter(strategy.removeprefix("jieba_"))
     if str(PIPELINE) not in sys.path:
         sys.path.insert(0, str(PIPELINE))
     from storymemory.adapter import StoryMemory
@@ -223,7 +226,8 @@ def main() -> None:
     cap.add_argument("--output", type=Path, required=True)
     run = sub.add_parser("replay")
     run.add_argument("--query-source", choices=("raw_user", "gold_rewrite", "agent_query"), required=True)
-    run.add_argument("--strategy", choices=("fts", "fts_strict", "vector", "rrf"), required=True)
+    run.add_argument("--strategy", choices=("fts", "fts_strict", "jieba_or", "jieba_and",
+                                            "jieba_phrase", "vector", "rrf"), required=True)
     run.add_argument("--trace", type=Path)
     run.add_argument("--top-k", type=int, default=5)
     run.add_argument("--candidate-k", type=int, default=10)
