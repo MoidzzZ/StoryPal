@@ -1,0 +1,30 @@
+diff --git a/nanobot/agent/loop.py b/nanobot/agent/loop.py
+--- a/nanobot/agent/loop.py
++++ b/nanobot/agent/loop.py
+@@ -770,7 +770,7 @@
+         assert ctx.request_context is not None
+         return await self._resolve_runtime_context_for_request(
+             ctx.request_context,
+-            ctx.tools or self.tools,
++            ctx.tools if ctx.tools is not None else self.tools,
+         )
+ 
+     async def _resolve_runtime_context_for_request(
+@@ -1138,7 +1138,7 @@
+                 request_ctx,
+                 workspace=effective_scope.project_path,
+             )
+-        effective_tools = tools or self.tools
++        effective_tools = tools if tools is not None else self.tools
+         file_state_token = bind_file_states(self._file_state_store.for_session(active_session_key))
+         request_token = bind_request_context(request_ctx)
+         workspace_token = bind_workspace_scope(effective_scope)
+@@ -1787,7 +1787,7 @@
+                 ctx.session = self.sessions.get_or_create(ctx.session_key)
+         session = ctx.session
+         ctx.ephemeral = ctx.ephemeral or not session.policy.persist
+-        tools = ctx.tools or self.tools
++        tools = ctx.tools if ctx.tools is not None else self.tools
+         allowed_tools = self.tools_config.allowed_tools
+         if allowed_tools is not None:
+             allowed_names = frozenset(allowed_tools)

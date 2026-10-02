@@ -14,4 +14,4 @@
 
 源模板为 `chatbot/src/storypal_chatbot/persona/prompts/consolidator_archive.md`，正常新安装由 install_persona 复制。已有工作区只补缺失的同名模板，不为此重跑初始化或 force 覆盖人格。Python 补丁首次部署需重启 gateway；网页无需重建。
 
-补丁已在固定上游 memory.py 加既有 Dream 改动后 check/apply 并与当前运行源码逐字比较。定向测试见 `chatbot_tests/test_reading_checkpoint.py` 和 `test_note_consolidation.py`；替身 provider 验证的是链路，不证明模型能正确保留文学解读。真实两请求隔离验收待发送授权，见连续共读核验文档。
+补丁已在固定上游 memory.py 加既有 Dream 改动后 check/apply 并与当前运行源码逐字比较。定向测试见 `chatbot_tests/test_reading_checkpoint.py` 和 `test_note_consolidation.py`；替身 provider 验证的是链路，不证明模型能正确保留文学解读。授权的 2+1 请求小样已完成：原始摘要生成成功，首次续聊因空工具回退失败，修复后复用旧摘要续聊成功。摘要将澄清夸写为此前误读，已收紧规则但未重新调用模型验证新模板，详见 result.md。

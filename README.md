@@ -26,7 +26,7 @@ nanobot webui --yes --config D:\StoryPal\.runtime\nanobot\storypal\config.json -
 
 已确认完整已读位置后，每轮会自动带入预算内的渐进故事视图，原文工具仍按需查证；这不是全书摘要或已验证的人物因果图。新安装还需同步 StoryMem 的 `get_progressive_view` 接口并应用 [临时上下文回放补丁](patches/nanobot/runtime-context-replay.md)。本机已更新源码，后端变更需要重启 gateway，无需改用户进度或重新初始化。
 
-共读压缩现在支持保留观点、修正与未解问题。新安装应用 [共读归档补丁](patches/nanobot/reading-checkpoint.md)；模板在工作区 `prompts/consolidator_archive.md`，默认只补缺失文件，已有自定义不覆盖。它复用原有压缩调用，不自动写入阅读手账或 Note；真实模型的压缩续聊效果仍待验收。
+共读压缩现在支持保留观点、修正与未解问题。新安装应用 [共读归档补丁](patches/nanobot/reading-checkpoint.md)；模板在工作区 `prompts/consolidator_archive.md`，默认只补缺失文件，已有自定义不覆盖。它复用原有压缩调用，不自动写入阅读手账或 Note；一条隔离压缩续聊已跑通，不代表全面体验通过。还需应用 [空工具注册表修复](patches/nanobot/empty-tool-registry.md)，防止空白名单意外回退默认工具。
 
 在桌面浏览器的聊天页点击右上角「阅读原文」，可在同一页阅读《流浪地球》并划选段落带入聊天。每段末尾的「读到这里」可发起精确段尾进度标记；也可在章末点「我已读完本章」，两者都需在聊天中再次确认才写入。滚动位置仅保存在本机浏览器，用于下次续读；浏览器也保留一个本机标识，让聊天侧已确认进度在刷新后仍对应同一用户。滚动和选中原文不会更改防剧透边界。段落落在 StoryUnit 中间时，系统只开放该段之前的原文，不把整个单元标记为已读。首版暂不适配手机，已确认位置暂不在阅读器中高亮。
 

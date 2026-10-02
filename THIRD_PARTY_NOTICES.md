@@ -8,6 +8,7 @@
 - 核对的 commit：`9ecdc4533f935bfd7cae9b8cbe651e77eec07cd7`
 - 许可证：MIT；原文见上游仓库的 `LICENSE`
 - 引入时间：2026-09-02（Asia/Shanghai）
+- 2026-10-03 新增 `storypal-empty-tool-registry.patch`：修正 loop 中三处将空注册表误回退成默认全集的行为，保持 None 的默认兼容语义；真实隔离测试发现，无小说或凭据。
 - 2026-10-03 新增 `storypal-reading-checkpoint.patch`：仅为 MemoryArchiver 增加通用工作区归档模板覆盖，复用已有安全读取与大小限制，不含小说或用户对话；中文业务模板属于 StoryPal 自有内容。
 - 2026-10-03 新增 `storypal-runtime-context-replay.patch`：通用逐来源临时上下文历史回放策略、消息合并和 provider 私有状态失效，不含 StoryPal 业务名、小说或凭据。
 - 2026-10-02 新增 `storypal-codex-model-catalog.patch`：将目录查询版本从 `0.144.0` 更新至已核验的 `0.159.2`；补丁不含凭据，运行默认与 Luna 白名单由 StoryPal 自有代码维护。

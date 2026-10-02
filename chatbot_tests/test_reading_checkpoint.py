@@ -47,6 +47,7 @@ def test_archive_template_install_preserves_user_edit(tmp_path):
     for tag in ["[读者观点]", "[暂定解释]", "[修正轨迹]", "[未解问题]"]:
         assert tag in template
     assert "失败" in template and "替换式" in template and "不在此摘要写入" in template
+    assert "纠错与澄清" in template and "补造旧立场" in template
     archive.write_text("用户维护的共读归档规则", encoding="utf-8")
     assert archive not in install_persona(tmp_path)
     assert archive.read_text(encoding="utf-8") == "用户维护的共读归档规则"
