@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="2080" viewBox="0 0 1720 2080" role="img" aria-labelledby="title desc">
+<title id="title">StoryPal 用户讨论融合、阅读手账与 Skill／Tool 设计</title>
+<desc id="desc">区分 StoryMem 故事材料、会话工作记忆、独立阅读手账、剧情外 Note。展示数据进入上下文后由主 Agent 结合 Skill 方法解释，使用五组共十一项已有工具。橙色为待完善；Skill 方法尚未落地为独立加载模块，不宣称已实现动态路由。</desc>
+<defs>
+  <style>
+    text{font-family:'Microsoft YaHei','Noto Sans CJK SC',sans-serif;fill:#183246}
+    .title{font-size:38px;font-weight:700}.head{font-size:26px;font-weight:700}.body{font-size:22px}.small{font-size:20px}.code{font-family:Consolas,'Microsoft YaHei',monospace;font-size:20px}
+    .muted{fill:#50687a}.orange{fill:#9b5b0c}.green{fill:#237452}
+    .panel{fill:#fff;stroke:#d5e0e8;stroke-width:1.5}.have{fill:#edf8f2;stroke:#78b497;stroke-width:1.8}.plan{fill:#fff7e9;stroke:#d2963e;stroke-width:2;stroke-dasharray:8 5}.neutral{fill:#f0f5fa;stroke:#b2c5d5;stroke-width:1.5}
+    .arrow{fill:none;stroke:#627f93;stroke-width:2.4;marker-end:url(#a)}.dashed{fill:none;stroke:#c38a32;stroke-width:2.4;stroke-dasharray:7 5;marker-end:url(#b)}
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#627f93"/></marker>
+  <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#c38a32"/></marker>
+</defs>
+<rect width="1720" height="2080" fill="#f7fafc"/>
+<text x="56" y="63" class="title">StoryPal · 你的解读怎样参与共读</text>
+<text x="56" y="106" class="body muted">绿色：已有底层｜橙色虚线：待完善的方法或路径｜不把用户观点当作故事事实｜2026-10-02</text>
+
+<text x="56" y="168" class="head">01 / 四类来源独立保存，各有自己的用途与更新时机</text>
+<rect x="56" y="202" width="390" height="256" rx="12" class="have"/>
+<text x="76" y="240" class="head">StoryMem · 故事材料</text>
+<text x="76" y="280" class="body">已读原文、状态和变化历史</text>
+<text x="76" y="316" class="body">用于理解／核验作品</text>
+<text x="76" y="352" class="body">不保存用户观点或偏好</text>
+<text x="76" y="395" class="small orange">C1 自动视图待补</text>
+<text x="76" y="428" class="small muted">抽取状态有误差，争议回原文</text>
+<rect x="462" y="202" width="390" height="256" rx="12" class="have"/>
+<text x="482" y="240" class="head">对话 · 当前共同理解</text>
+<text x="482" y="280" class="body">用户观点、AI 暂定解释</text>
+<text x="482" y="316" class="body">依据、修正、未解疑问</text>
+<text x="482" y="352" class="body">近期消息／会话压缩摘要</text>
+<text x="482" y="395" class="small orange">C2 专门保留解读待完善</text>
+<text x="482" y="428" class="small muted">普通聊天不自动写入手账</text>
+<rect x="868" y="202" width="390" height="256" rx="12" class="have"/>
+<text x="888" y="240" class="head">阅读手账 · 保存的想法</text>
+<text x="888" y="280" class="body">reaction / question / prediction</text>
+<text x="888" y="316" class="body">作品、阅读锚点、时间、来源</text>
+<text x="888" y="352" class="body">明确要求才写；按需回看</text>
+<text x="888" y="395" class="small muted">当前 JSON＋简单文本包含过滤</text>
+<text x="888" y="428" class="small orange">语义回看／预测复核仍待完善</text>
+<rect x="1274" y="202" width="390" height="256" rx="12" class="have"/>
+<text x="1294" y="240" class="head">Note · 剧情外交互约定</text>
+<text x="1294" y="280" class="body">行为约束、偏好、共同约定</text>
+<text x="1294" y="316" class="body">交互纠正、临时项、开放观察</text>
+<text x="1294" y="352" class="body">每用户 Note.md，每轮注入</text>
+<text x="1294" y="395" class="small muted">不是剧情观点／人物评价仓库</text>
+<text x="1294" y="428" class="small orange">过期与观察维护待完善</text>
+<path d="M251 458 L251 491 L800 491 L800 527" class="dashed"/>
+<path d="M657 458 L657 482 L850 482 L850 527" class="arrow"/>
+<path d="M1063 458 L1063 482 L910 482 L910 527" class="arrow"/>
+<path d="M1469 458 L1469 491 L960 491 L960 527" class="arrow"/>
+<rect x="56" y="528" width="1608" height="112" rx="12" class="neutral"/>
+<text x="78" y="566" class="head">本轮 Context：保留来源身份，而不是把四种内容揉成一份事实摘要</text>
+<text x="78" y="604" class="body">原话／当前片段＋StoryMem 已知材料＋我们刚才的理解＋按需找回的手账＋Note／人格约定</text>
+
+<rect x="56" y="700" width="790" height="272" rx="12" class="plan"/>
+<text x="78" y="741" class="head orange">Skill · 怎样理解与回应【方法待落地】</text>
+<text x="78" y="782" class="body">连续剧情讨论：人物／因果／阶段变化，不替作品硬圆</text>
+<text x="78" y="819" class="body">事实核验：区分事实与推测，先用已有依据，再补缺口</text>
+<text x="78" y="856" class="body">手账回看：找回旧判断，对照新证据，说明变化与未定处</text>
+<text x="78" y="904" class="small muted">首轮可打包为 1 份短常驻 Skill 的 3 个方法段</text>
+<text x="78" y="943" class="small muted">不是 3 个新 Agent；尚未实现动态 Skill 路由</text>
+<rect x="928" y="700" width="736" height="272" rx="12" class="have"/>
+<text x="950" y="741" class="head">主 Agent · 形成新的、有依据的解读</text>
+<text x="950" y="782" class="body">抓住用户关注点 → 比较证据与观点 → 保留不确定性</text>
+<text x="950" y="819" class="body">充分就直接回应；不足就选工具，拿结果后继续解释</text>
+<text x="950" y="856" class="body">回答进入会话；压缩保留理解；明确记录才写手账</text>
+<text x="950" y="904" class="small orange">C3 待完善：按证据缺口选源，不默认每次重新搜索</text>
+<text x="950" y="943" class="small muted">LLM 推理负责融合；Context 负责供给与来源区分</text>
+<path d="M860 640 L860 675 L1296 675 L1296 699" class="arrow"/>
+<path d="M846 832 L928 832" class="dashed"/>
+<text x="864" y="814" class="small orange">方法</text>
+
+<text x="56" y="1041" class="head">02 / Tool · 实际访问与写入：当前白名单 11 项，分为 5 组</text>
+<text x="56" y="1074" class="small muted">下列展示常用参数／返回作用；完整 schema 见 tools.py。owner 与已读边界由运行时提供，不交给模型随意指定。</text>
+<rect x="56" y="1106" width="500" height="254" rx="12" class="have"/>
+<text x="78" y="1144" class="head">A · 位置与进度（2）</text>
+<text x="78" y="1182" class="code">resolve_reading_location</text>
+<text x="78" y="1216" class="small">work_id／source_quote／source_line</text>
+<text x="78" y="1248" class="small">→ 章节或原文定位候选，不修改进度</text>
+<text x="78" y="1286" class="code">set_reading_progress</text>
+<text x="78" y="1318" class="small">action＋location_id／pending_id → 状态</text>
+<text x="78" y="1348" class="small muted">提议 → 下一轮确认／取消 → 持久化</text>
+<rect x="610" y="1106" width="500" height="254" rx="12" class="have"/>
+<text x="632" y="1144" class="head">B · 剧情证据（3）</text>
+<text x="632" y="1182" class="code">story_context(kind, query)</text>
+<text x="632" y="1216" class="small">→ recap／实体／情节线的已读结构线索</text>
+<text x="632" y="1254" class="code">search_story(query)</text>
+<text x="632" y="1287" class="small">→ 主证据、相邻补充、选择诊断</text>
+<text x="632" y="1324" class="code">get_story_evidence(unit_id)</text>
+<text x="632" y="1353" class="small">→ 一条已读原文与来源位置</text>
+<rect x="1164" y="1106" width="500" height="254" rx="12" class="have"/>
+<text x="1186" y="1144" class="head">C · 阅读手账（2）</text>
+<text x="1186" y="1182" class="code">search_reading_journal</text>
+<text x="1186" y="1216" class="small">query?／work_id? → entries／截断说明</text>
+<text x="1186" y="1254" class="code">save_journal_entry</text>
+<text x="1186" y="1287" class="small">entry_type／content／work_id? → 新条目</text>
+<text x="1186" y="1324" class="small muted">没有进度可存无锚点，不推进边界</text>
+<text x="1186" y="1353" class="small orange">编辑／删除工具及语义搜索未开放</text>
+<rect x="56" y="1390" width="790" height="212" rx="12" class="have"/>
+<text x="78" y="1428" class="head">D · 剧情外 Note（2）</text>
+<text x="78" y="1466" class="code">record_interaction_note(category, content, source_quote)</text>
+<text x="78" y="1500" class="small">→ 笔记；source_quote 必须逐字来自本轮用户，记录时间与来源</text>
+<text x="78" y="1538" class="code">forget_interaction_note(note_id)</text>
+<text x="78" y="1572" class="small">→ 删除结果；读取走运行时注入，不另增一个读工具</text>
+<rect x="928" y="1390" width="736" height="212" rx="12" class="have"/>
+<text x="950" y="1428" class="head">E · 旧显式阅读记忆（2，兼容待整理）</text>
+<text x="950" y="1466" class="code">search_memory(query, limit)</text>
+<text x="950" y="1500" class="small">→ 当前作品的已读显式 memories；SQLite FTS</text>
+<text x="950" y="1538" class="code">write_memory(action, memory_type, content, ...)</text>
+<text x="950" y="1572" class="small orange">与手账存在语义重叠，后续迁移／合并，不自动双写</text>
+
+<rect x="56" y="1645" width="1608" height="142" rx="12" class="neutral"/>
+<text x="78" y="1684" class="head">Workflow · 执行与更新时机，不代替 Skill 的理解方法</text>
+<text x="78" y="1723" class="body">已有：进度提议／确认／取消；显式手账保存；压缩边界后台 Note 抽取试作</text>
+<text x="78" y="1760" class="body orange">待完善：压缩保留剧情解读；进度变化后异步核验旧预测；Note 过期与开放观察维护</text>
+<rect x="56" y="1820" width="1608" height="161" rx="12" class="plan"/>
+<text x="78" y="1860" class="head orange">例：你说“我之前觉得他冷漠，现在有点改观”</text>
+<text x="78" y="1899" class="body">近期对话有旧判断：直接承接；没有且明确指向以前：回看手账／旧保存记忆，找不到就问一句</text>
+<text x="78" y="1936" class="body">结合当前已读行动解释“改观在哪里”；必要时查实体历史与原文；不会把“冷漠”写成角色事实</text>
+<text x="78" y="1970" class="small">只有你明确说“帮我记下这次改观”才保存手账；“以后别替作品硬圆”属于 Note，而不是手账。</text>
+<text x="56" y="2030" class="small muted">本图修正的是架构表达与后续设计，不代表自动手账注入、动态 Skill 加载或新的语义记忆已实现。</text>
+</svg>

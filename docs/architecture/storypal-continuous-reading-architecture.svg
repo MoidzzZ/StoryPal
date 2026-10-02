@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="3040" viewBox="0 0 1720 3040" role="img" aria-labelledby="title desc">
+  <title id="title">StoryPal：《流浪地球》连续共读系统架构与完善范围</title>
+  <desc id="desc">自上而下分为场景与 Agent 主循环、上下文和记忆、StoryMem 数据与查询、代码落点和实施顺序。绿色表示已有实现，不代表陪读效果已验收；橙色表示本轮待新增或完善，灰色表示后续 TODO。C1 自动故事视图、C2 压缩后延续理解、C3 按证据缺口查证尚未完成。</desc>
+  <defs>
+    <style>
+      text { font-family: 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif; fill: #183246; }
+      .title { font-size: 40px; font-weight: 700; }
+      .section { font-size: 29px; font-weight: 700; }
+      .heading { font-size: 25px; font-weight: 700; }
+      .body { font-size: 22px; }
+      .small { font-size: 20px; }
+      .code { font-family: Consolas, 'Microsoft YaHei', monospace; font-size: 20px; }
+      .muted { fill: #50687a; }
+      .green { fill: #237452; }
+      .orange { fill: #9b5b0c; }
+      .gray { fill: #687788; }
+      .panel { fill: #ffffff; stroke: #d5e0e8; stroke-width: 1.5; }
+      .existing { fill: #edf8f2; stroke: #78b497; stroke-width: 1.8; }
+      .planned { fill: #fff7e9; stroke: #d2963e; stroke-width: 2; stroke-dasharray: 8 5; }
+      .neutral { fill: #f0f5fa; stroke: #b2c5d5; stroke-width: 1.5; }
+      .future { fill: #f3f4f6; stroke: #a7b0bb; stroke-width: 1.5; stroke-dasharray: 3 5; }
+      .arrow { fill: none; stroke: #627f93; stroke-width: 2.4; marker-end: url(#arrow); }
+      .plan-arrow { fill: none; stroke: #c38a32; stroke-width: 2.4; stroke-dasharray: 7 5; marker-end: url(#plan-arrow); }
+      .line { fill: none; stroke: #b2c5d5; stroke-width: 1.8; }
+      .tag { font-size: 19px; font-weight: 700; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#627f93"/></marker>
+    <marker id="plan-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c38a32"/></marker>
+  </defs>
+  <rect width="1720" height="3040" fill="#f7fafc"/>
+  <text x="56" y="69" class="title">StoryPal · 连续共读系统架构</text>
+  <text x="56" y="112" class="body muted">聚焦《流浪地球》：人物理解、事件因果、线索讨论，以及随着阅读推进修正自己的解读</text>
+  <rect x="56" y="142" width="210" height="40" rx="8" class="existing"/>
+  <text x="73" y="169" class="tag green">已有实现 · 实线</text>
+  <rect x="292" y="142" width="295" height="40" rx="8" class="planned"/>
+  <text x="309" y="169" class="tag orange">本轮待新增／完善 · 虚线</text>
+  <rect x="613" y="142" width="260" height="40" rx="8" class="future"/>
+  <text x="630" y="169" class="tag gray">后续 TODO · 点线</text>
+  <text x="910" y="169" class="small muted">核对日期 2026-10-02｜已有模块 ≠ 理解质量已验收</text>
+
+  <!-- 01: 场景与在线主循环 -->
+  <rect x="32" y="210" width="1656" height="600" rx="16" class="panel"/>
+  <text x="56" y="253" class="section">01 / 场景与在线 Agent：理解是目标，定位与检索是支撑</text>
+  <text x="56" y="287" class="small muted">连续链：表达感受或困惑 → 形成暂定解释 → 读到新内容 → 补证据／修正解释；不要求每轮检索</text>
+  <rect x="56" y="313" width="730" height="124" rx="12" class="existing"/>
+  <text x="78" y="351" class="heading">桌面 WebUI · 阅读器</text>
+  <text x="78" y="387" class="body">阅读原文／划选提问／段尾标记／本地续读</text>
+  <text x="78" y="419" class="small muted">明确报告与确认才更新进度；滚动不开放未读证据</text>
+  <rect x="908" y="313" width="756" height="124" rx="12" class="existing"/>
+  <text x="930" y="351" class="heading">桌面 WebUI · 对话</text>
+  <text x="930" y="387" class="body">用户原话、正在讨论的人物／问题、作品与阅读范围</text>
+  <text x="930" y="419" class="small muted">目标：回应抓住点，区分事实、解释和用户观点</text>
+  <path d="M 300 437 L 300 489" class="arrow"/>
+  <text x="76" y="471" class="small muted">已确认进度＋已读片段</text>
+  <path d="M 1100 437 L 1100 457 L 860 457 L 860 489" class="arrow"/>
+  <text x="1202" y="471" class="small muted">原话与会话路由</text>
+  <rect x="56" y="490" width="470" height="220" rx="12" class="existing"/>
+  <text x="78" y="529" class="heading">上下文组装</text>
+  <text x="78" y="567" class="body">人格、Note、近期对话、压缩摘要</text>
+  <text x="78" y="603" class="body">阅读状态与当前单元已读前缀</text>
+  <text x="78" y="639" class="small muted">复用 nanobot ContextBuilder</text>
+  <rect x="75" y="658" width="427" height="36" rx="7" class="planned"/>
+  <text x="89" y="683" class="tag orange">C1：待带入有预算的已读故事视图</text>
+  <rect x="625" y="490" width="470" height="220" rx="12" class="existing"/>
+  <text x="647" y="529" class="heading">主 Agent · nanobot Agent Loop</text>
+  <text x="647" y="567" class="body">LLM → tool_calls → 执行 → 结果</text>
+  <text x="647" y="603" class="body">继续推理或直接回复；最多 6 轮工具</text>
+  <text x="647" y="639" class="small muted">沿用现有模型预设、会话与错误返回</text>
+  <rect x="644" y="658" width="427" height="36" rx="7" class="planned"/>
+  <text x="658" y="683" class="tag orange">C3：先用上下文，缺证据才调用工具</text>
+  <rect x="1194" y="490" width="470" height="220" rx="12" class="existing"/>
+  <text x="1216" y="529" class="heading">工具执行 · StoryPal 业务层</text>
+  <text x="1216" y="567" class="body">定位与进度确认｜结构状态查询</text>
+  <text x="1216" y="603" class="body">原文搜索／回取｜Note／手账</text>
+  <text x="1216" y="639" class="small muted">服务端执行 owner 隔离与已读边界</text>
+  <text x="1216" y="679" class="small green">已有工具复用，不重写注册／执行循环</text>
+  <path d="M 526 584 L 625 584" class="arrow"/>
+  <text x="535" y="567" class="small muted">上下文</text>
+  <path d="M 1095 560 L 1194 560" class="arrow"/>
+  <text x="1117" y="544" class="small muted">调用</text>
+  <path d="M 1194 622 L 1095 622" class="arrow"/>
+  <text x="1117" y="654" class="small muted">结果</text>
+  <path d="M 860 710 L 860 742" class="arrow"/>
+  <rect x="56" y="743" width="1608" height="46" rx="9" class="neutral"/>
+  <text x="78" y="774" class="body">回复回到对话：承接你的观点 → 提供有依据的理解增量 → 保留尚未确定的问题（体验待验收）</text>
+
+  <!-- 02: 上下文与记忆，C1/C2/C3 分工 -->
+  <rect x="32" y="845" width="1656" height="720" rx="16" class="panel"/>
+  <text x="56" y="888" class="section">02 / 上下文与记忆：故事已知状态 ≠ 我们的解读 ≠ 可回取的证据</text>
+  <rect x="56" y="927" width="500" height="285" rx="12" class="planned"/>
+  <text x="78" y="966" class="heading orange">C1 · 自动已读故事视图【新增】</text>
+  <text x="78" y="1006" class="body">输入：作品＋完整已读 order</text>
+  <text x="78" y="1041" class="body">来源：该边界最新 state_snapshot</text>
+  <text x="78" y="1076" class="body">人物／物件／地点／情节线状态</text>
+  <text x="78" y="1111" class="body">recent＋backdrop＋背景缓冲</text>
+  <text x="78" y="1151" class="small orange">按预算投影，带来源；不调用 LLM</text>
+  <text x="78" y="1184" class="small muted">不是全书总结，也不是新的记忆数据库</text>
+  <rect x="610" y="927" width="500" height="285" rx="12" class="existing"/>
+  <text x="632" y="966" class="heading">对话工作记忆【已有底座】</text>
+  <text x="632" y="1006" class="body">近期消息＋工具结果＋会话 JSONL</text>
+  <text x="632" y="1041" class="body">达到压缩条件 → 替换式摘要</text>
+  <rect x="628" y="1061" width="464" height="133" rx="9" class="planned"/>
+  <text x="644" y="1094" class="heading orange">C2 · 专门保留连续解读【完善】</text>
+  <text x="644" y="1129" class="small">你的观点／暂定解释／修正／依据</text>
+  <text x="644" y="1162" class="small">未解问题；与已有压缩共用一次调用</text>
+  <rect x="1164" y="927" width="500" height="285" rx="12" class="existing"/>
+  <text x="1186" y="966" class="heading">人格与交互约定【已有】</text>
+  <text x="1186" y="1006" class="body">SOUL.md：身份与说话方式</text>
+  <text x="1186" y="1041" class="body">AGENTS.md：工具、边界与产品规则</text>
+  <text x="1186" y="1076" class="body">USER.md：确认的用户信息</text>
+  <text x="1186" y="1111" class="body">每用户 Note.md：剧情外交互约定</text>
+  <text x="1186" y="1151" class="small muted">Dream 仅允许整合 SOUL／USER</text>
+  <text x="1186" y="1184" class="small orange">Note 临时项与开放观察维护仍待完善</text>
+  <path d="M 306 1212 L 306 1250 L 860 1250 L 860 1291" class="plan-arrow"/>
+  <path d="M 860 1212 L 860 1291" class="arrow"/>
+  <path d="M 1414 1212 L 1414 1250 L 908 1250 L 908 1291" class="arrow"/>
+  <text x="76" y="1280" class="small orange">自动常驻的是有界当前视图</text>
+  <text x="1175" y="1280" class="small muted">不是每轮抽取，也不自动写手账</text>
+  <rect x="56" y="1292" width="1608" height="131" rx="12" class="neutral"/>
+  <text x="78" y="1330" class="heading">交给上层 Agent 的本轮上下文</text>
+  <text x="78" y="1367" class="body">原话＋已读片段＋人格／Note＋近期对话／摘要＋按需回看的手账＋C1 故事视图</text>
+  <text x="78" y="1403" class="small orange">待补：按 source 替换旧故事视图；历史原记录保留，其他上下文与工具结果不清空</text>
+  <rect x="56" y="1450" width="500" height="85" rx="9" class="existing"/>
+  <text x="78" y="1481" class="heading">用户阅读手账【已有独立存储】</text>
+  <text x="78" y="1514" class="small">感受／疑问／预测；按需回看，明确要求才写</text>
+  <rect x="610" y="1450" width="500" height="85" rx="9" class="existing"/>
+  <text x="632" y="1481" class="heading">Policy／Provenance · 已有底座</text>
+  <text x="632" y="1514" class="small">owner／边界／确认／unit／行号；视图待补</text>
+  <path d="M 306 1450 L 306 1424" class="arrow"/>
+  <rect x="1164" y="1450" width="500" height="85" rx="9" class="neutral"/>
+  <text x="1186" y="1481" class="heading">Trace／诊断 · 不等于剧情记忆</text>
+  <text x="1186" y="1514" class="small">已有调用记录；视图选择与坏例诊断待补</text>
+  <text x="56" y="1558" class="small muted">用户持久化：进度 JSON／Note.md／手账 JSON／会话 JSONL＋摘要；旧 HistoryMemory 是 SQLite 显式存储。</text>
+
+  <!-- 03: StoryMem 数据和已实现查询 -->
+  <rect x="32" y="1605" width="1656" height="602" rx="16" class="panel"/>
+  <text x="56" y="1648" class="section">03 / StoryMem：保留离线抽取与索引，用公开接口服务在线 Agent</text>
+  <rect x="56" y="1686" width="500" height="119" rx="11" class="existing"/>
+  <text x="78" y="1724" class="heading">原文 → 规范化 → 切分</text>
+  <text x="78" y="1762" class="body">4 章／108 个 unit／原文行号映射</text>
+  <text x="78" y="1791" class="small muted">00_raw → 01_normalized → 02_segmented</text>
+  <rect x="610" y="1686" width="500" height="119" rx="11" class="existing"/>
+  <text x="632" y="1724" class="heading">逐 unit 抽取 → 确定性合并</text>
+  <text x="632" y="1762" class="body">LLM 产增量；state.py 顺序更新状态</text>
+  <text x="632" y="1791" class="small muted">本轮不重新切分／抽取，不迁移数据库</text>
+  <rect x="1164" y="1686" width="500" height="119" rx="11" class="existing"/>
+  <text x="1186" y="1724" class="heading">JSONL 事实源 → 可重建索引</text>
+  <text x="1186" y="1762" class="body">03_extracted/units_extracted.jsonl</text>
+  <text x="1186" y="1791" class="small muted">索引只辅助召回，原文是事实核验依据</text>
+  <path d="M 556 1746 L 610 1746" class="arrow"/>
+  <path d="M 1110 1746 L 1164 1746" class="arrow"/>
+  <rect x="56" y="1845" width="500" height="183" rx="11" class="existing"/>
+  <text x="78" y="1883" class="heading">结构状态与历史查询【已有】</text>
+  <text x="78" y="1921" class="body">108 快照；422 实体更新；96 情节线更新</text>
+  <text x="78" y="1956" class="code">get_recap / get_entity_context</text>
+  <text x="78" y="1991" class="code">get_plotline_context</text>
+  <rect x="610" y="1845" width="500" height="183" rx="11" class="existing"/>
+  <text x="632" y="1883" class="heading">原文证据与检索【已有】</text>
+  <text x="632" y="1921" class="body">BGE-M3＋LanceDB cosine 精确检索</text>
+  <text x="632" y="1956" class="body">SQLite FTS5／BM25；auto 可降级</text>
+  <text x="632" y="1991" class="small muted">当前 auto 优先向量，不默认执行 RRF</text>
+  <rect x="1164" y="1845" width="500" height="183" rx="11" class="planned"/>
+  <text x="1186" y="1883" class="heading orange">前文名称线索【待接入】</text>
+  <text x="1186" y="1921" class="body">context_refs：304 项名称字符串</text>
+  <text x="1186" y="1956" class="body">补 Evidence 元数据 → 名称导航／改写</text>
+  <text x="1186" y="1991" class="small orange">不是 unit 引用边，不是关系／因果图</text>
+  <path d="M 1414 1805 L 1414 1822 L 306 1822 L 306 1844" class="arrow"/>
+  <path d="M 860 1822 L 860 1844" class="arrow"/>
+  <path d="M 1414 1822 L 1414 1844" class="plan-arrow"/>
+  <rect x="56" y="2065" width="1608" height="112" rx="11" class="neutral"/>
+  <text x="78" y="2102" class="heading">唯一接入边界：StoryMem adapter → StoryPal backend／service → 上层上下文或工具</text>
+  <text x="78" y="2144" class="code">已有：search / get_unit / recap / entity / plotline</text>
+  <text x="916" y="2144" class="code orange">待新增：get_progressive_view</text>
+  <path d="M 306 2028 L 306 2064" class="arrow"/>
+  <path d="M 860 2028 L 860 2064" class="arrow"/>
+  <path d="M 1414 2028 L 1414 2064" class="plan-arrow"/>
+
+  <!-- 04: 代码落点，分层重构与验收 -->
+  <rect x="32" y="2247" width="1656" height="692" rx="16" class="panel"/>
+  <text x="56" y="2290" class="section">04 / 实现落点与交付顺序：增量改造，不重写 Agent 框架</text>
+  <rect x="56" y="2325" width="500" height="235" rx="11" class="planned"/>
+  <text x="78" y="2364" class="heading orange">StoryMem · 数据服务侧</text>
+  <text x="78" y="2402" class="code">code/storymemory/adapter.py</text>
+  <text x="78" y="2438" class="body">新增只读视图；补名称线索元数据</text>
+  <text x="78" y="2474" class="body">源版本变化时失效旧 units 缓存</text>
+  <text x="78" y="2510" class="small muted">不改旧方法返回契约；验证后独立提交</text>
+  <text x="78" y="2540" class="small green">复用 storypipe 状态流与两种索引</text>
+  <rect x="610" y="2325" width="500" height="235" rx="11" class="planned"/>
+  <text x="632" y="2364" class="heading orange">StoryPal · 业务编排侧</text>
+  <text x="632" y="2402" class="code">story_memory.py → reading_context.py</text>
+  <text x="632" y="2438" class="body">服务校验＋预算投影【新增模块】</text>
+  <text x="632" y="2474" class="code">tools.py：复用 provider／工具入口</text>
+  <text x="632" y="2510" class="small muted">Skill：连续讨论／事实核验／手账回看</text>
+  <text x="632" y="2540" class="small green">保留进度、Note、手账的存储与权限</text>
+  <rect x="1164" y="2325" width="500" height="235" rx="11" class="planned"/>
+  <text x="1186" y="2364" class="heading orange">nanobot · 两处小补丁</text>
+  <text x="1186" y="2402" class="body">历史投影：只回放当前故事视图</text>
+  <text x="1186" y="2438" class="body">归档：允许工作区覆盖压缩提示</text>
+  <text x="1186" y="2474" class="code">runtime_context / memory.py</text>
+  <text x="1186" y="2510" class="small muted">原始记录保留；缺覆盖仍用内置模板</text>
+  <text x="1186" y="2540" class="small green">不改 Loop；沿用工具调用与压缩兜底</text>
+  <rect x="56" y="2600" width="500" height="191" rx="11" class="planned"/>
+  <text x="78" y="2638" class="heading orange">① C1：先交付安全当前视图</text>
+  <text x="78" y="2676" class="body">接口 → 边界 → 投影 → 注入 → 去重</text>
+  <text x="78" y="2712" class="small">测试：108 个边界／部分 unit／预算</text>
+  <text x="78" y="2748" class="small">同进度多轮、换作品、源变化、重置</text>
+  <text x="78" y="2778" class="small muted">无模型调用；不推进真实用户进度</text>
+  <rect x="610" y="2600" width="500" height="191" rx="11" class="planned"/>
+  <text x="632" y="2638" class="heading orange">② C2：压缩后接得上讨论</text>
+  <text x="632" y="2676" class="body">工作区提示 → 压缩 → 摘要恢复</text>
+  <text x="632" y="2712" class="small">测试：观点／修正／依据／疑问保持</text>
+  <text x="632" y="2748" class="small">同会话重启；不自动写 Note／手账</text>
+  <text x="632" y="2778" class="small muted">先做一条真实三轮链＋受控压缩</text>
+  <rect x="1164" y="2600" width="500" height="191" rx="11" class="planned"/>
+  <text x="1186" y="2638" class="heading orange">③ C3：功能与检索实验共用案例</text>
+  <text x="1186" y="2676" class="body">原 query／Agent 改写；分词对照</text>
+  <text x="1186" y="2712" class="small">FTS／jieba／BGE-M3；必要证据覆盖</text>
+  <text x="1186" y="2748" class="small">分开评估召回、解释、调用与延迟</text>
+  <text x="1186" y="2778" class="small muted">查数据：6 Luna；模拟用户：6 Sol</text>
+  <path d="M 556 2660 L 610 2660" class="plan-arrow"/>
+  <path d="M 1110 2660 L 1164 2660" class="plan-arrow"/>
+  <rect x="56" y="2823" width="1608" height="87" rx="10" class="future"/>
+  <text x="78" y="2856" class="heading gray">后续 TODO · 不挤占当前最小闭环</text>
+  <text x="78" y="2889" class="small gray">新会话自动继承解读／按日情景记忆语义检索／Note 维护／旧预测自动核验／Reranker 与 ANN</text>
+  <text x="56" y="2981" class="small muted">边界：结构抽取有误差；关系、因果与动机仍需结合原文推理；没有独立可靠的关系图／因果图。</text>
+  <text x="56" y="3016" class="small muted">代码根：StoryPal 自有 chatbot/src/storypal_chatbot ｜协作 story_mem/code ｜nanobot 可重放补丁 patches/nanobot</text>
+</svg>

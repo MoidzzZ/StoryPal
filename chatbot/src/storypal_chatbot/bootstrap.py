@@ -8,6 +8,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
+from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL, LEGACY_MODEL, LEGACY_LUNA_PRESET, LUNA_PRESET
+
 
 PERSONA_FILES = (
     "AGENTS.md",
@@ -16,7 +18,6 @@ PERSONA_FILES = (
     "HEARTBEAT.md",
     "prompts/dream.md",
 )
-LUNA_PRESET = "storypal-luna"
 
 
 def _mapping(parent: dict[str, Any], key: str) -> dict[str, Any]:
@@ -61,23 +62,26 @@ def apply_storypal_defaults(config: dict[str, Any], workspace: Path) -> dict[str
     return config
 
 
-def lock_to_codex_luna(config: dict[str, Any]) -> dict[str, Any]:
-    """Make GPT-5.6 Luna the sole configured model with no automatic fallback."""
+def lock_to_codex_luna(config: dict[str, Any], *, model: str = DEFAULT_MODEL) -> dict[str, Any]:
+    """配置两种可手动选择的 Luna，默认 6；不启用自动回退。"""
+    if model not in ALLOWED_MODELS:
+        raise ValueError("StoryPal 只允许 GPT-6 Luna 或 GPT-5.6 Luna")
     config["modelPresets"] = {
-        LUNA_PRESET: {
+        name: {
             "provider": "openai_codex",
-            "model": "openai-codex/gpt-5.6-luna",
+            "model": preset_model,
             "maxTokens": 8192,
             "contextWindowTokens": 272000,
             "temperature": 0.1,
             "reasoningEffort": "medium",
         }
+        for name, preset_model in ((LUNA_PRESET, DEFAULT_MODEL), (LEGACY_LUNA_PRESET, LEGACY_MODEL))
     }
     defaults = _mapping(_mapping(config, "agents"), "defaults")
     defaults.update(
         {
-            "modelPreset": LUNA_PRESET,
-            "model": "openai-codex/gpt-5.6-luna",
+            "modelPreset": LUNA_PRESET if model == DEFAULT_MODEL else LEGACY_LUNA_PRESET,
+            "model": model,
             "provider": "openai_codex",
             "fallbackModels": [],
             "reasoningEffort": "medium",
@@ -107,6 +111,7 @@ def configure(
     *,
     force_persona: bool = False,
     luna_only: bool = False,
+    luna_model: str = DEFAULT_MODEL,
 ) -> list[Path]:
     if not config_path.is_file():
         raise FileNotFoundError(
@@ -115,7 +120,7 @@ def configure(
     config = json.loads(config_path.read_text(encoding="utf-8"))
     apply_storypal_defaults(config, workspace)
     if luna_only:
-        lock_to_codex_luna(config)
+        lock_to_codex_luna(config, model=luna_model)
     temporary = config_path.with_suffix(config_path.suffix + ".tmp")
     temporary.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(config_path)
@@ -130,14 +135,17 @@ def main() -> None:
     parser.add_argument(
         "--luna-only",
         action="store_true",
-        help="Use OpenAI Codex OAuth with GPT-5.6 Luna and no fallback models.",
+        help="仅允许 Codex GPT-6 / GPT-5.6 Luna，默认 GPT-6 Luna，无自动回退。",
     )
+    parser.add_argument("--luna-model", choices=sorted(ALLOWED_MODELS), default=DEFAULT_MODEL,
+                        help="与 --luna-only 配合，选择默认 Luna 型号。")
     args = parser.parse_args()
     written = configure(
         args.config.resolve(),
         args.workspace.resolve(),
         force_persona=args.force_persona,
         luna_only=args.luna_only,
+        luna_model=args.luna_model,
     )
     print(f"StoryPal defaults applied to {args.config.resolve()}")
     print(f"Persona files written: {len(written)}")

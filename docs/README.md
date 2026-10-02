@@ -4,9 +4,17 @@
 
 ## 从这里开始
 
+- 想直接推进《流浪地球》的连续理解功能与检索实验：查看 [连续共读实施清单](architecture/STORYPAL_CONTINUOUS_READING_PLAN.md)，包含首轮接口、压缩记忆与类型覆盖测试。
+- 想从场景一路看到上下文、数据和代码改动：查看 [连续共读分层架构图（SVG）](architecture/storypal-continuous-reading-architecture.svg)，已区分已有、本轮待完善和后续 TODO。
+- 想看用户手账如何参与讨论，以及 Skill／Tool／Workflow 的区别：查看 [记忆与技能工具详图（SVG）](architecture/storypal-memory-skills-tools.svg)，列出当前 11 项白名单工具。
+
+- 想从产品目标、九类需求、体验流程与验收标准开始讨论：查看 [StoryPal PRD](product/STORYPAL_PRD.md)（v0.1 讨论稿）。
+- 想用 5～8 分钟核验新版声音：查看 [口吻快速验收](operations/COMPANION_VOICE_ACCEPTANCE.md)，含可直接输入的虚构故事和四句测试。
+
 - 想运行本地 Chatbot：返回根目录 [README](../README.md)。
 - 想了解当前做到哪里：查看 [开发进度](operations/CHATBOT_DEVELOPMENT_PROGRESS.md)。
 - 想体验或设计陪读：从 [初次阅读体验](product/CHATBOT_FIRST_READING_EXPERIENCE.md) 开始。
+- 想讨论九类陪伴需求、角色口吻及双脑备选方案：查看 [陪读场景与声音](product/COMPANION_SCENARIOS_AND_VOICE.md)（2026-10-02）。
 - 想按真实用户行为验收桌面版：查看 [首次阅读行为验收规范](operations/FIRST_READING_ACCEPTANCE.md)。
 - 想了解桌面阅读器的复用补丁：查看 [阅读器补丁说明](../patches/nanobot/reader.md)。
 - 想了解接下来做什么：查看 [下一阶段交付](architecture/STORYPAL_NEXT_DELIVERY.md) 和 [RAG/Memory 规格](architecture/STORYPAL_RAG_MEMORY_SPEC.md)。

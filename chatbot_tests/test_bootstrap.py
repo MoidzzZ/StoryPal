@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
+from storypal_chatbot.model_policy import DEFAULT_MODEL, LEGACY_MODEL, LEGACY_LUNA_PRESET
+
 from storypal_chatbot.bootstrap import (
     LUNA_PRESET,
     apply_storypal_defaults,
@@ -49,7 +53,7 @@ def test_configure_installs_persona_without_overwriting_existing_file(tmp_path):
     assert (workspace / "prompts" / "dream.md") in written
 
 
-def test_luna_only_has_one_preset_and_no_fallbacks():
+def test_luna_only_has_two_selectable_presets_and_no_fallbacks():
     config = {
         "agents": {
             "defaults": {
@@ -62,11 +66,26 @@ def test_luna_only_has_one_preset_and_no_fallbacks():
 
     result = lock_to_codex_luna(config)
 
-    assert list(result["modelPresets"]) == [LUNA_PRESET]
+    assert list(result["modelPresets"]) == [LUNA_PRESET, LEGACY_LUNA_PRESET]
     preset = result["modelPresets"][LUNA_PRESET]
     assert preset["provider"] == "openai_codex"
-    assert preset["model"] == "openai-codex/gpt-5.6-luna"
+    assert preset["model"] == DEFAULT_MODEL
+    assert result["modelPresets"][LEGACY_LUNA_PRESET]["model"] == LEGACY_MODEL
     defaults = result["agents"]["defaults"]
     assert defaults["modelPreset"] == LUNA_PRESET
     assert defaults["fallbackModels"] == []
     assert defaults["dream"]["modelOverride"] == LUNA_PRESET
+
+
+def test_can_choose_legacy_luna_without_automatic_fallback():
+    result = lock_to_codex_luna({}, model=LEGACY_MODEL)
+    assert result["agents"]["defaults"]["modelPreset"] == LEGACY_LUNA_PRESET
+    assert result["agents"]["defaults"]["model"] == LEGACY_MODEL
+    assert result["agents"]["defaults"]["fallbackModels"] == []
+
+
+def test_luna_configuration_rejects_other_models_without_mutating():
+    config = {"modelPresets": {"unchanged": {"model": "original"}}}
+    with pytest.raises(ValueError, match="只允许"):
+        lock_to_codex_luna(config, model="openai-codex/gpt-6-sol")
+    assert config == {"modelPresets": {"unchanged": {"model": "original"}}}

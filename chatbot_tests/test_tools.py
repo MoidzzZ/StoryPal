@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 from nanobot import RequestContext
+from storypal_chatbot.model_policy import ALLOWED_MODELS
 from nanobot.agent.tools.context import request_context
 
 from storypal_chatbot.tools import (
@@ -98,17 +99,24 @@ async def test_runtime_context_contains_spoiler_boundary(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_runtime_context_rejects_every_model_except_luna(tmp_path):
+@pytest.mark.parametrize("blocked_model", ["openai-codex/gpt-5.6-sol", "openai-codex/gpt-6-sol", "openai/gpt-6-luna"])
+async def test_runtime_context_rejects_non_allowed_models(tmp_path, blocked_model):
     tool = StorySessionStateTool(tmp_path)
     blocked = _request()
-    object.__setattr__(blocked, "runtime", SimpleNamespace(model="openai-codex/gpt-5.6-sol"))
+    object.__setattr__(blocked, "runtime", SimpleNamespace(model=blocked_model))
 
     with pytest.raises(RuntimeError, match="模型策略拒绝"):
         await tool._provide_runtime_context(blocked)
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model", sorted(ALLOWED_MODELS))
+async def test_current_location_context_accepts_both_luna_models(tmp_path, model):
+    from storypal_chatbot.tools import ResolveReadingLocationTool
+
+    tool = ResolveReadingLocationTool(tmp_path)
     allowed = _request()
-    object.__setattr__(allowed, "runtime", SimpleNamespace(model=ALLOWED_MODEL))
-    assert await tool._provide_runtime_context(allowed) is not None
+    object.__setattr__(allowed, "runtime", SimpleNamespace(model=model))
+    assert await tool.runtime_context_provider()(allowed) is not None
 
 
 @pytest.mark.asyncio

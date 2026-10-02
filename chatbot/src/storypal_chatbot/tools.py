@@ -14,6 +14,7 @@ from nanobot.agent.tools import Tool, ToolResult, tool_parameters
 from nanobot.agent.tools.context import ToolContext, current_request_context
 
 from .interaction_note import InteractionNoteStore
+from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL
 from .note_consolidation import ArchivedNoteCoordinator
 from .storage import HistoryMemoryStore, NotesStore, PendingReadingProgressStore, ReadingNotebookStore, ReadingProgressStore
 from .story_memory import (
@@ -23,7 +24,8 @@ from .story_memory import (
     StoryProgressRequired,
 )
 
-ALLOWED_MODEL = "openai-codex/gpt-5.6-luna"
+# 保留旧导出供已有调用方使用；权限判断使用显式白名单。
+ALLOWED_MODEL = DEFAULT_MODEL
 
 
 def _request_keys() -> tuple[str, str]:
@@ -75,10 +77,10 @@ class StorySessionStateTool(Tool):
     async def _provide_runtime_context(
         self, request: RequestContext
     ) -> RuntimeContextBlock | None:
-        if request.runtime is not None and request.runtime.model != ALLOWED_MODEL:
+        if request.runtime is not None and request.runtime.model not in ALLOWED_MODELS:
             raise RuntimeError(
                 "StoryPal 模型策略拒绝本轮："
-                f"expected {ALLOWED_MODEL}, got {request.runtime.model}"
+                f"allowed {sorted(ALLOWED_MODELS)}, got {request.runtime.model}"
             )
         if not request.session_key:
             return None
