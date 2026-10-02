@@ -1,5 +1,19 @@
 # StoryPal Chatbot 开发进度
 
+## 2026-10-03：C3 连续讨论 Skill 与证据缺口回路
+
+- 目标／预期：在现有 nanobot 上让连续理解优先使用当前已读视图与讨论，只在具体证据不足时查证；接回已有 context_refs，不引入新 Agent、Router、模型请求或故事数据重抽取。
+- 新增原生 always Skill continuous-story-discussion，覆盖连续理解、按缺口核验、手账回看。bootstrap 默认只补缺失文件，wheel 已确认包含嵌套 Skill；实际 ContextBuilder 注入一次，可按 disabledSkills 关闭，禁用文件工具仍能使用。
+- AGENTS 和三个故事工具描述去掉按人物／因果题型强制检索，保留精确引用、争议事实、缺失前文的核验要求。运行 AGENTS 只更新相关规则并修正过时章节定位说明，未覆盖 SOUL／USER／Note 或配置。
+- StoryMem Evidence 增加可选 metadata.context_refs，兼容名称字符串／旧 entity 对象、去空白去重，不推断 unit 边；结构历史返回真实 unit_id 后可回取已读原文。接口／测试／两份说明已提交推送协作仓库 f60c987，无需重建索引或抽取。
+- GPT-6 Luna 只读核查：108 单元，86 个含线索、304/304 为非空名称字符串、107 个不同名称；3 个早期单元小样有匹配也有名称差异，不保证所有名称能导航，更不是完整情节线／因果图。未使用模拟用户 Agent。
+- 本轮最终受影响程序回归 58/58（15.92s），协作仓库 17/17（0.38s）；前面的 27 项包含在 58 项中，不累加。新增覆盖原生 Skill／Loop 输入、关闭／动态读取、保留自定义、名称→历史→原文、未命中、越界及预算。替身 provider 不证明模型选择与回答质量。
+- 现有证据预算计入新增名称长度，但仍不是完整工具 JSON 总预算。阅读视图自己的序列化总预算规则不变；真实 tokens 校准保留 TODO。
+- 本机 gateway 已后台重启到编辑安装源码，实际 Skill 和接口路径确认；首页／health HTTP 200，ready=true、状态 running。启动时短暂 websocket_unavailable 后恢复，未把 HTTP 可达写为真实聊天验收。真实模型请求 0，未改真实阅读进度、手账、Note 或小说数据。
+- 顺带发现旧白名单回归会读取正式本机配置并把合成会话写入正式 workspace，已改为 bootstrap 合成配置、隔离 sessions_root 并禁止后台维护；不再要求公开仓库具备本机私密配置，单独回归 1/1（2.20s）。此前正式目录中的旧合成记录本轮未删除，不混入业务成功率。
+- 已统一 [当前 TODO](../architecture/STORYPAL_REMAINING_WORK.md)，将完成项、真实验收和后置项分开。接下来 R1：真实 Agent query 采集／离线回放，再做中文分词与检索对照；功能线 M3 按日经历尚未实现。
+- 用户参与点：方便时在真正已读范围聊三轮，判断首句抓点、理解增量与是否无故重复检索；暂无必须介入的配置／数据决策。受限模型测试需新增发送授权时单独说明，不沿用上次 2+1 请求预算。
+
 > 本文件维护当前事实、阶段结果、用户核验和下一步；历史记录保留在本文后半部分。
 > 最后更新：2026-10-03（Asia/Shanghai）
 > 当前执行顺序：[下一阶段交付](../architecture/STORYPAL_NEXT_DELIVERY.md)；历史完整规格：[StoryPal RAG 与 Memory 强化规格](../architecture/STORYPAL_RAG_MEMORY_SPEC.md)

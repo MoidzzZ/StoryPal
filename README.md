@@ -46,6 +46,8 @@ nanobot gateway stop --config D:\StoryPal\.runtime\nanobot\storypal\config.json 
 
 ## 本地 Story Memory
 
+连续讨论方法使用 nanobot 原生常驻 Skill：工作区 `skills/continuous-story-discussion/SKILL.md`，模板在 `chatbot/src/storypal_chatbot/persona/skills/`。它在每次构建 system 时自动注入一次，不需要开放文件工具或增加模型请求；已有自定义文件不覆盖。若要关闭，可将名称 `continuous-story-discussion` 加入本机配置 `agents.defaults.disabledSkills`；不要为更新此 Skill 强制重装人格。
+
 `story_mem/` 是本地联调目录，当前含合作者的 offline-story-pipeline
 参考副本。它被 Git 忽略，不会提交；实际作品数据导出也应放在这里。
 

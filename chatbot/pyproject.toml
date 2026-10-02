@@ -39,4 +39,4 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-storypal_chatbot = ["persona/*.md", "persona/prompts/*.md"]
+storypal_chatbot = ["persona/*.md", "persona/prompts/*.md", "persona/skills/*/SKILL.md"]

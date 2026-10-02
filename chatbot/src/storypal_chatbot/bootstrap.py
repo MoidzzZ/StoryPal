@@ -18,6 +18,7 @@ PERSONA_FILES = (
     "HEARTBEAT.md",
     "prompts/dream.md",
     "prompts/consolidator_archive.md",
+    "skills/continuous-story-discussion/SKILL.md",
 )
 
 

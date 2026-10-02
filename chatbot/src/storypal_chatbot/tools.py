@@ -914,7 +914,7 @@ class SearchStoryTool(_StoryEvidenceTool):
     @property
     def description(self) -> str:
         return (
-            "仅搜索当前用户已经读到的故事证据。默认优先使用本地语义检索，不可用时自动退回关键词检索。query 应是由当前对话消歧后的中文事实检索词，"
+            "仅在可见材料缺少具体依据时搜索当前用户已经读到的故事证据，不因人物动机或因果问题自动检索。默认优先使用本地语义检索，不可用时自动退回关键词检索。query 应是由当前对话消歧后的中文事实检索词，"
             "不是照抄模糊口语。已读边界由运行时状态提供；本工具需要 "
             "active_work 与 max_seen_order。最多返回三条排序主证据；第 4/5 名仅在同章节、"
             "与主证据直接相邻且不超过防剧透边界时，才作为补充上下文返回。"
@@ -956,10 +956,10 @@ class StoryContextTool(_StoryEvidenceTool):
     @property
     def description(self) -> str:
         return (
-            "取得当前已读范围内的结构化故事线索，仅供组织回答，不能取代原文证据。"
+            "当前材料不足时取得已读范围内的结构化历史与状态，可供导航和回顾，不能冒充原文证据。"
             "kind=recap 用于用户断读后问‘之前读到哪了’；kind=entity 用于追问人物、地点或术语的当前状态；"
             "kind=plotline 用于追问一条情节线进展。entity 和 plotline 必须给 query。"
-            "不要把原始字段或内部编号直接展示给用户；需要解释事实时，仍须用 search_story 或 get_story_evidence 取得原文依据。"
+            "不要把原始字段或内部编号直接展示给用户。已有原文够用时不重复检索；争议事实、精确引用或关键因果缺依据时，再凭真实 unit_id 用 get_story_evidence 回取，未知位置用 search_story。"
         )
 
     async def execute(
@@ -996,7 +996,7 @@ class GetStoryEvidenceTool(_StoryEvidenceTool):
     @property
     def description(self) -> str:
         return (
-            "读取当前作品中一条已引用的故事单元。绝不返回 max_seen_order 之后的证据，"
+            "已有可信 unit_id 但缺少该段原文或需要核验时，读取当前作品中这条故事单元；可见原文足够时不要重复读取。metadata.context_refs 仅是名称导航候选，不是单元关联边。绝不返回 max_seen_order 之后的证据，"
             "也不会改变阅读进度。"
         )
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import json
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -50,6 +51,9 @@ class ContextPacker:
 
     def _estimate_tokens(self, evidence: dict[str, Any]) -> int:
         content = f"{evidence.get('summary', '')}\n{evidence.get('raw_text', '')}".strip()
+        metadata = evidence.get("metadata")
+        if isinstance(metadata, dict) and metadata.get("context_refs"):
+            content += json.dumps({"context_refs": metadata["context_refs"]}, ensure_ascii=False)
         return max(1, math.ceil(len(content) / self.chars_per_token))
 
     @staticmethod

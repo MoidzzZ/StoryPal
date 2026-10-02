@@ -1,6 +1,6 @@
 # Story Pipeline 接入说明
 
-> 状态：已完成接口审阅，可开始单篇联调。最后核对：2026-09-05。
+> 状态：原文／结构历史／渐进视图／名称线索已接入。最后核对：2026-10-03。以下早期实施顺序保留沿革，当前 TODO 见文末。
 
 ## 结论
 
@@ -8,8 +8,8 @@
 提供 StoryMemory 作为 Chatbot 唯一读取入口。它的核心测试 11 项已在本机
 storypal-chatbot Conda 环境通过。
 
-参考副本位于 story_mem/offline-story-pipeline，受 .gitignore 保护，只用于
-开发核对；它不是 StoryPal 的运行时依赖副本。
+协作仓库直接位于 `story_mem/`，受主仓库 .gitignore 保护；当前本机使用其
+`code` 目录作为联调后端，作品数据不随两个公开代码仓库提交。
 
 ## 已确认的契约
 
@@ -43,6 +43,12 @@ StoryPal Service 重验来源与顺序；ReadingContextProjector 以 1500 估算
 
 nanobot 必须应用第七组 runtime-context-replay 补丁：新视图只保留当前模型输入，磁盘原始历史仍保留。来源文件 path／mtime_ns／size 变化时 adapter 重新加载并计算 SHA-256；它不是文件监听，不防御人为保持相同 stat 的改写。结果及未验收范围见根目录 result.md 与连续共读实施清单。
 
+## 2026-10-03 证据名称线索接入
+
+StoryMem `f60c987` 增加可选 `Evidence.metadata.context_refs`：有效字符串／旧 entity 对象规范化为名称列表，空值省略；原 Evidence 字段及 max_order 过滤不变。消费者可查询实体更新历史，取得真实 unit_id 后回取原文；名称未命中不等于原文没有，不能将名称当引用图或因果边。
+
+此改动无需重抽取或重建索引。StoryPal 的 ContextPacker 将新增名称序列化长度计入现有正文预算；其他元数据／完整 JSON／诊断尚非总预算范围，估算不等于 provider 实测 tokens。结构契约与 Skill 接线测试通过，不证明模型实际工具决策。
+
 ## 原始推荐实施顺序（保留设计沿革）
 
 1. 在 StoryPal 建立只读 Protocol，并实现 search_story 和
@@ -63,8 +69,8 @@ nanobot 必须应用第七组 runtime-context-replay 补丁：新视图只保留
 
 ## 当前待办
 
-- [ ] 实现只读 StoryMemory Protocol 与两个 native tools。
-- [ ] 增加临时数据根目录配置和缺数据的安全提示。
-- [ ] 与合作者给出的单篇数据跑首轮联调测试。
+- [x] 实现只读 StoryMemory Protocol 与两个 native tools，并接入结构历史和安全视图。
+- [x] 增加数据根目录配置和缺数据的安全提示。
+- [x] 与合作者的《流浪地球》数据联调，开展 FTS5／BGE-M3／RRF 离线对照。
 - [ ] 共同确认 release manifest 与 unit ID 漂移的处理方式。
-- [ ] 基于 bad cases 决定是否启用向量检索或混合排序。
+- [ ] 采集真实 Agent query；基于同边界 bad cases 评估中文分词、混合排序和 reranker，不把离线 RRF 原型当线上胜出方案。

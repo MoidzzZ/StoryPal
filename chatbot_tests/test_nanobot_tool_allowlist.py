@@ -1,15 +1,15 @@
 """StoryPal 对 nanobot 工具白名单补丁的行为回归测试。"""
 
-from pathlib import Path
-
 import pytest
 
 from nanobot.agent.loop import AgentLoop
 from nanobot.agent.runner import AgentRunResult
 from nanobot.agent.tools.registry import ToolRegistry
 from nanobot.bus.queue import MessageBus
-from nanobot.config.loader import load_config
+from nanobot.config.schema import Config
 from nanobot.providers.base import LLMProvider, LLMResponse
+from nanobot.session.manager import SessionManager
+from storypal_chatbot.bootstrap import apply_storypal_defaults, install_persona, lock_to_codex_luna
 
 
 class _NoNetworkProvider(LLMProvider):
@@ -44,15 +44,20 @@ class _RecordingRunner:
 
 
 @pytest.mark.asyncio
-async def test_storypal_runtime_only_exposes_allowlisted_tools() -> None:
-    root = Path(__file__).resolve().parents[1]
-    config = load_config(root / ".runtime" / "nanobot" / "storypal" / "config.json")
+async def test_storypal_runtime_only_exposes_allowlisted_tools(tmp_path) -> None:
+    workspace = tmp_path / "workspace"
+    install_persona(workspace)
+    config = Config.model_validate(lock_to_codex_luna(apply_storypal_defaults({}, workspace)))
+    sessions = SessionManager(workspace, sessions_root=tmp_path / "sessions")
     loop = AgentLoop.from_config(
         config,
         MessageBus(),
         provider=_NoNetworkProvider(),
         tool_registry=ToolRegistry(),
+        session_manager=sessions,
     )
+    # 禁止测试触发后台维护；合成会话不得写入正式 workspace／sessions。
+    loop.schedule_background = lambda coro: coro.close()
     recorder = _RecordingRunner()
     loop.runner = recorder
     try:

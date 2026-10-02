@@ -4,6 +4,8 @@
 
 ## 从这里开始
 
+- 想知道整体还差什么、哪些优先或暂缓：查看 [当前能力与 TODO](architecture/STORYPAL_REMAINING_WORK.md)，避免将历史提案误认成当前缺口。
+
 - 想直接推进《流浪地球》的连续理解功能与检索实验：查看 [连续共读实施清单](architecture/STORYPAL_CONTINUOUS_READING_PLAN.md)，包含首轮接口、压缩记忆与类型覆盖测试。
 - 想从场景一路看到上下文、数据和代码改动：查看 [连续共读分层架构图（SVG）](architecture/storypal-continuous-reading-architecture.svg)，已区分已有、本轮待完善和后续 TODO。
 - 想看用户手账如何参与讨论，以及 Skill／Tool／Workflow 的区别：查看 [记忆与技能工具详图（SVG）](architecture/storypal-memory-skills-tools.svg)，列出当前 11 项白名单工具。
@@ -13,7 +15,7 @@
 
 - 想运行本地 Chatbot：返回根目录 [README](../README.md)。
 - 想了解当前做到哪里：查看 [开发进度](operations/CHATBOT_DEVELOPMENT_PROGRESS.md)。
-- 想小规模核验新已读故事视图和观点承接：查看 [连续共读核验](operations/CONTINUOUS_READING_ACCEPTANCE.md)，只需在真实已读范围聊三轮；压缩已完成程序实现、真实语义待验收，Skill 仍待开发。
+- 想小规模核验新已读故事视图和观点承接：查看 [连续共读核验](operations/CONTINUOUS_READING_ACCEPTANCE.md)，只需在真实已读范围聊三轮；压缩有一条隔离小样，Skill 已接通，真实决策及真人体验仍待验收。
 - 想理解压缩如何保留共读观点：查看 [共读归档补丁](../patches/nanobot/reading-checkpoint.md)，明确模板路径、回退、近期历史和显式手账边界。
 - 想体验或设计陪读：从 [初次阅读体验](product/CHATBOT_FIRST_READING_EXPERIENCE.md) 开始。
 - 想讨论九类陪伴需求、角色口吻及双脑备选方案：查看 [陪读场景与声音](product/COMPANION_SCENARIOS_AND_VOICE.md)（2026-10-02）。
