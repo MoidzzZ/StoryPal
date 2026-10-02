@@ -16,7 +16,7 @@ from nanobot.agent.tools.context import ToolContext, current_request_context
 from .interaction_note import InteractionNoteStore
 from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL
 from .reading_context import ReadingContextProjector
-from .note_consolidation import ArchivedNoteCoordinator
+from .archive_maintenance import ArchivedMemoryCoordinator
 from .storage import HistoryMemoryStore, NotesStore, PendingReadingProgressStore, ReadingNotebookStore, ReadingProgressStore
 from .story_memory import (
     PipelineStoryMemoryBackend,
@@ -526,11 +526,15 @@ class _InteractionNoteTool(Tool):
 
     def __init__(self, workspace: str | Path) -> None:
         self.store = InteractionNoteStore(workspace)
-        self._archive_notes: ArchivedNoteCoordinator | None = None
+        self._archive_notes: ArchivedMemoryCoordinator | None = None
 
     @classmethod
     def create(cls, ctx: ToolContext) -> Tool:
-        return cls(ctx.workspace)
+        tool = cls(ctx.workspace)
+        if tool.name == "record_interaction_note":
+            root = Path(ctx.sessions.sessions_dir).parent if ctx.sessions is not None else None
+            tool._archive_notes = ArchivedMemoryCoordinator(ctx.workspace, sessions_root=root)
+        return tool
 
     def runtime_context_provider(self):
         return self._provide_runtime_context
@@ -575,7 +579,7 @@ class RecordInteractionNoteTool(_InteractionNoteTool):
         if request.runtime is not None:
             try:
                 if self._archive_notes is None:
-                    self._archive_notes = ArchivedNoteCoordinator(self.store.root.parent.parent)
+                    self._archive_notes = ArchivedMemoryCoordinator(self.store.root.parent.parent)
                 self._archive_notes.observe(request)
             except Exception as exc:
                 logger.warning("StoryPal archive Note observer skipped: {}", type(exc).__name__)

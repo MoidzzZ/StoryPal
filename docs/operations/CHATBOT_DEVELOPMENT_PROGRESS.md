@@ -1,5 +1,16 @@
 # StoryPal Chatbot 开发进度
 
+## 2026-10-03：应用线 M3-B 联合压缩后维护
+
+- 目标／预期：从已提交 checkpoint 水位低频抽取互动经历，并与自动 Note 共用一次维护调用；不增加普通对话每轮抽取，不重建故事数据。实现细节见 [M3 契约](../architecture/STORYPAL_EPISODIC_MEMORY.md)。
+- 新增 ArchivedMemoryCoordinator，record_interaction_note 的唯一上下文入口接入，沿用工具白名单。创建时使用 ToolContext 真实 sessions namespace；旧 Note coordinator 留作兼容，不并行运行。Note／经历分别验证保存，两类全部预验证后再写；失败不推进联合水位。
+- 下一次用户请求观察新归档；当前无新归档时可维护同一 owner 已绑定的旧会话，因此切换新会话不会永久漏掉旧归档。每次最多一批，24 条／12000 字正文、单条1500字截断标记，余量留待下一次。无用户输入不主动抽取；首次绑定不扫描启用前历史，旧独立 Note 待处理水位不补跑，原话和已写笔记保留。
+- scope 只取已保存且验证过的运行时 state 来源，不使用今天的进度；其他视图或用户伪造字段不生效。换作品分批，部分 unit 前缀计入保守范围；未知 scope 首版只维护 Note、不写经历。泛聊无作品经历与旧混合后缀恢复保留 TODO。
+- 模型维护调用只返回两组候选，不给工具；区分 tool error／empty／返回证据／未分类，不能把失败归成核实。STORYPAL_AUTO_NOTE／STORYPAL_AUTO_EPISODE 可独立关闭；全关时水位保留，重开可能继续待处理批次。未实测 token 收益，provider 自有重试可能产生多次网络请求。
+- 最终受影响回归 70/70（9.62s），两处空字段防御在联合组补跑 18/18（2.34s，已含于70），不跑全量长聊。初轮34项为重叠子集，不累加。只使用隔离合成对话及替身 provider，没有真实模型／模拟用户请求。
+- 已构建 wheel 并核对新模块，运行 AGENTS／Skill 只更新相关记忆边界，未覆盖 SOUL／USER／Note。gateway 已后台重启，首页200、health ok／ready=true；未发送测试聊天，不将部署可达算抽取语义验收。
+- 尚未完成 M3-C 语义索引／回忆工具；不能声称 WebUI 已能靠新经历跨会话续聊。下一步先接现有 BGE-M3／LanceDB 的一次召回、单一阈值及预算；用户暂不需要改配置，首次可体验后核验观点归属和变化是否忠实。
+
 ## 2026-10-03：应用线 M3-A 按日经历存储
 
 - 本会话从算法实验切回功能：先补跨会话经历的 Markdown 事实源，而非新增偏好库。契约与边界见 [M3 情景记忆](../architecture/STORYPAL_EPISODIC_MEMORY.md)。

@@ -72,7 +72,7 @@ class EpisodicMemoryStore:
         path = self._state_path(session_key)
         if path.exists():
             return self.processed(owner_key, session_key)
-        state = {"owner_hash": _digest(owner_key), "processed": archived}
+        state = {"owner_hash": _digest(owner_key), "processed": archived, "source_session_key": session_key}
         _atomic_write(path, json.dumps(state, ensure_ascii=False) + "\n")
         return archived
 
@@ -101,10 +101,23 @@ class EpisodicMemoryStore:
                 records.append({**record, "text": document[begin + 1:match.start()].strip()})
         return records
 
+    def bound_sessions(self, owner_key: str) -> list[str]:
+        """仅枚举已绑定当前用户的来源；不扫描／认领上游所有历史会话。"""
+        keys = []
+        for path in sorted((self.root / "_archive_state").glob("*.json")):
+            state = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(state, dict) or state.get("owner_hash") != _digest(owner_key):
+                continue
+            key = state.get("source_session_key")
+            if isinstance(key, str) and key.strip() and _digest(key) == path.stem:
+                keys.append(key)
+        return keys
+
     def commit_archive(
         self, owner_key: str, session_key: str, *, messages: list[dict[str, Any]],
         archived_end: int, candidates: list[dict[str, Any]],
         work_id: str | None = None, max_seen_order: int | None = None,
+        validate_only: bool = False,
     ) -> dict[str, Any]:
         """接收抽取器候选；只允许本批已归档原话引用，不接受模型指定进度。"""
         start = self.processed(owner_key, session_key)
@@ -168,6 +181,8 @@ class EpisodicMemoryStore:
                     + f"\n\n<!-- episode-meta {encoded} -->\n")
             date = min(times).date().isoformat()
             pending.append((date, episode_id, body))
+        if validate_only:
+            return {"validated": len(pending), "processed": start}
         # 先验证全部候选，再写文件；中途写失败时水位不变，重试以稳定 ID 去重。
         written = 0
         for date, episode_id, body in pending:
@@ -176,7 +191,7 @@ class EpisodicMemoryStore:
             if f"\n## [e-{episode_id}] " not in document:
                 _atomic_write(path, document + body)
                 written += 1
-        state = {"owner_hash": _digest(owner_key), "processed": end,
+        state = {"owner_hash": _digest(owner_key), "processed": end, "source_session_key": session_key,
                  "last_result": {"written": written, "candidates": len(candidates)}}
         _atomic_write(self._state_path(session_key), json.dumps(state, ensure_ascii=False) + "\n")
         return {"written": written, "processed": end, "ids": [item[1] for item in pending]}
