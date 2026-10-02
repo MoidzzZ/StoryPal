@@ -57,7 +57,7 @@ def apply_storypal_defaults(config: dict[str, Any], workspace: Path) -> dict[str
     _mapping(gateway, "heartbeat")["enabled"] = False
 
     tools = _mapping(config, "tools")
-    tools["allowedTools"] = ["resolve_reading_location", "set_reading_progress", "search_story", "get_story_evidence", "story_context", "record_interaction_note", "forget_interaction_note", "search_reading_journal", "save_journal_entry", "search_memory", "write_memory"]
+    tools["allowedTools"] = ["resolve_reading_location", "set_reading_progress", "search_story", "get_story_evidence", "story_context", "record_interaction_note", "forget_interaction_note", "search_reading_journal", "save_journal_entry", "search_memory", "write_memory", "recall_interaction_history"]
     tools["restrictToWorkspace"] = True
     for key in ("exec", "file", "cliApps", "my"):
         _mapping(tools, key)["enable"] = False

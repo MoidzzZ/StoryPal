@@ -27,6 +27,10 @@ story_context = "storypal_chatbot.tools:StoryContextTool"
 get_story_evidence = "storypal_chatbot.tools:GetStoryEvidenceTool"
 search_memory = "storypal_chatbot.tools:SearchHistoryMemoryTool"
 write_memory = "storypal_chatbot.tools:WriteHistoryMemoryTool"
+recall_interaction_history = "storypal_chatbot.tools:RecallInteractionHistoryTool"
+
+[project.optional-dependencies]
+episodic = ["lancedb>=0.20,<1", "sentence-transformers>=3,<6"]
 
 [project.scripts]
 storypal-chatbot-configure = "storypal_chatbot.bootstrap:main"

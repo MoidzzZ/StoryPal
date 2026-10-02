@@ -74,6 +74,7 @@ async def test_storypal_runtime_only_exposes_allowlisted_tools(tmp_path) -> None
             "save_journal_entry",
             "search_memory",
             "write_memory",
+            "recall_interaction_history",
         ])
     finally:
         await loop.aclose()

@@ -1,6 +1,7 @@
 # Local upstream source references and runtime data
 .reference/
 .runtime/
+.storypal/
 story_mem/
 .pnpm-store/
 .pytest_cache/

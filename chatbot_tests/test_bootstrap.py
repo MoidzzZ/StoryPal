@@ -30,7 +30,7 @@ def test_defaults_are_bounded_and_preserve_provider_secret(tmp_path):
     assert result["tools"]["restrictToWorkspace"] is True
     assert result["tools"]["allowedTools"] == [
         "resolve_reading_location", "set_reading_progress", "search_story", "get_story_evidence", "story_context",
-        "record_interaction_note", "forget_interaction_note", "search_reading_journal", "save_journal_entry", "search_memory", "write_memory",
+        "record_interaction_note", "forget_interaction_note", "search_reading_journal", "save_journal_entry", "search_memory", "write_memory", "recall_interaction_history",
     ]
     assert result["tools"]["exec"]["enable"] is False
     assert result["providers"]["custom"]["apiKey"] == "keep-me"

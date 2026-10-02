@@ -2,7 +2,7 @@
 
 > 更新：2026-10-03。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
 
-当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。下文保留设计沿革：常驻连续讨论 Skill 已落地，不将旧“两份 Skill”提案视作仍须原样执行的任务；M3-A 事实源、M3-B 联合低频抽取已接通，真实语义及 M3-C 回忆未验收／接通，见 [M3 契约](STORYPAL_EPISODIC_MEMORY.md)。
+当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。下文保留设计沿革：常驻连续讨论Skill已落地；M3-A事实源／M3-B联合低频抽取／M3-C语义回忆均已程序接通，真实联合抽取、Agent改写及跨会话续聊效果未验收。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
 
 2026-10-03 最新执行决定：用户要求应用开发与检索算法拆为两个会话并行。本会话下一包是 M3 按日情景记忆；R1 query／分词／检索排序实验由新会话负责，具体场景和协作边界见 [双线推进](STORYPAL_PARALLEL_TRACKS.md)。此前“先 R1 再 M3”顺序不再约束应用开发。
 

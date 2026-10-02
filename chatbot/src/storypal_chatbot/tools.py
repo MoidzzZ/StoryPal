@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import asyncio
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from .interaction_note import InteractionNoteStore
 from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL
 from .reading_context import ReadingContextProjector
 from .archive_maintenance import ArchivedMemoryCoordinator
+from .episodic_recall import EpisodicRecallService, EpisodicRecallUnavailable
 from .storage import HistoryMemoryStore, NotesStore, PendingReadingProgressStore, ReadingNotebookStore, ReadingProgressStore
 from .story_memory import (
     PipelineStoryMemoryBackend,
@@ -1015,6 +1017,54 @@ class GetStoryEvidenceTool(_StoryEvidenceTool):
             return json.dumps(evidence, ensure_ascii=False)
         except (StoryMemoryError, StoryProgressRequired, OSError, ValueError) as exc:
             return ToolResult.error(str(exc))
+
+@tool_parameters({
+    "type": "object", "properties": {"query": {"type": "string", "minLength": 1, "maxLength": 240}},
+    "required": ["query"], "additionalProperties": False,
+})
+class RecallInteractionHistoryTool(Tool):
+    """按需召回当前用户已归档的互动经历，范围不由模型指定。"""
+
+    def __init__(self, workspace: str | Path, service: EpisodicRecallService | None = None) -> None:
+        self.service = service or EpisodicRecallService.from_environment(workspace)
+        self.state_store = ReadingProgressStore(workspace)
+
+    @classmethod
+    def create(cls, ctx: ToolContext) -> Tool:
+        return cls(ctx.workspace)
+
+    @property
+    def name(self) -> str:
+        return "recall_interaction_history"
+
+    @property
+    def description(self) -> str:
+        return (
+            "近期历史／摘要不够时，语义回忆我们过去怎样讨论、如何改变理解及留下的疑问。"
+            "query 用简短中文明确讨论对象与关注点，直接消解指代；不另调改写模型。"
+            "只召回当前用户、当前作品和已确认阅读范围内已归档的按日经历，带时间和原话来源。"
+            "经历不是故事事实；空结果不代表用户从未说过，失败不算检索完成。"
+            "明确保存的预测／感受优先用 search_reading_journal，不每轮机械查询全部记忆工具。"
+        )
+
+    @property
+    def read_only(self) -> bool:
+        return True
+
+    async def execute(self, query: str, **_: Any) -> str | ToolResult:
+        try:
+            session, owner = _request_keys()
+            state = self.state_store.get(owner, legacy_session_key=session)
+            if not state.get("active_work") or type(state.get("max_seen_order")) is not int:
+                raise StoryProgressRequired("回忆共读经历需要当前作品及已确认阅读范围。")
+            result = await asyncio.to_thread(self.service.recall, owner, work_id=state["active_work"],
+                                             max_seen_order=state["max_seen_order"], query=query)
+            return json.dumps(result, ensure_ascii=False)
+        except (RuntimeError, OSError, ValueError) as exc:
+            if isinstance(exc, (EpisodicRecallUnavailable, StoryProgressRequired)):
+                return ToolResult.error(str(exc))
+            return ToolResult.error("经历来源或范围无效，未完成回忆检索。")
+
 
 class _HistoryMemoryTool(Tool):
     _plugin_discoverable = False
