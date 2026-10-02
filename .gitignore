@@ -15,6 +15,7 @@ story_mem/
 __pycache__/
 *.py[cod]
 *.egg-info/
+build/
 .venv/
 node_modules/
 dist/

@@ -130,3 +130,29 @@ async def test_temporary_is_rejected_and_observation_is_marked_tentative(tmp_pat
     assert "明天早上提醒我" not in note
     assert "待验证：阅读时可能更喜欢先讨论感受" in note
     assert coordinator._read_state("webui:tentative")["last_result"] == {"written": 1, "rejected": 1}
+
+
+@pytest.mark.asyncio
+async def test_auto_note_sees_user_words_not_runtime_story_material(tmp_path):
+    from nanobot.runtime_context import RuntimeContextBlock, append_runtime_context, RUNTIME_CONTEXT_HISTORY_META
+
+    class CapturingProvider(_FakeProvider):
+        async def chat_with_retry(self, **kwargs):
+            self.user_inputs = json.loads(kwargs["messages"][1]["content"])
+            return await super().chat_with_retry(**kwargs)
+    provider = CapturingProvider({"note_ops": []})
+    coordinator = ArchivedNoteCoordinator(tmp_path / "workspace", sessions_root=tmp_path / "sessions")
+    request = _request(provider)
+    coordinator.observe(request)
+    content, marker = append_runtime_context("本轮只是在讨论人物，不是长期偏好", [
+        RuntimeContextBlock("story_view", "这个角色的行为约束不是用户的", replay=False),
+        RuntimeContextBlock("note", "已有的互动约定也不是这次用户原话"),
+    ])
+    session = Session(key="webui:note")
+    session.add_message("user", content, **{RUNTIME_CONTEXT_HISTORY_META: marker})
+    session.last_archived = 1
+    coordinator.sessions.save(session)
+    coordinator.observe(request)
+    await asyncio.gather(*list(coordinator._tasks.values()))
+    assert [item["text"] for item in provider.user_inputs] == ["本轮只是在讨论人物，不是长期偏好"]
+    assert coordinator._read_state("webui:note")["last_result"] == {"written": 0, "rejected": 0}

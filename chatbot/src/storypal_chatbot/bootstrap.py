@@ -17,6 +17,7 @@ PERSONA_FILES = (
     "USER.md",
     "HEARTBEAT.md",
     "prompts/dream.md",
+    "prompts/consolidator_archive.md",
 )
 
 

@@ -11,6 +11,7 @@ from typing import Any
 
 from loguru import logger
 from nanobot import RequestContext
+from nanobot.runtime_context import public_history_message
 from nanobot.session.manager import JsonlSessionStore
 
 from .interaction_note import InteractionNoteStore
@@ -90,7 +91,7 @@ class ArchivedNoteCoordinator:
         messages: list[dict[str, str]] = []
         advance = archived
         for index in range(processed, archived):
-            entry = session.messages[index]
+            entry = public_history_message(session.messages[index])
             if entry.get("role") != "user" or not isinstance(entry.get("content"), str):
                 continue
             content = entry["content"].strip()
