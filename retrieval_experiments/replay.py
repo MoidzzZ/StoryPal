@@ -27,8 +27,17 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def load_cases() -> list[dict[str, Any]]:
+def load_cases(case_set: str = "focused") -> list[dict[str, Any]]:
     goldens = {row["编号"]: row for row in json.loads(GOLDENS.read_text(encoding="utf-8"))}
+    if case_set == "goldens29":
+        return [{"case_id": row["编号"], "work_id": "wandering_earth",
+                 "max_order": int(row["阅读边界"]), "raw_user": row["用户原话"],
+                 "gold_rewrite": row["检索查询"],
+                 "required_units": list(row["期望单元"]),
+                 "retrieval_decision": "search"}
+                for row in goldens.values()]
+    if case_set != "focused":
+        raise ValueError("Unknown case set: " + case_set)
     cases = json.loads(CONTRACT.read_text(encoding="utf-8"))
     for case in cases:
         base = goldens.get(case["case_id"])
@@ -147,10 +156,11 @@ def _queries(source: str, cases: list[dict[str, Any]], trace: Path | None) -> di
 
 
 def replay(*, source: str, strategy: str, top_k: int = 5, candidate_k: int = 10,
-           trace: Path | None = None, case_ids: set[str] | None = None) -> dict[str, Any]:
-    if top_k <= 0 or candidate_k <= 0:
-        raise ValueError("top_k and candidate_k must be positive")
-    cases = load_cases()
+           trace: Path | None = None, case_ids: set[str] | None = None,
+           case_set: str = "focused") -> dict[str, Any]:
+    if top_k <= 0 or candidate_k < top_k:
+        raise ValueError("candidate_k must be >= positive top_k")
+    cases = load_cases(case_set)
     queries = _queries(source, cases, trace)
     adapter = _adapter(strategy, candidate_k)
     rows = []
@@ -164,9 +174,11 @@ def replay(*, source: str, strategy: str, top_k: int = 5, candidate_k: int = 10,
                          else "query_unavailable", "query_available": query is not None})
             continue
         started = time.perf_counter()
-        hits = adapter.search(case["work_id"], query, max_order=case["max_order"], top_k=top_k)
+        candidates = adapter.search(case["work_id"], query, max_order=case["max_order"], top_k=candidate_k)
         latency = round((time.perf_counter() - started) * 1000, 2)
+        hits = candidates[:top_k]
         ids = [str(hit["unit_id"]) for hit in hits]
+        candidate_ids = [str(hit["unit_id"]) for hit in candidates]
         gold = set(case["required_units"])
         diagnostics = dict(getattr(adapter, "last_search_diagnostics", None) or {})
         if strategy == "vector" and diagnostics.get("used_retrieval") != "vector":
@@ -175,11 +187,15 @@ def replay(*, source: str, strategy: str, top_k: int = 5, candidate_k: int = 10,
             raise RuntimeError("Sparse path unavailable: " + case_id)
         safe = all(hit.get("work_id") == case["work_id"] and
                    type(hit.get("order")) is int and 0 < hit["order"] <= case["max_order"]
-                   for hit in hits)
+                   for hit in candidates)
         first = next((rank for rank, uid in enumerate(ids, 1) if uid in gold), None)
         rows.append({"case_id": case_id, "status": "searched", "max_order": case["max_order"],
                      "query_sha256": hashlib.sha256(query.encode("utf-8")).hexdigest(),
                      "required_units": sorted(gold), "result_units": ids,
+                     "candidate_units": candidate_ids, "candidate_count": len(candidates),
+                     "candidate_hit": bool(gold.intersection(candidate_ids)) if gold else None,
+                     "candidate_recall": round(len(gold.intersection(candidate_ids)) / len(gold), 3) if gold else None,
+                     "candidate_joint": gold.issubset(candidate_ids) if gold else None,
                      "hit_at_3": bool(gold.intersection(ids[:3])) if gold else None,
                      "recall_at_3": round(len(gold.intersection(ids[:3])) / len(gold), 3) if gold else None,
                      "joint_at_3": gold.issubset(ids[:3]) if gold else None,
@@ -199,6 +215,9 @@ def replay(*, source: str, strategy: str, top_k: int = 5, candidate_k: int = 10,
     def avg(field: str) -> float | None:
         return round(statistics.fmean(r[field] for r in scored), 3) if scored else None
     metrics = {"cases": len(rows), "searched": len(searched), "scored": len(scored),
+               "candidate_hit": avg("candidate_hit"),
+               "candidate_recall": avg("candidate_recall"),
+               "candidate_joint": avg("candidate_joint"),
                "hit_at_3": avg("hit_at_3"), "recall_at_3": avg("recall_at_3"),
                "joint_at_3": avg("joint_at_3"), "hit_at_5": avg("hit_at_5"),
                "recall_at_5": avg("recall_at_5"), "joint_at_5": avg("joint_at_5"),
@@ -211,7 +230,8 @@ def replay(*, source: str, strategy: str, top_k: int = 5, candidate_k: int = 10,
     source_sha256 = hashlib.sha256(source_file.read_bytes()).hexdigest() if source_file.exists() else None
     vector_meta = DATA / "wandering_earth" / "05_index" / "vectors.lance" / "_meta.json"
     index_meta = json.loads(vector_meta.read_text(encoding="utf-8")) if vector_meta.exists() else {}
-    return {"schema": "retrieval-replay@1", "query_source": source, "strategy": strategy,
+    return {"schema": "retrieval-replay@2", "case_set": case_set,
+            "query_source": source, "strategy": strategy,
             "top_k": top_k, "candidate_k": candidate_k, "source_sha256": source_sha256,
             "vector_index_model": index_meta.get("model"),
             "vector_index_source_sha256": index_meta.get("source_sha256"),
@@ -224,6 +244,7 @@ def main() -> None:
     cap = sub.add_parser("capture")
     cap.add_argument("--input", type=Path, required=True)
     cap.add_argument("--output", type=Path, required=True)
+    cap.add_argument("--case-set", choices=("focused", "goldens29"), default="focused")
     run = sub.add_parser("replay")
     run.add_argument("--query-source", choices=("raw_user", "gold_rewrite", "agent_query"), required=True)
     run.add_argument("--strategy", choices=("fts", "fts_strict", "jieba_or", "jieba_and",
@@ -232,19 +253,21 @@ def main() -> None:
     run.add_argument("--top-k", type=int, default=5)
     run.add_argument("--candidate-k", type=int, default=10)
     run.add_argument("--case-id", action="append")
+    run.add_argument("--case-set", choices=("focused", "goldens29"), default="focused")
     run.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "capture":
         if not args.output.resolve().is_relative_to(RUNTIME.resolve()):
             parser.error("Captured queries must remain under .runtime/retrieval-experiments/")
-        payload = capture_trace(read_jsonl(args.input), load_cases())
+        payload = capture_trace(read_jsonl(args.input), load_cases(args.case_set))
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in payload), encoding="utf-8")
         print(json.dumps({"captured": len(payload), "output": str(args.output)}, ensure_ascii=False))
     else:
         payload = replay(source=args.query_source, strategy=args.strategy, top_k=args.top_k,
                          candidate_k=args.candidate_k, trace=args.trace,
-                         case_ids=set(args.case_id) if args.case_id else None)
+                         case_ids=set(args.case_id) if args.case_id else None,
+                         case_set=args.case_set)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(payload["metrics"], ensure_ascii=False))

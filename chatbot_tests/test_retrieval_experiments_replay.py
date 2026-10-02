@@ -16,6 +16,15 @@ def test_first_batch_contract_matches_read_only_goldens():
     ]
 
 
+def test_full_case_set_reuses_all_existing_goldens_without_p01():
+    cases = experiment.load_cases("goldens29")
+    assert len(cases) == 29
+    assert len({c["case_id"] for c in cases}) == 29
+    assert all(c["work_id"] == "wandering_earth" for c in cases)
+    assert "P01" not in {c["case_id"] for c in cases}
+    assert sum(bool(c["required_units"]) for c in cases) == 27
+
+
 def test_capture_requires_actual_tool_argument_and_boundary():
     cases = experiment.load_cases()
     base = {"case_id": "R14", "origin": "agent_trace", "trace_ref": "opaque-1",
@@ -38,10 +47,12 @@ def test_agent_replay_requires_trace():
 
 
 def test_joint_coverage_differs_from_any_hit(monkeypatch):
+    requested_k = []
     class Fake:
         last_search_diagnostics = {"used_retrieval": "fts"}
 
         def search(self, work_id, query, *, max_order, top_k):
+            requested_k.append(top_k)
             return [{"work_id": work_id, "unit_id": "we-0004", "order": 4}]
 
     monkeypatch.setattr(experiment, "_adapter", lambda *_: Fake())
@@ -50,4 +61,23 @@ def test_joint_coverage_differs_from_any_hit(monkeypatch):
     assert row["hit_at_3"] is True
     assert row["recall_at_3"] == 0.5
     assert row["joint_at_3"] is False
+    assert row["candidate_joint"] is False
+    assert requested_k == [10]
     assert row["boundary_ok"] is True
+
+
+def test_candidate_boundary_is_checked_before_top_five(monkeypatch):
+    class Fake:
+        last_search_diagnostics = {"used_retrieval": "fts"}
+
+        def search(self, work_id, query, *, max_order, top_k):
+            return [{"work_id": work_id, "unit_id": f"we-{i:04d}", "order": i}
+                    for i in range(1, 6)] + [
+                        {"work_id": work_id, "unit_id": "we-0099", "order": 99}
+                    ]
+
+    monkeypatch.setattr(experiment, "_adapter", lambda *_: Fake())
+    row = experiment.replay(source="raw_user", strategy="fts", case_ids={"R12"})["cases"][0]
+    assert len(row["result_units"]) == 5
+    assert len(row["candidate_units"]) == 6
+    assert row["boundary_ok"] is False

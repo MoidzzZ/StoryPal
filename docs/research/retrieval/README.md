@@ -18,6 +18,14 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.re
 
 将 `jieba_or` 改为 `jieba_and`、`jieba_phrase` 即可在同一隔离索引上对照。严格现有 FTS5 可用 `fts_strict`；`fts` 是含 Python 扫描回退的实际 StoryMem 路径。结果只存编号、来源哈希、查询哈希及耗时，不存故事文本。
 
+既有 29 例的复跑使用 `--case-set goldens29 --candidate-k 10 --top-k 5`。逐个替换 `--strategy` 为 `fts`、`fts_strict`、`jieba_or`、`jieba_and`、`jieba_phrase`、`vector`、`rrf`；逐个替换 `--query-source` 为 `raw_user` 与 `gold_rewrite`。例如：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.replay replay --case-set goldens29 --query-source raw_user --strategy jieba_or --candidate-k 10 --top-k 5 --output .runtime/retrieval-experiments/29-raw-jieba_or.json
+```
+
+各策略都最多向指标层交付 10 条候选，再取前 5 条输出；RRF 先从每路各取 10 条，算力成本不与单路相同。完整 29 例只复用既有金标，未附加首批 P01/N01 的探索标注。采集真实查询时可给 `capture` 指定相同的 `--case-set`。
+
 真实查询需先用独立、经审核的 JSONL 事件输入 `capture`。首版每例只采首次检索决策或首次 `search_story` 调用；后续重试另行分析，不静默挑最优查询。每行示意：
 
 ```json
