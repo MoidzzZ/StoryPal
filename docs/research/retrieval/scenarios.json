@@ -1,0 +1,92 @@
+[
+  {
+    "case_id": "R12", "work_id": "wandering_earth", "max_order": 10,
+    "raw_user": "我是不是记错了，发动机光柱一开始就是斜的吗？",
+    "required_units": ["we-0004"], "retrieval_decision": "search",
+    "visible_context": "只有当前问题；未提供光柱变化的原文。",
+    "understanding_goal": "核对先后与原因，允许纠正用户记忆。",
+    "evidence_gap": "起初状态及刹车阶段的变化顺序。",
+    "source_route": "已读原文 we-0004；不要只凭同名发动机单元回答。",
+    "unknown_condition": "证据不足时说明无法核对，不补写时序。"
+  },
+  {
+    "case_id": "R14", "work_id": "wandering_earth", "max_order": 26,
+    "raw_user": "老师刚才说的五步到底怎么排？",
+    "required_units": ["we-0023"], "retrieval_decision": "search",
+    "visible_context": "上一轮提到小星老师讲解人类逃亡计划；未含五步原文。",
+    "understanding_goal": "按已读文本复原五步顺序，并解释每步所起作用。",
+    "evidence_gap": "老师所说五步的具体次序。",
+    "source_route": "对话消歧后查 we-0023 原文；只有“老师”时允许先澄清。",
+    "unknown_condition": "缺少上一轮讨论时不得假定老师所指。"
+  },
+  {
+    "case_id": "R20", "work_id": "wandering_earth", "max_order": 15,
+    "raw_user": "刚才那个谜底为什么让我发冷？",
+    "required_units": ["we-0011"], "retrieval_decision": "search",
+    "visible_context": "上一轮提到哲学课的墙和“死亡”谜底；未含原文。",
+    "understanding_goal": "连起谜底、课堂情境和用户的感受；保留解读空间。",
+    "evidence_gap": "谜底所指及课堂语境。",
+    "source_route": "对话消歧后查 we-0011 原文。",
+    "unknown_condition": "无对话前文时先澄清“那个”指什么。"
+  },
+  {
+    "case_id": "R25", "work_id": "wandering_earth", "max_order": 26,
+    "raw_user": "最开始光柱为什么斜着，启航时又为什么变直？",
+    "required_units": ["we-0004", "we-0026"], "retrieval_decision": "search",
+    "visible_context": "当前问题提到两个阶段；未提供对应原文。",
+    "understanding_goal": "比较刹车与启航阶段的变化，不把两个光柱描述混成同一时刻。",
+    "evidence_gap": "两个阶段各自的光柱状态及成因。",
+    "source_route": "联合取回 we-0004 与 we-0026 的已读原文。",
+    "unknown_condition": "只命中一个阶段不能声称解释了变化。"
+  },
+  {
+    "case_id": "R26", "work_id": "wandering_earth", "max_order": 22,
+    "raw_user": "地球派和飞船派争什么？小星老师为什么认为不能坐飞船走？",
+    "required_units": ["we-0019", "we-0022"], "retrieval_decision": "search",
+    "visible_context": "只给出当前追问；没有争论和老师论证的原文。",
+    "understanding_goal": "区分两派立场，再依据老师的论证解释飞船方案争议。",
+    "evidence_gap": "双方主张与老师所用的理由是不同证据。",
+    "source_route": "联合取回 we-0019 与 we-0022 的已读原文。",
+    "unknown_condition": "只找到阵营名称不能推断老师的完整理由。"
+  },
+  {
+    "case_id": "R21", "work_id": "wandering_earth", "max_order": 56,
+    "raw_user": "加代子看完爆炸以后眼睛怎么样了？",
+    "required_units": [], "retrieval_decision": "search",
+    "visible_context": "截至 56 单元；后果单元尚未进入阅读边界。",
+    "understanding_goal": "识别当前已读证据无法回答后果，同时陪伴用户的关切。",
+    "evidence_gap": "所问后果在当前已读边界内没有金标证据。",
+    "source_route": "仅允许 <=56 的候选；不能触达 we-0057。",
+    "unknown_condition": "空结果表示当前范围未知，不表示故事中没有后果。"
+  },
+  {
+    "case_id": "R29", "work_id": "wandering_earth", "max_order": 57,
+    "raw_user": "现在我读到加代子看见爆炸了，她的眼睛后来怎么样？",
+    "required_units": ["we-0057"], "retrieval_decision": "search",
+    "visible_context": "已读到 57 单元；用户已提到看见爆炸。",
+    "understanding_goal": "在新边界内回答眼睛后果，不延伸未来情节。",
+    "evidence_gap": "具体后果。",
+    "source_route": "取回 we-0057 已读原文。",
+    "unknown_condition": "仍应按来源限定细节。"
+  },
+  {
+    "case_id": "P01", "work_id": "wandering_earth", "max_order": 22,
+    "raw_user": "飞船派和地球派的争论是怎样一步步展开的？",
+    "required_units": ["we-0018", "we-0022"], "retrieval_decision": "search",
+    "visible_context": "只看到当前问题；当前状态不足以重建争论起点和后续论证。",
+    "understanding_goal": "追踪争论提出到老师回应的过程，不能把当前状态当历史。",
+    "evidence_gap": "争论起点与后续论证的来源。",
+    "source_route": "先按 plotline 标题“飞船派与地球派之争”查结构更新真实 unit_id，再回取 <=22 原文；首末必要证据暂标 we-0018、we-0022。",
+    "unknown_condition": "标题别名未命中须记录，不用 context_refs 虚构 unit 边。"
+  },
+  {
+    "case_id": "N01", "work_id": "wandering_earth", "max_order": 22,
+    "raw_user": "我有点难受，先别分析，陪我缓缓。",
+    "required_units": [], "retrieval_decision": "skip",
+    "visible_context": "用户明确要求暂停分析；本轮没有故事事实问题。",
+    "understanding_goal": "先回应情绪并尊重暂停。",
+    "evidence_gap": "无证据缺口。",
+    "source_route": "不调用故事检索。",
+    "unknown_condition": "此例评工具决策，不计召回。"
+  }
+]
