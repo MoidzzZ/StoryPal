@@ -6,6 +6,7 @@
 
 - 想知道整体还差什么、哪些优先或暂缓：查看 [当前能力与 TODO](architecture/STORYPAL_REMAINING_WORK.md)，避免将历史提案误认成当前缺口。
 - 想了解应用开发与算法会话的分工、具体实验场景与文件边界：查看 [双线推进契约](architecture/STORYPAL_PARALLEL_TRACKS.md)。
+- 想了解跨会话经历如何按日保存、来源和水位怎样校验、哪些尚未接通：查看 [M3 情景记忆](architecture/STORYPAL_EPISODIC_MEMORY.md)。
 
 - 想直接推进《流浪地球》的连续理解功能与检索实验：查看 [连续共读实施清单](architecture/STORYPAL_CONTINUOUS_READING_PLAN.md)，包含首轮接口、压缩记忆与类型覆盖测试。
 - 想从场景一路看到上下文、数据和代码改动：查看 [连续共读分层架构图（SVG）](architecture/storypal-continuous-reading-architecture.svg)，已区分已有、本轮待完善和后续 TODO。
