@@ -33,7 +33,17 @@ Evidence 至少包括 work_id、unit_id、order、raw_text、summary、score，�
 | Evidence.order | current_anchor | 回答后可用来提示用户确认阅读进度，不自动推进 |
 | raw_text 和行号 | 工具观察结果 | 仅返回长度受限的证据，保留引用锚点用于追溯 |
 
-## 推荐实施顺序
+## 2026-10-03 当前已读视图接入
+
+现有原文检索和结构查询之外，新增公开 `get_progressive_view(work_id, max_order=完整已读顺序)`；需要同步 StoryMem 代码，不能从 adapter 私有加载函数绕过接口。返回 work_id／max_order／source_version／snapshot_order／status／reason／snapshot／provenance。仅 status=ok 可消费；缺数据与无效快照不注入，不退回最终全书状态。
+
+本轮协作接口提交为 `1248bba`（Pilgrimage19/offline-story-pipeline）；新部署至少需要包含此接口版本，不要求同步本机 data 到公开仓库。
+
+StoryPal Service 重验来源与顺序；ReadingContextProjector 以 1500 估算 token 投影人物、对象、地点、情节线、事件、背景缓冲、累计背景。复用已确认阅读状态提供器，不改工具数量。旧版本后端明确报缺接口，保留基本聊天与阅读状态。
+
+nanobot 必须应用第七组 runtime-context-replay 补丁：新视图只保留当前模型输入，磁盘原始历史仍保留。来源文件 path／mtime_ns／size 变化时 adapter 重新加载并计算 SHA-256；它不是文件监听，不防御人为保持相同 stat 的改写。结果及未验收范围见根目录 result.md 与连续共读实施清单。
+
+## 原始推荐实施顺序（保留设计沿革）
 
 1. 在 StoryPal 建立只读 Protocol，并实现 search_story 和
    get_story_evidence 两个 native tools。数据根目录通过本机配置传入；未导入

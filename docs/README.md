@@ -13,6 +13,7 @@
 
 - 想运行本地 Chatbot：返回根目录 [README](../README.md)。
 - 想了解当前做到哪里：查看 [开发进度](operations/CHATBOT_DEVELOPMENT_PROGRESS.md)。
+- 想小规模核验新已读故事视图和观点承接：查看 [连续共读核验](operations/CONTINUOUS_READING_ACCEPTANCE.md)，只需在真实已读范围聊三轮，压缩和 Skill 另列待办。
 - 想体验或设计陪读：从 [初次阅读体验](product/CHATBOT_FIRST_READING_EXPERIENCE.md) 开始。
 - 想讨论九类陪伴需求、角色口吻及双脑备选方案：查看 [陪读场景与声音](product/COMPANION_SCENARIOS_AND_VOICE.md)（2026-10-02）。
 - 想按真实用户行为验收桌面版：查看 [首次阅读行为验收规范](operations/FIRST_READING_ACCEPTANCE.md)。

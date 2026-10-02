@@ -1,0 +1,210 @@
+diff --git a/nanobot/runtime_context.py b/nanobot/runtime_context.py
+--- a/nanobot/runtime_context.py
++++ b/nanobot/runtime_context.py
+@@ -30,6 +30,7 @@
+ 
+     source: str
+     content: str
++    replay: bool = True
+ 
+ 
+ def normalize_webui_quote(value: Any) -> str | None:
+@@ -92,7 +93,9 @@
+         if not source:
+             raise ValueError("runtime context block source must not be empty")
+         if content:
+-            blocks.append(RuntimeContextBlock(source=source, content=content))
++            if type(block.replay) is not bool:
++                raise TypeError("runtime context replay must be a boolean")
++            blocks.append(RuntimeContextBlock(source=source, content=content, replay=block.replay))
+     return blocks
+ 
+ 
+@@ -127,12 +130,19 @@
+ 
+     rendered = [block.content for block in blocks]
+     sources = [block.source for block in blocks]
++    replay_metadata = {}
++    if any(not block.replay for block in blocks):
++        replay_metadata["replay_records"] = [
++            {"block": {"type": "text", "text": block.content},
++             "sources": [block.source], "replay": block.replay} for block in blocks
++        ]
+     if isinstance(content, list):
+         context_blocks = [{"type": "text", "text": text} for text in rendered]
+         return [*content, *context_blocks], {
+             "version": 1,
+             "sources": sources,
+             "blocks": context_blocks,
++            **replay_metadata,
+         }
+ 
+     text = "" if content is None else str(content)
+@@ -142,6 +152,7 @@
+         "version": 1,
+         "sources": sources,
+         "suffix": suffix,
++        **replay_metadata,
+     }
+ 
+ 
+@@ -168,6 +179,15 @@
+             clean_content = content[: -(len(suffix) + 2)]
+         else:
+             return None
++        records = marker_data.get("replay_records")
++        if isinstance(records, list) and records:
++            segment_blocks = [record.get("block") for record in records if isinstance(record, dict)]
++            if len(segment_blocks) != len(records) or not all(
++                isinstance(block, dict) and block.get("type") == "text" and isinstance(block.get("text"), str)
++                for block in segment_blocks
++            ) or "\n\n".join(block["text"] for block in segment_blocks) != suffix:
++                return None
++            return clean_content, sources, deepcopy(segment_blocks)
+         return clean_content, sources, [{"type": "text", "text": suffix}]
+ 
+     expected = marker_data.get("blocks")
+@@ -185,9 +205,14 @@
+     content: Any,
+     sources: Sequence[str],
+     blocks: Sequence[Mapping[str, Any]],
++    *,
++    replay_records: Sequence[Mapping[str, Any]] | None = None,
+ ) -> tuple[Any, dict[str, Any]]:
+     """Append detached runtime-context blocks after visible messages are merged."""
+     context_blocks = [deepcopy(dict(block)) for block in blocks]
++    replay_metadata = {}
++    if replay_records and any(record.get("replay") is False for record in replay_records):
++        replay_metadata["replay_records"] = deepcopy(list(replay_records))
+     if isinstance(content, str) and all(
+         block.get("type") == "text" and isinstance(block.get("text"), str)
+         for block in context_blocks
+@@ -198,6 +223,7 @@
+             "version": 1,
+             "sources": list(sources),
+             "suffix": suffix,
++            **replay_metadata,
+         }
+ 
+     visible_blocks: list[Any] = (
+@@ -209,7 +235,55 @@
+         "version": 1,
+         "sources": list(sources),
+         "blocks": context_blocks,
++        **replay_metadata,
+     }
++
++
++def runtime_context_replay_records(marker, sources, blocks):
++    """Preserve per-block replay policy across message merges, including legacy suffixes."""
++    records = marker.get("replay_records") if isinstance(marker, Mapping) else None
++    if isinstance(records, list) and len(records) == len(blocks) and all(
++        isinstance(record, dict) and record.get("block") == block and type(record.get("replay")) is bool
++        and isinstance(record.get("sources"), list) and all(isinstance(s, str) for s in record["sources"])
++        for record, block in zip(records, blocks)
++    ):
++        return deepcopy(records)
++    return [{"block": deepcopy(block), "sources": [sources[i]] if len(sources) == len(blocks) else list(sources),
++             "replay": True} for i, block in enumerate(blocks)]
++
++
++def replay_history_message(message: Mapping[str, Any]) -> dict[str, Any]:
++    """Omit only opted-out runtime blocks; never alter the durable transcript."""
++    cleaned = deepcopy(dict(message))
++    marker = cleaned.get(RUNTIME_CONTEXT_HISTORY_META)
++    if not isinstance(marker, Mapping) or "replay_records" not in marker:
++        return cleaned
++    detached = detach_runtime_context(cleaned.get("content"), marker)
++    if detached is None:
++        return cleaned
++    visible, sources, blocks = detached
++    records = runtime_context_replay_records(marker, sources, blocks)
++    kept = [record for record in records if record["replay"]]
++    cleaned.pop(RUNTIME_CONTEXT_HISTORY_META, None)
++    if kept:
++        content, new_marker = reattach_runtime_context(visible,
++            [source for record in kept for source in record["sources"]],
++            [record["block"] for record in kept])
++        cleaned["content"] = content
++        cleaned[RUNTIME_CONTEXT_HISTORY_META] = new_marker
++    else:
++        cleaned["content"] = visible
++    return cleaned
++
++
++def runtime_context_requires_fresh_replay(messages: Iterable[Mapping[str, Any]]) -> bool:
++    """Opaque provider state cannot remove opted-out historical input blocks."""
++    for message in messages:
++        marker = message.get(RUNTIME_CONTEXT_HISTORY_META)
++        if isinstance(marker, Mapping) and "replay_records" in marker:
++            if replay_history_message(message).get("content") != message.get("content"):
++                return True
++    return False
+ 
+ 
+ def public_history_message(message: Mapping[str, Any]) -> dict[str, Any]:
+diff --git a/nanobot/session/manager.py b/nanobot/session/manager.py
+--- a/nanobot/session/manager.py
++++ b/nanobot/session/manager.py
+@@ -26,6 +26,7 @@
+ from nanobot.runtime_context import (
+     RUNTIME_CONTEXT_HISTORY_META,
+     public_history_message,
++    replay_history_message,
+ )
+ from nanobot.session.model_selection import SESSION_MODEL_PRESET_METADATA_KEY
+ from nanobot.utils.helpers import (
+@@ -394,6 +395,8 @@
+             )
+             if not include_runtime_context:
+                 message = public_history_message(message)
++            else:
++                message = replay_history_message(message)
+             content = message.get("content", "")
+             role = message.get("role")
+             if role == "assistant" and isinstance(content, str):
+diff --git a/nanobot/agent/runner.py b/nanobot/agent/runner.py
+--- a/nanobot/agent/runner.py
++++ b/nanobot/agent/runner.py
+@@ -43,6 +43,7 @@
+     RUNTIME_CONTEXT_MESSAGE_META,
+     detach_runtime_context,
+     reattach_runtime_context,
++    runtime_context_replay_records,
+ )
+ from nanobot.session.history_visibility import is_hidden_history_message
+ from nanobot.session.recovery import PENDING_FOLLOWUP_ID_KEY
+@@ -236,6 +237,10 @@
+                             merged_content,
+                             [*left_sources, *right_sources],
+                             context_blocks,
++                            replay_records=[
++                                *runtime_context_replay_records(left_marker_dict, left_sources, left_blocks),
++                                *runtime_context_replay_records(right_marker_dict, right_sources, right_blocks),
++                            ],
+                         )
+                         internal_meta = dict(left_meta_dict) if left_meta_dict is not None else {}
+                         if right_meta_dict is not None:
+diff --git a/nanobot/agent/loop.py b/nanobot/agent/loop.py
+--- a/nanobot/agent/loop.py
++++ b/nanobot/agent/loop.py
+@@ -65,6 +65,7 @@
+     append_runtime_context,
+     resolve_runtime_context,
+     runtime_context_blocks_from_metadata,
++    runtime_context_requires_fresh_replay,
+ )
+ from nanobot.security.workspace_access import (
+     WorkspaceScopeResolver,
+@@ -1921,6 +1922,11 @@
+         }
+         ctx.history = session.get_history(**_hist_kwargs)
+         stored_state = session.provider_state
++        if stored_state is not None and runtime_context_requires_fresh_replay(session.messages):
++            # Rebuild the filtered transcript; opaque response state still contains
++            # historical blocks that providers explicitly marked non-replayable.
++            stored_state = None
++            session.provider_state = None
+         subagent_followup_persisted = False
+         if is_subagent:
+             # Keep the durable internal delivery as an assistant record, but

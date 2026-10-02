@@ -20,6 +20,8 @@ class StoryProgressRequired(StoryMemoryError):
 
 
 class StoryMemoryBackend(Protocol):
+    def get_progressive_view(self, work_id: str, *, max_order: int) -> dict[str, Any]: ...
+
     def search(
         self,
         work_id: str,
@@ -112,6 +114,12 @@ class PipelineStoryMemoryBackend:
             work_id, query, max_order=max_order, top_k=top_k, filters=filters
         )
 
+    def get_progressive_view(self, work_id: str, *, max_order: int) -> dict[str, Any]:
+        adapter = self._get_adapter()
+        if not callable(getattr(adapter, "get_progressive_view", None)):
+            raise StoryMemoryError("StoryMem 版本过旧，缺少 get_progressive_view 接口")
+        return adapter.get_progressive_view(work_id, max_order=max_order)
+
     def get_unit(self, work_id: str, unit_id: str) -> dict[str, Any] | None:
         return self._get_adapter().get_unit(work_id, unit_id)
 
@@ -170,6 +178,20 @@ class StoryMemoryService:
     def __init__(self, backend: StoryMemoryBackend, context_packer: ContextPacker | None = None) -> None:
         self.backend = backend
         self.context_packer = context_packer or ContextPacker()
+
+    def progressive_view(self, *, work_id: str, max_seen_order: int) -> dict[str, Any]:
+        from .reading_context import validate_progressive_view
+
+        if not work_id or type(max_seen_order) is not int or max_seen_order < 0:
+            raise StoryProgressRequired("已读故事视图需要有效作品与非负完整已读边界")
+        method = getattr(self.backend, "get_progressive_view", None)
+        if not callable(method):
+            raise StoryMemoryError("后端尚未提供渐进故事视图")
+        view = method(work_id, max_order=max_seen_order)
+        reason = validate_progressive_view(view, work_id, max_seen_order)
+        if reason:
+            return {"work_id": work_id, "max_order": max_seen_order, "status": "unavailable", "reason": reason}
+        return view
 
     @staticmethod
     def _safe_evidence(
