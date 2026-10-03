@@ -34,7 +34,9 @@
 
 ## 目录说明
 
-新增：[阅读手账生命周期与回看候选](architecture/STORYPAL_READING_JOURNAL.md)、[手账小规模核验](operations/READING_JOURNAL_ACCEPTANCE.md)。修订／删除程序已实现，独立异步语义复核仍待做；检索最新真实批次见[报告](research/retrieval/MODEL_BATCH_2026_10_03.md)。
+新增：[连续陪读与记忆联动测试规范](operations/CONTINUOUS_MEMORY_TEST_PROTOCOL.md)。区分21项替身程序测试、独立预算真实模型批次及真人体验，明确六类目标、失败判据和发送范围。
+
+新增：[阅读手账生命周期与回看候选](architecture/STORYPAL_READING_JOURNAL.md)、[手账小规模核验](operations/READING_JOURNAL_ACCEPTANCE.md)。修订／删除及可选独立复核程序已实现，后台默认关闭，已通过一条两请求合成复核→承接小样；复杂语义仍待验收。检索最新真实批次见[报告](research/retrieval/MODEL_BATCH_2026_10_03.md)。
 
 | 目录 | 内容 |
 | --- | --- |

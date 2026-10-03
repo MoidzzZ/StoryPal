@@ -1,10 +1,10 @@
 # StoryPal 下一阶段交付：记忆闭环与检索实验
 
-> 更新：2026-10-03。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
+> 更新：2026-10-04。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
 
-最新交付：手账维护、回看候选及[可选后台复核](STORYPAL_JOURNAL_RECHECK.md)已程序接通，73项定向通过；默认关闭后台模型工作，真实语义与连续理解小样仍待独立授权验收。项目完整讲解见[叙述主线](../product/STORYPAL_PROJECT_STORY.md)。算法真实首query5条、skip1条，当前扩新理解任务／留出契约与四路线协议；本包不新增模型请求／GPU，默认Dense不变。旧段落下一步／query=0保留为沿革，不覆盖当前状态。
+最新交付：后台手账复核默认关闭，已有两请求合成小样；本轮新增连续记忆21项＋预算3项、受影响52/52，另获批15次真实合成请求完成原生闲置压缩→联合维护→新会话回忆及同会话澄清／暂停／错误／手账／够用不查。入口显式触发而非自然WebUI阈值调度，复杂语义仍待验收。项目主线见[叙述](../product/STORYPAL_PROJECT_STORY.md)，事实见[真实报告](../operations/CONTINUOUS_MEMORY_ACCEPTANCE_2026_10_04.md)。算法新增15任务／30问CPU多路线及Qwen同池小批，标签待独立核验、CPU延迟明显，默认Dense不变。旧段落下一步／query=0保留为沿革，不覆盖当前状态。
 
-当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。常驻连续讨论Skill、M3事实源／联合低频抽取／语义回忆均已程序接通；本轮3次真实Luna逻辑调用跑通一条合成归档→抽取→空白新会话回忆，澄清和未查证保持正确。手动归档水位，不包含真实压缩摘要生成，不能视为长程效果完成。隔离query导出程序已完成，真实故事agent_query仍0。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md)、[导出规范](../operations/AGENT_QUERY_CAPTURE.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
+当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。2026-10-03的3次真实Luna小样使用手动归档水位和真实BGE；2026-10-04另用原生闲置压缩、真实抽取及确定性向量回忆，不能将两种验证混为同批的端到端算法成绩。隔离query导出已有5条真实故事首query、1条skip，query=0为沿革。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md)、[导出规范](../operations/AGENT_QUERY_CAPTURE.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
 
 2026-10-03 最新执行决定：应用与检索两个会话并行。Note会话范围临时项／归档观察复核程序已完成，规则与限制见[Note维护](STORYPAL_NOTE_MAINTENANCE.md)；应用下一包手账编辑／删除和旧预测回看。R1 query／分词／排序由独立会话推进，真实请求另批。默认检索不因离线融合结果改变；算法关注跨阶段必要证据进入实际装包。协作边界见 [双线推进](STORYPAL_PARALLEL_TRACKS.md)。下文保留历史设计，不能用旧“下一步”覆盖当前状态。
 

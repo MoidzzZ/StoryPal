@@ -2,6 +2,9 @@
 
 本目录保存由 StoryPal 维护的单元测试与集成测试。首轮基线覆盖有界配置、人格文件安装、按会话隔离的故事状态、防剧透运行时上下文，以及仅在用户明确要求时写入的用户笔记。
 
+- 新增`test_continuous_memory_workflow.py`：21项跨模块完整链／故障／后台时序测试，不手动设置归档水位；原生压缩、存储、工具和LanceDB真实，LLM与向量替身，不评价模型语义。行为规范见[连续记忆测试](../docs/operations/CONTINUOUS_MEMORY_TEST_PROTOCOL.md)。
+- `manual_memory_acceptance.py`是单独获批的最多12 Luna＋3 Sol合成验收入口，缺省离线预算自检；参数不是通用外发授权，运行结果另记根result。没有小说／正式用户资料或GPU加载。
+
 上游 nanobot 测试位于 .reference/nanobot/tests；它们只用于验证依赖基线，不能替代 StoryPal 的行为测试。
 
 - 当前检索金标与主评测事实源：[story_retrieval_goldens.json](story_retrieval_goldens.json)；`story_retrieval_cases.md` 仅保留为历史说明。
