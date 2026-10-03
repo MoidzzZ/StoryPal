@@ -1,5 +1,15 @@
 # StoryPal Chatbot 开发进度
 
+## 2026-10-03：M2-D 临时Note与开放观察复核
+
+- 本包补当前交互工作区的生命周期，不扩故事检索。显式temporary默认仅创建会话生效；新会话不注入、重启不删来源，无模型时间解析／位置失效／提醒任务。待用户核验默认是否符合习惯。
+- 新增read_for_context／review_snapshot／apply_reviews，沿用每用户单份Note.md；复核旧行与用户来源存同文件“维护记录（不注入）”。共享准入始终将observation标待验证，去重按类别且临时项按会话区分。
+- 归档维护一次调用新增note_reviews：最多4条／2400正文字符已有观察，仅用户当批逐字来源，revise／retire不升级类别；stable约束／偏好不改。先验证两类候选与复核，再分别写入；版本变动拒绝旧结果、单MD原子保存及复核操作去重，不声明跨文件事务。
+- 有效Note新运行块replay=false，原始轨迹保留；原生Loop新两轮测试确认停用旧快照不回放、用户原话保留、provider私有旧状态失效。旧replay=true或无分块历史未迁移，本轮Note规则优先，不宣称旧摘要或原话被遗忘。
+- 受影响回归最终86/86（10.40s），初组43、83、84项属于重叠子集不累加；末轮补移至稳定分类／重复ID拒绝与无关新约定保留。全部合成数据／替身provider，新真实模型请求0。语义准入／分类效果仍待授权小样或用户体验，不将程序测试写成准确率／提速。
+- 细节、失败边界和用户输入见[Note维护契约](../architecture/STORYPAL_NOTE_MAINTENANCE.md)。Dream只更新规则，不宣称已接按用户消费Note；真实SOUL／USER／Note不批量迁移、不强制覆盖。后续先手账编辑／删除和旧预测回看，deadline／位置型失效及完整旧记录删除后置。
+- 仅增补运行AGENTS／Dream规则，已构建wheel和重启gateway；首页200、health ok／ready=true／websocket running，不算模型语义验收。当前Note回归不用真实Embedding；用户询问GPU占用后不再追加载模，CPU／GPU显式配置及两路Embedding实例复用保留待办，不静默改设备策略。
+
 ## 2026-10-03：隔离查询导出与 M3 真实模型小样
 
 - 目标：为算法线提供可核对的真实 query 入口，核验跨会话经历是否保留讨论中的澄清和未知，不扫描真实历史／修改正式进度。

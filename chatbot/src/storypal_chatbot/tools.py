@@ -545,14 +545,16 @@ class _InteractionNoteTool(Tool):
         if not request.session_key:
             return None
         owner_key = request.sender_id or "local-user"
-        note = self.store.read(owner_key)
+        note = self.store.read_for_context(owner_key, session_key=request.session_key)
         return RuntimeContextBlock(
             source="storypal_interaction_note",
             content=(
                 "[StoryPal Note.md：用户交互约定，按原文记录；不是剧情证据]\n"
+                "这是本轮有效Note视图；以本轮用户表达为先，不从历史注入快照恢复已停用约定。开放观察仅待验证。\n"
                 f"{note}\n"
                 "[/StoryPal Note.md]"
             ),
+            replay=False,
         )
 
 
@@ -597,6 +599,7 @@ class RecordInteractionNoteTool(_InteractionNoteTool):
             "仅在用户明确要求记住非剧情的行为约束、纠错、偏好或交互约定时写入 Note.md。"
             "content 是提炼后的一条记录；source_quote 必须逐字来自本轮用户原话。"
             "不要把猜测、阅读感受、剧情事实或工具输出写入。"
+            "temporary只在当前会话生效，跨会话不注入；observation始终为待验证弱提示。"
         )
 
     async def execute(self, category: str, content: str, source_quote: str, **_: Any) -> str | ToolResult:

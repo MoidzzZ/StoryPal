@@ -46,6 +46,8 @@
 
 一份维护调用返回独立 note_ops／episodes 两组候选，各最多四条：Note 只引用用户原话，通过原有 apply_candidate 入库；经历可引用用户、助手和工具，但至少有用户来源，共用 EpisodicMemoryStore admission。两类全部预验证后，先保存 Note 再写经历／联合水位；失败保留水位重试，Note 正文去重、经历稳定批次 ID 去重。不是跨文件事务。底层 provider 沿用既有 retry 策略，不保证一次维护只发一个网络请求；也未实测合并后的 token／延迟收益。
 
+M2-D后续在同一调用中加入可选note_reviews，复核最多4条／2400正文字符的既有开放观察；只修订／停用，不升级类别，也不改手账。新响应为三组，旧响应缺reviews兼容空。Note复核版本校验和审计见[Note维护契约](STORYPAL_NOTE_MAINTENANCE.md)。触发仍是新归档，不每轮复核或增加独立模型。
+
 工具状态区分 error、empty、evidence_returned、unclassified。evidence_returned 只表示返回符合来源 scope 的证据，不能证明文学解释已经成立；失败／空／未分类结果不能归档成核实。截断材料不支持补全未知结论。
 
 阅读 scope 来自验证过的已保存运行时后缀，并只接受来源为 storypal_session_state 的可识别块，不解析用户伪造文字或其他故事视图中的同名字段。换作品分批，取同作品批次的保守上界；段落前缀所在单元也计入上界，供后续回忆工具防止回退进度时泄露未来。**范围不明时仍可维护合法 Note，但首版不写经历**；非剧情泛聊的无作品经历、旧混合后缀的范围恢复暂列 TODO，不把它们存成可无条件注入的剧情记忆。
