@@ -1,5 +1,9 @@
 # 场景契约与离线回放
 
+## 最新运行包
+
+2026-10-04已完成[CPU扩展对照](CPU_ROUTES_2026_10_04.md)，源核验修订见[SOURCE_REVIEW_2026_10_04.json](SOURCE_REVIEW_2026_10_04.json)。新问题30、开发29、阶段26分别报告，14新故事任务标签仍provisional。Qwen真实CPU小批已评分100对，但不运行远程provider或最终回答。以下旧包说明按各自日期理解。
+
 下一轮预登记、Sol／Luna 分工、与主进程的参数对齐及预算执行限制见 [NEXT_EXPERIMENT.md](NEXT_EXPERIMENT.md)；完整推进顺序见 [PLAN.md](PLAN.md)。
 
 首批模型实验已完成：6 场景、18/24 次物理请求，5 条真实 Agent query、1 条真实无工具暂停。过程和逐例结果见 [MODEL_BATCH_2026_10_03.md](MODEL_BATCH_2026_10_03.md)，可讲述的探索经历见 [EXPERIENCE.md](EXPERIENCE.md)。模型原始材料及会话只存忽略的隔离目录。
@@ -106,3 +110,17 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m pytest chatbot_t
 ```
 
 每次用新输出路径。本机前置条件是同SHA的原文、原有开发金标、StoryMem只读结构数据、既有Dense缓存／批次审计与18请求账本；忽略运行材料不会随Git复制，缺失时应明确准备对应本地fixture，不伪造缓存。模型文件缺失会记录可用性，不自动下载；文件存在也不证明加载和CPU性能。当前33项定向回归涵盖本包与既有实验，真实新评分为0。
+
+
+## 完全离线CPU扩展复现
+
+先固定v1.1契约与版本锁，阅读CPU报告中的小批、成本停止和标签限制。依赖／权重都必须在本机，缺失不自动安装下载；不修改正式服务设备设置。每阶段输出必须用新名字，输入为同源、同契约的完成文件：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m retrieval_experiments.cpu_routes dense --output .runtime/retrieval-experiments/cpu-dense-local-new.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m retrieval_experiments.cpu_routes routes --input .runtime/retrieval-experiments/cpu-dense-local-new.json --output .runtime/retrieval-experiments/cpu-routes-local-new.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m retrieval_experiments.cpu_routes reranker --input .runtime/retrieval-experiments/cpu-routes-local-new.json --output .runtime/retrieval-experiments/cpu-reranker-local-new.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m pytest chatbot_tests/test_retrieval_experiments_cpu.py -q -p no:cacheprovider --basetemp .runtime/retrieval-experiments/tests-cpu-local-new
+```
+
+Dense显式CPU、local_files_only、小batch2和4线程；Qwen显式CPU/float32、batch1，无CUDA初始化。两模型分进程执行；reranker只能重排固定Dense Top10，不支持自己补候选。Qwen失败／成本停止保存已完成结果并标未完成，不能给缺分造值。报告含来源ID／查询SHA／向量缓存／相关分数，未包含原文或真实聊天。旧账本检查只约束算法线原批次，不代表应用线没有其自身授权调用。

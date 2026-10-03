@@ -1,0 +1,237 @@
+{
+  "schema": "local-source-review@1",
+  "date": "2026-10-04",
+  "origin": "same author local source check, not independent data verifier; zero Sol/Luna calls",
+  "contract_version": "prospective-v1.1",
+  "review_before_new_rankings": true,
+  "formal_gold_count": 0,
+  "tasks": [
+    {
+      "task_id": "H01",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0014",
+        "we-0018"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "适应不等于太阳灾变不存在。",
+        "不将情绪变化解释为未经描述的医学治愈。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H02",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0033",
+        "we-0037"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "平静表现不能唯一确定其内心没有感情。",
+        "消息有转述链，不能把担忧当作已观测到毁灭。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H03",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0040",
+        "we-0041"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "叙述者未再见二人不等于证明死亡。",
+        "灵儿对地面死亡方式的判断是人物观点，不是科学实测。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H04",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0051",
+        "we-0052"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "到此只见申请，不能借后文说登记或其他手续已经完成。",
+        "不能把相遇直接当作足以证明一切长期动机。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H05",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0058"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "角色误以为被击中不是已确认事实。",
+        "爆音解释不等于飞行安全已恢复；不借后续事件作答。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H06",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0059",
+        "we-0060",
+        "we-0061"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "安全结论受到削弱，不证明冰面从来没有衰减作用。",
+        "保留旧预测原文，不自动修改用户手账。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H07",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0038",
+        "we-0064",
+        "we-0068"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "希望的象征解释可以不同，但不能说发动机完全没有损失。",
+        "逃逸所需功率够用不证明后续无风险。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H08",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0071",
+        "we-0073"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "不能将东半球的夜推广到全球。",
+        "关于未来时长属于当前叙述已给出的预期，不借全书末尾补细节。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H09",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0074",
+        "we-0075"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "当前所见不足以宣布已达到逃逸速度。",
+        "不得使用未读会合完成的原文或终态快照。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H10",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0081",
+        "we-0083"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "已读观测的未变化不等于未来永久安全的逻辑保证。",
+        "叙述者态度和小说中观测报告分开，不用未读反转裁定。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H11",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0084",
+        "we-0087",
+        "we-0088"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "事件先后不证明送走孩子直接导致每个人的政治选择。",
+        "不编造加代子未写出的完整内心动机或后续结局。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H12",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0088",
+        "we-0090",
+        "we-0091",
+        "we-0092"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "他人指责与主角亲口自我判断不能互换。",
+        "不宣称文字已提供全部心理过程；不借后来的结局倒推。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H13",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0089",
+        "we-0095"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "同样保护发动机不等于两方政治信念相同。",
+        "发言者的解释不证明每项政府决策都正确。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H14",
+      "status": "source_checked_pending_independent_review",
+      "checked_unit_candidates": [
+        "we-0105"
+      ],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "不能借其他阶段发动机关停解释当前光柱不可见。",
+        "只按此处小说设定解释，不添加未经核对的现实物理细节。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    },
+    {
+      "task_id": "H15",
+      "status": "missing_reader_memory",
+      "checked_unit_candidates": [],
+      "raw_span_hashes_checked": true,
+      "counter_unknown_retained": [
+        "隔离夹具没有旧手账、历史消息或经历记录，无法确定读者原观点。",
+        "故事事实不能恢复用户未保存的观点；应说明缺记录并请求原话，不声称用户从未预测。"
+      ],
+      "independent_necessity_and_equivalence_review": "pending"
+    }
+  ],
+  "revision": [
+    {
+      "from": "prospective-v1",
+      "date": "2026-10-04",
+      "task_id": "H04",
+      "field": "variants.H04-a.text",
+      "old_text": "他比赛时那么孤独，遇到加代子以后为什么连名次都不在意了？两人怎么走到一起的？",
+      "reason": "原文we-0051在相遇前已明确名次无关；去掉相遇后才不在意的误导前提。必要候选、边界、组和其余问法不变；新检索成绩尚未运行。",
+      "review_origin": "same Codex author local source audit; not independent Luna/human review"
+    }
+  ],
+  "limitations": [
+    "Span supports a claim, not proof of a unique/minimal complete evidence set.",
+    "H07 speaker association supported by narrative context and explicit recollection in68, still provisional.",
+    "H06 and H09 reader predictions are synthetic fixtures; H15 intentionally absent.",
+    "No new provider data verification; Luna remains agreed future verifier."
+  ]
+}
