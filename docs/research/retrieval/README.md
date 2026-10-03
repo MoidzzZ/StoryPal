@@ -2,6 +2,8 @@
 
 下一轮预登记、Sol／Luna 分工、与主进程的参数对齐及预算执行限制见 [NEXT_EXPERIMENT.md](NEXT_EXPERIMENT.md)；完整推进顺序见 [PLAN.md](PLAN.md)。
 
+首批模型实验已完成：6 场景、18/24 次物理请求，5 条真实 Agent query、1 条真实无工具暂停。过程和逐例结果见 [MODEL_BATCH_2026_10_03.md](MODEL_BATCH_2026_10_03.md)，可讲述的探索经历见 [EXPERIENCE.md](EXPERIENCE.md)。模型原始材料及会话只存忽略的隔离目录。
+
 `scenarios.json` 的 `visible_context` 是实验输入契约，并非真实会话记录。其 `required_units` 表示回答所需的最小已读来源集合；命中任一单元不等于联合证据充分。R21 的空集合表示当前已读边界内没有后果金标，N01 则要求不调用检索；两者含义不同。
 
 本机离线回放示例：
@@ -58,3 +60,25 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.re
 ```
 
 工具仅检查输入格式、来源标签与边界一致，不能独自证明事件来自真实 Agent。审核者需保证 `trace_ref` 可在隔离环境回溯到实际工具调用；不得用人工金标文本伪造输入。捕获输出被限制在未跟踪的 `.runtime/retrieval-experiments/`。
+
+## 六场景批次实现与本地复现
+
+`model_batch.py` 的 generate／roleplay 阶段均要求显式 `--execute-authorized-batch`；只有与 run-root 绑定的材料授权、问题意图 SHA 和固定人格快照满足时才运行陪读。现有批次已经完成，授权不扩展到另一个 run-root 或新的材料范围；阅读本文不触发额外模型调用。执行器禁用重试／压缩／后台 LLM，在每次物理传输前持久计数。
+
+`generated_replay.py --run-root ...` 只用本地 BGE 回放经审核的 Sol 问法，排除 N01 强制检索、单列 P01 暂定标签。`batch_analysis.py --run-root ...` 重导出原生回执，审计实际原文边界并回放五条真实 query；两者拒绝覆盖原有产物。`literary_review.py` 是另一次受计数限制的 P01 模型核验，已经完成，不当作 Agent query 或人类金标。
+
+复用现有实际查询做无新增对话模型调用的稀疏回放（输出请换新文件名）：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.replay replay --query-source agent_query --trace .runtime/retrieval-experiments/isolated/sol-luna-20261003-01/agent-queries.jsonl --strategy jieba_or --case-id R14 --case-id R25 --case-id R26 --case-id R21 --candidate-k 10 --top-k 5 --output .runtime/retrieval-experiments/agent-jieba-local-rerun.json
+```
+
+将 strategy 改成 fts／fts_strict 可核对扫描与严格零命中的区别。正式排序分母为 3，R21 空集合只审边界；不要额外纳入 P01 的 provisional 集合。原始批次的账本／会话／原文及材料授权文件均留在忽略的隔离目录。
+
+定向回归覆盖输入不含金标、审核 SHA 不可复用、持久预算与物理重发限制、隔离真实 AgentLoop 接线、候选／装包及暂定分母。测试 provider 是替身，不计真实模型结果：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pytest chatbot_tests/test_retrieval_experiments_replay.py chatbot_tests/test_retrieval_experiments_fusion.py chatbot_tests/test_retrieval_experiments_facets.py chatbot_tests/test_retrieval_experiments_model_batch.py chatbot_tests/test_retrieval_experiments_generated.py -q -p no:cacheprovider --basetemp .runtime/retrieval-experiments/tests-final-new
+```
+
+basetemp 每次使用新目录；模型运行无需作为回归测试重跑。

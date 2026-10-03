@@ -62,8 +62,9 @@ def _safe(items: list[dict[str, Any]], max_order: int) -> None:
         raise ValueError("Candidate crosses story/read boundary")
 
 
-def replay() -> dict[str, Any]:
-    cases = load_cases("goldens29")
+def replay(cases: list[dict[str, Any]] | None = None, *, query_source: str = "algorithmic_raw_user",
+           case_set: str = "goldens29") -> dict[str, Any]:
+    cases = load_cases("goldens29") if cases is None else cases
     digest, units = _source_units()
     adapter = _adapter("vector", 10)
     if str(CHATBOT_SRC) not in sys.path:
@@ -114,6 +115,7 @@ def replay() -> dict[str, Any]:
             first = next((rank for rank, uid in enumerate(top5, 1) if uid in gold), None)
             grouped[config].append({
                 "case_id": case["case_id"], "max_order": case["max_order"],
+                "gold_status": case.get("gold_status", "existing_gold"),
                 "query_sha256": hashlib.sha256(query.encode()).hexdigest(),
                 "clause_sha256": [hashlib.sha256(c.encode()).hexdigest() for c in clauses],
                 "split": len(clauses) == 2, "required_units": sorted(gold),
@@ -130,11 +132,12 @@ def replay() -> dict[str, Any]:
             })
     configurations = {}
     for name, rows in grouped.items():
-        scored = [row for row in rows if row["required_units"]]
+        scored = [row for row in rows if row["required_units"] and row["gold_status"] != "provisional"]
         singles = [row for row in scored if len(row["required_units"]) == 1]
         times = [row["retrieval_ms"] for row in rows]
         configurations[name] = {"cases": rows, "metrics": {
             "cases": len(rows), "scored": len(scored),
+            "provisional_cases": [row["case_id"] for row in rows if row["gold_status"] == "provisional"],
             "split_cases": [row["case_id"] for row in rows if row["split"]],
             **{field: sum(row[field] is True for row in scored) for field in
                ("candidate_joint", "joint_at_3", "joint_at_5", "packed_joint")},
@@ -145,8 +148,8 @@ def replay() -> dict[str, Any]:
             "warm_p95_ms": _percentile(times[1:], .95),
             "split_retrieval_p50_ms": _percentile([row["retrieval_ms"] for row in rows if row["split"]], .5),
         }}
-    return {"schema": "clause-replay@1", "query_source": "algorithmic_raw_user",
-            "source_sha256": digest, "case_set": "goldens29", "rule_version": RULE_VERSION,
+    return {"schema": "clause-replay@1", "query_source": query_source,
+            "source_sha256": digest, "case_set": case_set, "rule_version": RULE_VERSION,
             "rrf_k": 60, "total_result_slots": 10, "evidence_limit": 5,
             "configurations": configurations,
             "latency_note": "Two clauses use two sequential local embeddings/searches with five slots each. "
