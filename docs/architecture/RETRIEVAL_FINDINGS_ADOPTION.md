@@ -42,6 +42,8 @@ R25 早段进入 Dense／新融合 Top5，但排第5／4且不与主证据直接
 
 生产仍不改Dense、Top3或RRF。下一包已交接仅离线、缓存或CPU：保持主体／阶段／关系的查询处理，再固定query／候选／预算比较装包。专用reranker与最终回答成对评估需另批，不能拿“证据进包”当理解质量通过。
 
+本轮[缓存词项与打包对照](../research/retrieval/CACHED_CONTEXT_PACK_2026_10_03.md)已出报告：27项定向程序通过；固定已有Dense Top10，未重算query Embedding或新增召回。词项重排MRR由0.895最高到0.938，但12种原话排序／装包组合的联合覆盖仍26/27，R25词项重排还丢失Top5早段。R28只在当前完整问题缓存内升位，不是此前分句召回退化已修复。不采纳这些规则；这是候选内词项启发式，不把它称为语义Query Rewrite或神经reranker。双方文档同步，生产不因单一MRR上升改变。
+
 已实现显式隔离 Hook／落盘收据／只读导出：人工选择隔离 case／turn，提取 `case_id, origin, trace_ref（匿名）, work_id, max_order（服务端完整已读边界）, tool_name=search_story, arguments={query}`；每例首个实际搜索。skip 只来自完整无工具回合，其他工具路线、未知边界、未完成或插入输入拒绝。运行收据不是工具返回事实证明，来源标签是执行器声明而非加密模型证明。见 [导出规范](../operations/AGENT_QUERY_CAPTURE.md)。
 
 契约对接现有 `retrieval_experiments.replay.capture_trace`；输出只落忽略的 `.runtime/retrieval-experiments/`，不导出完整聊天／小说原文／秘密，不自动读取真实用户会话。23项导出程序测试包含原生Loop替身回放，synthetic不会升级成真实数据；最终受影响回归67/67。真实故事请求另获批，本轮3次Luna只用于合成经历抽取与回忆，不能算 search_story query。
