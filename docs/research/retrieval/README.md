@@ -26,6 +26,14 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.re
 
 各策略都最多向指标层交付 10 条候选，再取前 5 条输出；RRF 先从每路各取 10 条，算力成本不与单路相同。完整 29 例只复用既有金标，未附加首批 P01/N01 的探索标注。采集真实查询时可给 `capture` 指定相同的 `--case-set`。
 
+固定真 Sparse 融合直接复用上面的两个源报告，不重新加载模型：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.fusion_replay --query-source raw_user --dense-report .runtime/retrieval-experiments/29-raw-vector.json --sparse-report .runtime/retrieval-experiments/29-raw-jieba_or.json --output .runtime/retrieval-experiments/29-raw-fixed-fusion.json
+```
+
+人工改写对照将 `raw_user` 改成 `gold_rewrite`，三个文件名中的 `29-raw-` 改成 `29-gold-`。脚本只运行四组预置配置，严格核对源哈希、查询哈希、边界和候选预算，并在本机内存调用应用原有 `ContextPacker`。输出只含单元 ID、来源排名、装包结果及计时；不写原文。融合计时是缓存回放开销，不代表双路实际服务延迟。
+
 真实查询需先用独立、经审核的 JSONL 事件输入 `capture`。首版每例只采首次检索决策或首次 `search_story` 调用；后续重试另行分析，不静默挑最优查询。每行示意：
 
 ```json
