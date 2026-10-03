@@ -93,3 +93,16 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pytest chatbot_tests/tes
 ```
 
 使用新输出／测试目录。v1.1 修正误删阶段词的停词表，初跑仍在忽略目录保留；最终代码权重固定，不按金标调参。四种查询处理只在相同 Top10 内重排，三个 packer 固定每组 Top5、2400 估算 tokens、最多4单元。运行末检查真实模型账本未变，进程没有导入模型／GPU库。缓存初始化、原文分词和原始检索不计入报告的选择开销。
+
+## 拟留出理解任务：契约核对，不运行新排名
+
+当前新增任务、数据局限、四路协议和预算见[PROSPECTIVE_TASKS_2026_10_03.md](PROSPECTIVE_TASKS_2026_10_03.md)。版本契约和锁先于新检索固定；14个任务只达到原文证据候选状态，另1个缺读者记忆，尚无独立语义金标。任务问法不接收预期结论／必要单元，旧预测合成fixture与真实读者记忆分开。
+
+以下命令只检查契约、既有缓存可用性、本地模型文件元数据及生产只读历史接口，不运行Dense／jieba检索或加载神经模型；手动名称和已知证据ID的可达性探查不是正式导航结果：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m retrieval_experiments.holdout_contract --output .runtime/retrieval-experiments/prospective-preflight-local-new.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -X utf8 -m pytest chatbot_tests/test_retrieval_experiments_holdout.py -q -p no:cacheprovider --basetemp .runtime/retrieval-experiments/tests-holdout-local-new
+```
+
+每次用新输出路径。本机前置条件是同SHA的原文、原有开发金标、StoryMem只读结构数据、既有Dense缓存／批次审计与18请求账本；忽略运行材料不会随Git复制，缺失时应明确准备对应本地fixture，不伪造缓存。模型文件缺失会记录可用性，不自动下载；文件存在也不证明加载和CPU性能。当前33项定向回归涵盖本包与既有实验，真实新评分为0。
