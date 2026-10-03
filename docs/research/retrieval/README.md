@@ -1,5 +1,7 @@
 # 场景契约与离线回放
 
+下一轮预登记、Sol／Luna 分工、与主进程的参数对齐及预算执行限制见 [NEXT_EXPERIMENT.md](NEXT_EXPERIMENT.md)；完整推进顺序见 [PLAN.md](PLAN.md)。
+
 `scenarios.json` 的 `visible_context` 是实验输入契约，并非真实会话记录。其 `required_units` 表示回答所需的最小已读来源集合；命中任一单元不等于联合证据充分。R21 的空集合表示当前已读边界内没有后果金标，N01 则要求不调用检索；两者含义不同。
 
 本机离线回放示例：
@@ -33,6 +35,15 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.fu
 ```
 
 人工改写对照将 `raw_user` 改成 `gold_rewrite`，三个文件名中的 `29-raw-` 改成 `29-gold-`。脚本只运行四组预置配置，严格核对源哈希、查询哈希、边界和候选预算，并在本机内存调用应用原有 `ContextPacker`。输出只含单元 ID、来源排名、装包结果及计时；不写原文。融合计时是缓存回放开销，不代表双路实际服务延迟。
+
+自动分句与同候选首位保留消融（本地 BGE，不调用 Sol／Luna）：
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.facet_replay --output .runtime/retrieval-experiments/29-raw-clauses-v1.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pytest chatbot_tests/test_retrieval_experiments_facets.py -q -p no:cacheprovider
+```
+
+输出路径必须是隔离目录中的新文件；重跑换一个文件名。三组固定配置的拆分规则、候选槽位和成本差异均见预登记文档。其 query 来源为 `algorithmic_raw_user`，不记作真实 `agent_query`。
 
 真实查询需先用独立、经审核的 JSONL 事件输入 `capture`。首版每例只采首次检索决策或首次 `search_story` 调用；后续重试另行分析，不静默挑最优查询。每行示意：
 
