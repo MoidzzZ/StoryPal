@@ -1,5 +1,17 @@
 # StoryPal Chatbot 开发进度
 
+## 2026-10-03：默认关闭的手账异步复核与完整项目叙述
+
+- 用户要求两线继续推进、维护文档并能自上而下讲完整故事。已给算法会话指示：固定29例开发集，准备约15个新理解任务／30种问法的分组留出契约；候选／金标不随成绩调整，证据不足不凑数；准备Dense／融合／专用reranker／结构导航四路线协议，本包无新真实模型、下载或Embedding/GPU加载。
+- 新增JournalRecheckCoordinator／Store：进度候选入持久pending，下一用户观察最多后台一批；独立暂定reviews，不改原观点。明确FTS取证＋一次无工具provider.chat逻辑请求，最多5原文单元／6000正文字符，不发送summary；空正文／分隔符不补剧情。默认STORYPAL_AUTO_JOURNAL_REVIEW=0，部署不新增外发。
+- 原文引用必须来自本次前缀、支持／削弱需新增已读证据；条目版本、owner／作品／边界在取证与提交阶段复核，原文hash复核排除score。源变／重置／修订／删除不提交旧结果。取消pending可重启续跑，failed不每轮重试，不宣称外部调用恰好一次／跨文件事务。
+- search_reading_journal新增reviews；完成项下一回合单条通知replay=false，原手账修订／删除或进度回退后不返回失效复核。历史审计不全删，完整隐私删除仍TODO。模型语义正确性不能由quote子串证明。
+- 最终受影响73/73、18.20s（24项新复核测试＋既有49项），前48／72项重叠不累加。全部合成正文与替身provider、真实模型0、Embedding0，无GPU加载；验证恢复／取消／重复观察／坏输出／来源变化／分隔符正文，不是语义准确率或产品提速。
+- 新增[项目完整叙述](../product/STORYPAL_PROJECT_STORY.md)：需求→State／Context／Skill／Tools→分层记忆→Workflow→实验定位→取舍，区分nanobot复用、StoryPal自研及协作StoryMem贡献；数字链接事实源、不把计划写成完成。复核细节见[契约](../architecture/STORYPAL_JOURNAL_RECHECK.md)。
+- 算法线扩任务进行中：发现部分抽取摘要与原文不一致、分隔符正文；新案例以原文及hash为准，结构历史只导航。本地发现Qwen3-Reranker-0.6B文件，尚未加载或评分，不再按“暂无本地模型”描述最新状态。生产检索不变。
+- 下一步：1条隔离真实复核＋完整连续理解验收，各自报告发送范围与请求预算后再执行；当前无需用户修改真实阅读进度。服务／Git结果在交付核验，不静默开启后台复核。
+- 已同步运行人格与常驻Skill的相关公开规则，gateway已重启；本次启动显式保持STORYPAL_AUTO_JOURNAL_REVIEW=0，未改持久配置／用户资料／进度。首页200、health ok／ready=true／websocket running；不发送测试聊天，健康不当语义通过。
+
 ## 2026-10-03：阅读手账生命周期与进度回看候选
 
 - 扩既有save_journal_entry为缺省add／revise／delete，不新增工具，仍12项白名单。修订／删除需本轮逐字用户摘录与回合；先定位唯一ID，提示判断明确意图，不把引用匹配说成意图证明。新增保留旧调用兼容。

@@ -4,6 +4,9 @@
 
 ## 从这里开始
 
+- 想从用户需求一路讲到Agent、记忆、检索实验与取舍：先看[项目完整叙述](product/STORYPAL_PROJECT_STORY.md)，区分复用基座、自研贡献、已验证与计划。
+- 想了解进度触发的独立复核与来源验证：看[手账异步复核](architecture/STORYPAL_JOURNAL_RECHECK.md)，默认关闭，程序通过不等于真实语义完成。
+
 - 想知道整体还差什么、哪些优先或暂缓：查看 [当前能力与 TODO](architecture/STORYPAL_REMAINING_WORK.md)，避免将历史提案误认成当前缺口。
 - 想了解应用开发与算法会话的分工、具体实验场景与文件边界：查看 [双线推进契约](architecture/STORYPAL_PARALLEL_TRACKS.md)。
 - 想了解跨会话经历如何按日保存、来源和水位怎样校验、哪些尚未接通：查看 [M3 情景记忆](architecture/STORYPAL_EPISODIC_MEMORY.md)。

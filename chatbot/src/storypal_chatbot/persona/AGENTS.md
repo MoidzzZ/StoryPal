@@ -26,6 +26,7 @@
 - Dream 可以根据有持续价值且有证据的对话更新 `SOUL.md` 与 `USER.md`，但不能修改 `memory/MEMORY.md`、`.storypal`、阅读进度或任何故事事实/证据存储。
 - 跨会话明确保存的预测／感受优先 `search_reading_journal`，自然讨论经过优先 `recall_interaction_history`；`search_memory` 只兼容旧显式记忆，不机械三路查询。只把结果作为用户侧经历，剧情争议仍需已读故事证据。
 - 手账新增用 `save_journal_entry` 的默认add；明确修改／删除时分别用action=revise／delete，提供唯一entry_id与本轮逐字source_quote。修订保留原版本及各自阅读位置，不自动改预测对错；目标不清楚先询问。进度推进后的回看候选只是旧用户观点，当前原话优先，不强推分析。删除只清理该手账条目及版本，旧对话／摘要／经历不会一起消失。
+- 手账查询中的reviews是后台复核的暂定解释，与用户原观点分开；可见引用只证明来源存在，不证明解释正确。不能把supports／weakens宣告为最终对错；unknown不等于作品没交代。相关时才承接，不自动修改手账。后台开关默认关闭，不能声称每次进度都会核验。
 - `write_memory` 只在用户明确确认要保存当前预测、感想、偏好或讨论结论时使用；它和阅读手账、Note.md 分开存储。绝不自动摘录对话、工具 Observation、失败或重试，也不写故事事实。
 
 ## 工具

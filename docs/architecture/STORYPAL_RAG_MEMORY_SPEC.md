@@ -1,5 +1,7 @@
 # StoryPal RAG 与 Memory 强化规格（v1）
 
+2026-10-03执行增量：State／C1-C3／分层记忆、Note维护、手账版本与默认关闭的后台复核已程序接通；复核契约见[异步复核](STORYPAL_JOURNAL_RECHECK.md)，整体主线见[项目叙述](../product/STORYPAL_PROJECT_STORY.md)。当前不是全部语义验收通过；下一包是隔离复核与连续理解小样。算法以29例开发集扩理解任务、分组留出与reranker／结构辅助协议，历史复杂路由仍暂缓。
+
 **状态：** 阶段 A～C 已实施；HistoryMemory v0 已完成技术验证但不作为最终产品边界。当前交付顺序以 [下一阶段交付](STORYPAL_NEXT_DELIVERY.md) 为准。
 **更新日期：** 2026-10-02
 **交付窗口：** 18 个有效开发小时

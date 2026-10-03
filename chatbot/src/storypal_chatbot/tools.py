@@ -17,6 +17,7 @@ from nanobot.agent.tools.context import ToolContext, current_request_context
 
 from .interaction_note import InteractionNoteStore
 from .journal_review import JournalReviewObserver
+from .journal_recheck import JournalRecheckCoordinator, JournalRecheckStore
 from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL
 from .reading_context import ReadingContextProjector
 from .archive_maintenance import ArchivedMemoryCoordinator
@@ -805,6 +806,11 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
 
     _plugin_discoverable = True
 
+    def __init__(self, workspace: str | Path) -> None:
+        super().__init__(workspace)
+        self.rechecks = JournalRecheckStore(workspace)
+        self._recheck_coordinator = JournalRecheckCoordinator(workspace)
+
     @property
     def name(self) -> str:
         return "search_reading_journal"
@@ -815,6 +821,7 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
             "回看指定作品、当前已读范围内保存的感受、问题和预测；进度未确认时只回看无锚点条目。"
             "query 可选；省略时返回最近条目，提供时仅做简单文本包含过滤。"
             "手账是用户阅读反应，不是故事事实。"
+            "reviews为已生成且仍匹配当前版本／已读边界的暂定复核，含原文引用，不能当最终对错。"
         )
 
     @property
@@ -824,28 +831,40 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
     def runtime_context_provider(self):
         return self._provide_runtime_context
 
-    async def _provide_runtime_context(self, request: RequestContext) -> RuntimeContextBlock | None:
+    async def _provide_runtime_context(self, request: RequestContext) -> RuntimeContextBlock | list[RuntimeContextBlock] | None:
         if not request.session_key:
             return None
         owner_key = request.sender_id or "local-user"
         state = self.state_store.get(owner_key, legacy_session_key=request.session_key)
         try:
             view = JournalReviewObserver(self.workspace).observe(owner_key, state)
+            self._recheck_coordinator.observe(request, view)
+            entries = self.store.list(owner_key, active_work=state["active_work"],
+                                      max_seen_order=state["max_seen_order"]) if state.get("active_work") and type(state.get("max_seen_order")) is int else []
+            notice = self.rechecks.take_notice(owner_key, work_id=state.get("active_work"),
+                                              max_order=state.get("max_seen_order"), entries=entries)
         except (OSError, ValueError, TypeError) as exc:
             logger.warning("手账回看提示准备失败，不影响已确认进度：{}", type(exc).__name__)
             return None
-        if view is None:
-            return None
-        return RuntimeContextBlock(
-            source="storypal_journal_review",
-            content=("[进度推进后的手账回看候选：用户观点，不是剧情事实]\n"
-                     "本轮已读边界仍由服务端限定。若用户仍在讨论相关问题，可结合新已读视图回应一条旧疑问；"
-                     "需要证据才按需查新增范围，未找到不等于推翻预测。不要为了这份提示打断情绪或强制回看。"
-                     "不自动判对错或写回手账；当前用户的纠正优先，只有明确要求才修订。\n"
-                     + json.dumps(view, ensure_ascii=False)
-                     + "\n[/手账回看候选]"),
-            replay=False,
-        )
+        blocks = []
+        if notice:
+            blocks.append(RuntimeContextBlock(source="storypal_journal_recheck", replay=False,
+                content=("[手账复核已完成：AI暂定解读，不是事实或用户新观点]\n"
+                         "这是旧观点与当时已读证据的对照。当前用户表达优先；相关时才自然承接，不打断情绪，"
+                         "不自动修改手账。引用可核对，但引文存在不证明解释成立。\n"
+                         + json.dumps(notice, ensure_ascii=False) + "\n[/手账复核]")))
+        if view:
+            blocks.append(RuntimeContextBlock(
+                source="storypal_journal_review",
+                content=("[进度推进后的手账回看候选：用户观点，不是剧情事实]\n"
+                         "本轮已读边界仍由服务端限定。若用户仍在讨论相关问题，可结合新已读视图回应一条旧疑问；"
+                         "需要证据才按需查新增范围，未找到不等于推翻预测。不要为了这份提示打断情绪或强制回看。"
+                         "不自动判对错或写回手账；当前用户的纠正优先，只有明确要求才修订。\n"
+                         + json.dumps(view, ensure_ascii=False)
+                         + "\n[/手账回看候选]"),
+                replay=False,
+            ))
+        return blocks[0] if len(blocks) == 1 else blocks or None
 
     async def execute(self, query: str | None = None, work_id: str | None = None, **_: Any) -> str | ToolResult:
         try:
@@ -857,8 +876,11 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
             if query and query.strip():
                 needle = query.strip().casefold()
                 entries = [item for item in entries if needle in item["content"].casefold()]
+            reviews = self.rechecks.visible(owner_key, work_id=active_work,
+                                           max_order=max_seen_order, entries=entries[-20:])
             return json.dumps(
-                {"entries": entries[-20:], "total": len(entries), "truncated": len(entries) > 20},
+                {"entries": entries[-20:], "total": len(entries), "truncated": len(entries) > 20,
+                 "reviews": reviews},
                 ensure_ascii=False,
             )
         except (RuntimeError, StoryMemoryError, OSError, ValueError) as exc:

@@ -2,7 +2,7 @@
 
 > 更新：2026-10-03。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
 
-最新交付：手账add／revise／delete与进度推进后的延后回看候选已程序接通，49项定向通过；不是独立后台语义核验，详见[手账契约](STORYPAL_READING_JOURNAL.md)。Note首版维护已完成；下一应用包为带证据的异步复核与连续理解小样。算法真实首query已5条、实际skip1条，旧文query=0为历史；当前继续离线语境保持与证据装包，不新增模型请求／GPU加载，默认Dense不变。
+最新交付：手账维护、回看候选及[可选后台复核](STORYPAL_JOURNAL_RECHECK.md)已程序接通，73项定向通过；默认关闭后台模型工作，真实语义与连续理解小样仍待独立授权验收。项目完整讲解见[叙述主线](../product/STORYPAL_PROJECT_STORY.md)。算法真实首query5条、skip1条，当前扩新理解任务／留出契约与四路线协议；本包不新增模型请求／GPU，默认Dense不变。旧段落下一步／query=0保留为沿革，不覆盖当前状态。
 
 当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。常驻连续讨论Skill、M3事实源／联合低频抽取／语义回忆均已程序接通；本轮3次真实Luna逻辑调用跑通一条合成归档→抽取→空白新会话回忆，澄清和未查证保持正确。手动归档水位，不包含真实压缩摘要生成，不能视为长程效果完成。隔离query导出程序已完成，真实故事agent_query仍0。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md)、[导出规范](../operations/AGENT_QUERY_CAPTURE.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
 
