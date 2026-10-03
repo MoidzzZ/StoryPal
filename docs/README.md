@@ -4,6 +4,8 @@
 
 ## 从这里开始
 
+- 想现在完整验收第一阶段：看[真人验收指南](operations/STAGE1_USER_ACCEPTANCE_GUIDE.md)，包括真实陪读、段尾进度确认、跨会话手账、Note、反馈方式与阶段完成条件；不要求用户制造超长对话。
+
 - 想从用户需求一路讲到Agent、记忆、检索实验与取舍：先看[项目完整叙述](product/STORYPAL_PROJECT_STORY.md)，区分复用基座、自研贡献、已验证与计划。
 - 想了解进度触发的独立复核与来源验证：看[手账异步复核](architecture/STORYPAL_JOURNAL_RECHECK.md)，默认关闭，程序通过不等于真实语义完成。
 
