@@ -82,3 +82,14 @@ D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pytest chatbot_tests/tes
 ```
 
 basetemp 每次使用新目录；模型运行无需作为回归测试重跑。
+
+## 缓存内完整语境与证据选择（CPU）
+
+预登记与结果见 [CACHED_CONTEXT_PACK_2026_10_03.md](CACHED_CONTEXT_PACK_2026_10_03.md)。脚本只读现有 Dense 排名、原文和实际 query 缓存；无 adapter 搜索、Embedding、对话模型、模型下载或 GPU。原话／人工改写／实际 query 分开出报告，P01 provisional、N01 skip；输出只含词项与 ID，不含故事原文。它不检验新 query 的 Dense 召回。
+
+```powershell
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m retrieval_experiments.cached_context_pack --batch-root .runtime/retrieval-experiments/isolated/sol-luna-20261003-01 --output .runtime/retrieval-experiments/cached-frame-pack-local-new.json
+D:/Void/Tools/conda/envs/storypal-chatbot/python.exe -m pytest chatbot_tests/test_retrieval_experiments_cached.py -q -p no:cacheprovider --basetemp .runtime/retrieval-experiments/tests-cached-pack-local-new
+```
+
+使用新输出／测试目录。v1.1 修正误删阶段词的停词表，初跑仍在忽略目录保留；最终代码权重固定，不按金标调参。四种查询处理只在相同 Top10 内重排，三个 packer 固定每组 Top5、2400 估算 tokens、最多4单元。运行末检查真实模型账本未变，进程没有导入模型／GPU库。缓存初始化、原文分词和原始检索不计入报告的选择开销。
