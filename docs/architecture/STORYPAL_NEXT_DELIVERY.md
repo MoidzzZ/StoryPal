@@ -2,9 +2,9 @@
 
 > 更新：2026-10-03。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
 
-当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。下文保留设计沿革：常驻连续讨论Skill已落地；M3-A事实源／M3-B联合低频抽取／M3-C语义回忆均已程序接通，真实联合抽取、Agent改写及跨会话续聊效果未验收。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
+当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。常驻连续讨论Skill、M3事实源／联合低频抽取／语义回忆均已程序接通；本轮3次真实Luna逻辑调用跑通一条合成归档→抽取→空白新会话回忆，澄清和未查证保持正确。手动归档水位，不包含真实压缩摘要生成，不能视为长程效果完成。隔离query导出程序已完成，真实故事agent_query仍0。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md)、[导出规范](../operations/AGENT_QUERY_CAPTURE.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
 
-2026-10-03 最新执行决定：用户要求应用开发与检索算法拆为两个会话并行。本会话下一包是 M3 按日情景记忆；R1 query／分词／检索排序实验由新会话负责，具体场景和协作边界见 [双线推进](STORYPAL_PARALLEL_TRACKS.md)。此前“先 R1 再 M3”顺序不再约束应用开发。
+2026-10-03 最新执行决定：应用与检索两个会话并行。应用下一包是Note临时项／开放观察低频维护，再补手账编辑与旧预测回看；R1 query／分词／排序由独立会话推进，真实请求另批。默认检索不因离线融合结果改变；算法关注跨阶段必要证据进入实际装包。协作边界见 [双线推进](STORYPAL_PARALLEL_TRACKS.md)。下文仍保留历史设计，不能用旧“下一步”覆盖此处当前状态。
 
 ## 当前具体实施入口（2026-10-02）
 

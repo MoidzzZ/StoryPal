@@ -48,7 +48,9 @@ nanobot gateway stop --config D:\StoryPal\.runtime\nanobot\storypal\config.json 
 
 ## 本地 Story Memory
 
-压缩后的后台维护现在共用一次 Note／按日经历抽取调用，首次启用不回扫旧归档，每次用户请求最多处理一个新归档批次。可用进程环境 `STORYPAL_AUTO_NOTE=0` 或 `STORYPAL_AUTO_EPISODE=0` 分别暂停类别；两个全关时暂停但不删除水位，重开可能继续待处理归档。已接通写入，尚无新的聊天回忆工具；细节见 [情景记忆说明](docs/architecture/STORYPAL_EPISODIC_MEMORY.md)。
+压缩后的后台维护共用一次 Note／按日经历抽取调用，首次启用不回扫旧归档，每次用户请求最多处理一个新归档批次。可用进程环境 `STORYPAL_AUTO_NOTE=0` 或 `STORYPAL_AUTO_EPISODE=0` 分别暂停类别；两个全关时暂停但不删除水位，重开可能继续待处理归档。按需回忆工具已接通，一条授权合成归档→空白新会话验证通过；不代表全部长聊或自动压缩流程已验收。细节见 [情景记忆说明](docs/architecture/STORYPAL_EPISODIC_MEMORY.md)。
+
+开发验收可使用 [隔离查询导出](docs/operations/AGENT_QUERY_CAPTURE.md)，显式核对真实工具参数并保留查询来源；不会自动扫描或导出正式聊天。公开实验与真实体验的限制见 [result.md](result.md)。
 
 连续讨论方法使用 nanobot 原生常驻 Skill：工作区 `skills/continuous-story-discussion/SKILL.md`，模板在 `chatbot/src/storypal_chatbot/persona/skills/`。它在每次构建 system 时自动注入一次，不需要开放文件工具或增加模型请求；已有自定义文件不覆盖。若要关闭，可将名称 `continuous-story-discussion` 加入本机配置 `agents.defaults.disabledSkills`；不要为更新此 Skill 强制重装人格。
 

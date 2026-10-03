@@ -34,6 +34,7 @@ episodic = ["lancedb>=0.20,<1", "sentence-transformers>=3,<6"]
 
 [project.scripts]
 storypal-chatbot-configure = "storypal_chatbot.bootstrap:main"
+storypal-export-agent-query = "storypal_chatbot.query_capture:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

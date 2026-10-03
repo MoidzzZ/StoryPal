@@ -54,7 +54,7 @@ def tool_observation_state(message, scope):
     return "unclassified"
 
 
-def archived_reading_scope(message):
+def archived_reading_scope(message, *, include_partial=True):
     """只解析验证过的持久运行时后缀；用户伪造文字不算状态。"""
     marker = message.get(RUNTIME_CONTEXT_HISTORY_META)
     if not isinstance(marker, dict) or not isinstance(marker.get("sources"), list) or "storypal_session_state" not in marker["sources"]:
@@ -75,7 +75,7 @@ def archived_reading_scope(message):
                 if not isinstance(work, str) or not work or type(order) is not int or order < 0:
                     return None
                 position = state.get("reader_position")
-                if isinstance(position, dict):
+                if include_partial and isinstance(position, dict):
                     partial_order = position.get("unit_order")
                     if type(partial_order) is not int or partial_order < 0:
                         return None

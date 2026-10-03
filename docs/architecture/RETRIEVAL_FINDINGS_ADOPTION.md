@@ -20,13 +20,23 @@
 | 全句AND／短语8/8零结果，人工改写收益不等于真实Agent | 主Agent同次工具选择消解指代／保留对象，不加独立Query模型 | 方法已在Skill；真实query效果未测 |
 | BGE首次66.80s、暖查询中位116.2ms | 延迟加载并在经历模块进程内复用；缺依赖返回错误而不是空记忆 | M3-C已实现；不宣称与StoryMem内部实例共享 |
 
-RRF目前稀疏支路包含扫描，不能写成“纯FTS＋Dense胜出”。零越界只针对最终检索证据，不是最终回答或整个候选过程的完整安全证明。新29例结论出来后重新审阅，不预先承诺收益。
+首包及旧 RRF 的稀疏支路包含扫描，不能写成“纯FTS＋Dense胜出”。后续 ffb080b 已单独验证真正 jieba OR＋Dense；各口径不能混用。零越界是检索／装包层检查，不是最终回答语义防剧透证明。
+
+## 29 例与固定融合：本轮采纳
+
+来源：4d4480d、ffb080b 及算法 RESULT；同数据哈希、阅读边界、候选 Top10，27 个有目标问题（5 个多证据），另外2个无目标问题单列安全。原话口径：Dense 联合@3=26/27、@5=27/27；jieba OR=18/27、25/27，候选联合均27/27。当前 FTS→扫描23/29次回退，不以配置名假定为纯 FTS。
+
+真正 jieba OR＋Dense 的固定等权和 Dense:Sparse=2:1 RRF，原话联合@3均26/27，实际 ContextPacker 装包均26/27；预置2:1只追平 Dense。等权单证据首位15/22，Dense及2:1为18/22。旧扫描 RRF 的 R19／R04／R28 退化不能直接归因于 jieba。
+
+R25 早段进入 Dense／新融合 Top5，但排第5／4且不与主证据直接相邻，未进装包。四组没有 token 预算丢弃，本轮缺口来自排序／Top3＋相邻规则。应用保留默认 BGE-M3，不上线融合、jieba或粗暴扩大常驻上下文；下一项更应检验保留语境的多证据查询和装包必要集合，而不是只看任一命中。人工改写上界继续单列，真实故事 agent_query=0。
+
+已向算法会话交接只读导出、保持生产不变和请求授权边界。后续bb91a25的朴素分句消融触发4/29例，装包联合26/27→25/27，没有新增成功例；R25／R28的省略主语／阶段与退化同时出现，尚未单因素证明原因。无条件两路首位保留也未改善，应用不采纳。下一实验先保留语境／冻结实际query，再比较必要证据组织。应用开工／交付节点查看独立进度和状态快照，不持续轮询。神经reranker尚无结果，纯jieba双路端到端延迟尚未实测。
 
 ## 应用侧接下来要给算法什么
 
-待实现只读导出：人工选择隔离 case／turn，从真实已保存请求／工具轨迹提取 `case_id, origin=agent_trace, trace_ref（匿名）, work_id, max_order（服务端确认）, tool_name=search_story, arguments={query}`；每例只取首个实际搜索。skip 只能来自完整结束且可核对的实际回合，不由“没找到日志”推断。边界未知、来源不完整或回合未完成拒绝导出。
+已实现显式隔离 Hook／落盘收据／只读导出：人工选择隔离 case／turn，提取 `case_id, origin, trace_ref（匿名）, work_id, max_order（服务端完整已读边界）, tool_name=search_story, arguments={query}`；每例首个实际搜索。skip 只来自完整无工具回合，其他工具路线、未知边界、未完成或插入输入拒绝。运行收据不是工具返回事实证明，来源标签是执行器声明而非加密模型证明。见 [导出规范](../operations/AGENT_QUERY_CAPTURE.md)。
 
-契约对接现有 `retrieval_experiments.replay.capture_trace`；输出只落忽略的 `.runtime/retrieval-experiments/`，不导出完整聊天／小说原文／秘密，不自动读取真实用户会话。真实请求需另报样本和预算；人工gold_rewrite始终单列。此导出尚未实现，本轮不造真实query。
+契约对接现有 `retrieval_experiments.replay.capture_trace`；输出只落忽略的 `.runtime/retrieval-experiments/`，不导出完整聊天／小说原文／秘密，不自动读取真实用户会话。23项导出程序测试包含原生Loop替身回放，synthetic不会升级成真实数据；最终受影响回归67/67。真实故事请求另获批，本轮3次Luna只用于合成经历抽取与回忆，不能算 search_story query。
 
 ## 下一采纳门槛
 
