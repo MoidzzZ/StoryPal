@@ -2,6 +2,8 @@
 
 > 更新：2026-10-03。本文是当前执行顺序；此前规格中的复杂检索编排与工具路由作为备选设计。
 
+最新交付：手账add／revise／delete与进度推进后的延后回看候选已程序接通，49项定向通过；不是独立后台语义核验，详见[手账契约](STORYPAL_READING_JOURNAL.md)。Note首版维护已完成；下一应用包为带证据的异步复核与连续理解小样。算法真实首query已5条、实际skip1条，旧文query=0为历史；当前继续离线语境保持与证据装包，不新增模型请求／GPU加载，默认Dense不变。
+
 当前能力、剩余核心工作及后置项统一见 [当前 TODO](STORYPAL_REMAINING_WORK.md)。常驻连续讨论Skill、M3事实源／联合低频抽取／语义回忆均已程序接通；本轮3次真实Luna逻辑调用跑通一条合成归档→抽取→空白新会话回忆，澄清和未查证保持正确。手动归档水位，不包含真实压缩摘要生成，不能视为长程效果完成。隔离query导出程序已完成，真实故事agent_query仍0。见 [M3契约](STORYPAL_EPISODIC_MEMORY.md)、[导出规范](../operations/AGENT_QUERY_CAPTURE.md) 与 [算法采纳记录](RETRIEVAL_FINDINGS_ADOPTION.md)。
 
 2026-10-03 最新执行决定：应用与检索两个会话并行。Note会话范围临时项／归档观察复核程序已完成，规则与限制见[Note维护](STORYPAL_NOTE_MAINTENANCE.md)；应用下一包手账编辑／删除和旧预测回看。R1 query／分词／排序由独立会话推进，真实请求另批。默认检索不因离线融合结果改变；算法关注跨阶段必要证据进入实际装包。协作边界见 [双线推进](STORYPAL_PARALLEL_TRACKS.md)。下文保留历史设计，不能用旧“下一步”覆盖当前状态。

@@ -48,6 +48,8 @@ nanobot gateway stop --config D:\StoryPal\.runtime\nanobot\storypal\config.json 
 
 ## 本地 Story Memory
 
+阅读手账现支持对话中明确新增、修订、删除；修订保留原观点与不同阅读位置，删除不等于擦除旧聊天。确认进度推进后，下一轮可获得少量旧问题／预测作为回看候选，未自动判定对错。见[手账设计与边界](docs/architecture/STORYPAL_READING_JOURNAL.md)及[五分钟核验](docs/operations/READING_JOURNAL_ACCEPTANCE.md)。
+
 Note每轮注入当前有效Markdown；显式temporary只在创建会话生效，跨会话不注入，原记录保留。开放观察在新归档的联合维护中可修订／停用，始终待验证，不自动升级为稳定偏好；同文件维护历史不注入。新快照不回放，旧版历史兼容迁移仍待做。详见[Note生命周期](docs/architecture/STORYPAL_NOTE_MAINTENANCE.md)。
 
 压缩后的后台维护共用一次 Note／按日经历抽取调用，首次启用不回扫旧归档，每次用户请求最多处理一个新归档批次。可用进程环境 `STORYPAL_AUTO_NOTE=0` 或 `STORYPAL_AUTO_EPISODE=0` 分别暂停类别；两个全关时暂停但不删除水位，重开可能继续待处理归档。按需回忆工具已接通，一条授权合成归档→空白新会话验证通过；不代表全部长聊或自动压缩流程已验收。细节见 [情景记忆说明](docs/architecture/STORYPAL_EPISODIC_MEMORY.md)。

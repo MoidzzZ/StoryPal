@@ -34,6 +34,14 @@ R25 早段进入 Dense／新融合 Top5，但排第5／4且不与主证据直接
 
 ## 应用侧接下来要给算法什么
 
+### 最新口径：7a86b1b真实隔离批次已完成
+
+上文“真实query=0”为此前历史，不是当前缺口。最新[批次报告](../research/retrieval/MODEL_BATCH_2026_10_03.md)：6独立场景，5实际首search_story query＋1实际零工具暂停，物理请求18/24（Sol6、Luna12，含1次P01证据复核）。剩余预算不自动继承。本轮无新请求。
+
+只有R14／R25／R26三个非空既有金标场景进入正式分母；冻结Sol问题Dense联合@3／实际装包2/3，实际Luna查询3/3。R25早期必要证据从rank4进入rank3，局部缺口被补上；查询来源和Agent可见上下文同时改变，不宣称纯query改写因果收益或29例整体改善。N01尊重暂停零工具；R21有单元编号污染自然提问的限制。P01工具实际仅原文search，没证明结构化历史链路；Luna复核有内部不一致，不自动升级金标。
+
+生产仍不改Dense、Top3或RRF。下一包已交接仅离线、缓存或CPU：保持主体／阶段／关系的查询处理，再固定query／候选／预算比较装包。专用reranker与最终回答成对评估需另批，不能拿“证据进包”当理解质量通过。
+
 已实现显式隔离 Hook／落盘收据／只读导出：人工选择隔离 case／turn，提取 `case_id, origin, trace_ref（匿名）, work_id, max_order（服务端完整已读边界）, tool_name=search_story, arguments={query}`；每例首个实际搜索。skip 只来自完整无工具回合，其他工具路线、未知边界、未完成或插入输入拒绝。运行收据不是工具返回事实证明，来源标签是执行器声明而非加密模型证明。见 [导出规范](../operations/AGENT_QUERY_CAPTURE.md)。
 
 契约对接现有 `retrieval_experiments.replay.capture_trace`；输出只落忽略的 `.runtime/retrieval-experiments/`，不导出完整聊天／小说原文／秘密，不自动读取真实用户会话。23项导出程序测试包含原生Loop替身回放，synthetic不会升级成真实数据；最终受影响回归67/67。真实故事请求另获批，本轮3次Luna只用于合成经历抽取与回忆，不能算 search_story query。

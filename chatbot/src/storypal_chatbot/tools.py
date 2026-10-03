@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import asyncio
 import sqlite3
 from pathlib import Path
@@ -15,6 +16,7 @@ from nanobot.agent.tools import Tool, ToolResult, tool_parameters
 from nanobot.agent.tools.context import ToolContext, current_request_context
 
 from .interaction_note import InteractionNoteStore
+from .journal_review import JournalReviewObserver
 from .model_policy import ALLOWED_MODELS, DEFAULT_MODEL
 from .reading_context import ReadingContextProjector
 from .archive_maintenance import ArchivedMemoryCoordinator
@@ -661,6 +663,7 @@ class _ReadingNotebookTool(Tool):
     _plugin_discoverable = False
 
     def __init__(self, workspace: str | Path) -> None:
+        self.workspace = Path(workspace)
         self.store = ReadingNotebookStore(workspace)
         self.state_store = ReadingProgressStore(workspace)
 
@@ -818,6 +821,32 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
     def read_only(self) -> bool:
         return True
 
+    def runtime_context_provider(self):
+        return self._provide_runtime_context
+
+    async def _provide_runtime_context(self, request: RequestContext) -> RuntimeContextBlock | None:
+        if not request.session_key:
+            return None
+        owner_key = request.sender_id or "local-user"
+        state = self.state_store.get(owner_key, legacy_session_key=request.session_key)
+        try:
+            view = JournalReviewObserver(self.workspace).observe(owner_key, state)
+        except (OSError, ValueError, TypeError) as exc:
+            logger.warning("手账回看提示准备失败，不影响已确认进度：{}", type(exc).__name__)
+            return None
+        if view is None:
+            return None
+        return RuntimeContextBlock(
+            source="storypal_journal_review",
+            content=("[进度推进后的手账回看候选：用户观点，不是剧情事实]\n"
+                     "本轮已读边界仍由服务端限定。若用户仍在讨论相关问题，可结合新已读视图回应一条旧疑问；"
+                     "需要证据才按需查新增范围，未找到不等于推翻预测。不要为了这份提示打断情绪或强制回看。"
+                     "不自动判对错或写回手账；当前用户的纠正优先，只有明确要求才修订。\n"
+                     + json.dumps(view, ensure_ascii=False)
+                     + "\n[/手账回看候选]"),
+            replay=False,
+        )
+
     async def execute(self, query: str | None = None, work_id: str | None = None, **_: Any) -> str | ToolResult:
         try:
             active_work, max_seen_order, _anchor = self._journal_scope(work_id)
@@ -843,13 +872,15 @@ class SearchReadingJournalTool(_ReadingNotebookTool):
             "entry_type": {"type": "string", "enum": ["reaction", "question", "prediction"]},
             "content": {"type": "string", "minLength": 1, "maxLength": 2000},
             "work_id": {"type": "string", "minLength": 1, "maxLength": 200},
+            "action": {"type": "string", "enum": ["add", "revise", "delete"], "default": "add"},
+            "entry_id": {"type": "string", "minLength": 1, "maxLength": 64},
+            "source_quote": {"type": "string", "minLength": 1, "maxLength": 500},
         },
-        "required": ["entry_type", "content"],
         "additionalProperties": False,
     }
 )
 class SaveJournalEntryTool(_ReadingNotebookTool):
-    """Save one explicit reading reaction, question or prediction."""
+    """明确新增、修订或删除手账；保留历史版本的阅读边界。"""
 
     _plugin_discoverable = True
 
@@ -860,16 +891,47 @@ class SaveJournalEntryTool(_ReadingNotebookTool):
     @property
     def description(self) -> str:
         return (
-            "仅在用户明确要求记录阅读感受、问题或预测时写入指定作品手账；进度未确认时标记为无锚点，不推进阅读边界。"
-            "不要自动摘录或把剧情事实、用户人格推断写进手账。"
+            "用户明确要求才维护手账。action默认add，需entry_type和content；"
+            "revise需entry_id、content和本轮原话source_quote，保留原版本及各自阅读位置；"
+            "delete需entry_id和source_quote，删除该条所有手账版本，不删除旧聊天／摘要。"
+            "目标不明确时先search_reading_journal或询问，不猜ID；不自动判对错／记录剧情事实。"
+            "进度未确认的新增仍为无锚点，不推进阅读进度。"
         )
 
-    async def execute(self, entry_type: str, content: str, work_id: str | None = None, **_: Any) -> str | ToolResult:
+    async def execute(self, entry_type: str | None = None, content: str | None = None,
+                      work_id: str | None = None, action: str = "add", entry_id: str | None = None,
+                      source_quote: str | None = None, **_: Any) -> str | ToolResult:
         try:
-            if not content.strip():
-                return ToolResult.error("手账内容不能为空")
+            if action not in {"add", "revise", "delete"}:
+                return ToolResult.error("不支持的手账操作")
             active_work, max_seen_order, current_anchor = self._journal_scope(work_id)
             session_key, owner_key = _request_keys()
+            request = current_request_context()
+            turn_id = request.turn_id if request else None
+            if action != "add" or source_quote is not None:
+                if (not turn_id or not source_quote or not source_quote.strip()
+                        or len(source_quote) > 500 or source_quote not in (request.original_user_text or "")):
+                    return ToolResult.error("修订／删除需要可追溯回合和本轮逐字用户原话source_quote")
+            operation_id = hashlib.sha256(json.dumps(
+                [session_key, turn_id, active_work, action, entry_id, entry_type, content, source_quote],
+                ensure_ascii=False).encode()).hexdigest() if turn_id else None
+            if action == "delete":
+                if not entry_id:
+                    return ToolResult.error("删除手账需要entry_id")
+                deleted = self.store.delete(owner_key, entry_id, active_work=active_work)
+                return json.dumps({"entry_id": entry_id, "status": "deleted" if deleted else "absent"}, ensure_ascii=False)
+            if not content or not content.strip() or len(content.strip()) > 2000:
+                return ToolResult.error("手账内容必须在1至2000字符内")
+            if action == "revise":
+                if not entry_id or entry_type is not None:
+                    return ToolResult.error("修订需entry_id，不能改变原条目的类型")
+                entry = self.store.revise(
+                    owner_key, entry_id, active_work=active_work, anchor_order=max_seen_order,
+                    anchor_text=current_anchor, content=content, source_session_key=session_key,
+                    source_turn_id=turn_id, source_quote=source_quote, operation_id=operation_id)
+                return json.dumps(entry, ensure_ascii=False)
+            if not entry_type or entry_id:
+                return ToolResult.error("新增需entry_type，不得带entry_id")
             entry = self.store.add(
                 owner_key,
                 active_work=active_work,
@@ -878,6 +940,9 @@ class SaveJournalEntryTool(_ReadingNotebookTool):
                 entry_type=entry_type,
                 content=content,
                 source_session_key=session_key,
+                source_turn_id=turn_id,
+                source_quote=source_quote,
+                operation_id=operation_id,
             )
             return json.dumps(entry, ensure_ascii=False)
         except (RuntimeError, StoryMemoryError, OSError, ValueError) as exc:

@@ -312,19 +312,25 @@ class ReadingNotebookStore:
     def _path(self, owner_key: str) -> Path:
         return self.root / f"{_session_id(owner_key)}.json"
 
+    def _entries(self, owner_key: str) -> list[dict[str, Any]]:
+        value = _read_json(self._path(owner_key), [])
+        return [item for item in value if isinstance(item, dict)] if isinstance(value, list) else []
+
     def list(
         self, owner_key: str, *, active_work: str, max_seen_order: int
     ) -> list[dict[str, Any]]:
-        value = _read_json(self._path(owner_key), [])
-        if not isinstance(value, list):
-            return []
-        return [
-            entry
-            for entry in value
-            if entry.get("active_work") == active_work
-            and isinstance(entry.get("anchor_order"), int)
-            and entry["anchor_order"] <= max_seen_order
-        ]
+        visible = []
+        for entry in self._entries(owner_key):
+            if entry.get("active_work") != active_work:
+                continue
+            versions = [*entry.get("revisions", []), {k: v for k, v in entry.items() if k != "revisions"}]
+            allowed = [v for v in versions if type(v.get("anchor_order")) is int
+                       and 0 <= v["anchor_order"] <= max_seen_order]
+            if allowed:
+                projected = dict(allowed[-1])
+                projected["revisions"] = allowed[:-1]
+                visible.append(projected)
+        return visible
 
     def add(
         self,
@@ -336,9 +342,19 @@ class ReadingNotebookStore:
         entry_type: str,
         content: str,
         source_session_key: str,
+        source_turn_id: str | None = None,
+        source_quote: str | None = None,
+        operation_id: str | None = None,
     ) -> dict[str, Any]:
         if entry_type not in self.VALID_ENTRY_TYPES:
             raise ValueError("entry_type 只能是 reaction、question 或 prediction")
+        if type(anchor_order) is not int or anchor_order < 0 or not content.strip() or len(content.strip()) > 2000:
+            raise ValueError("手账需要有效的已读位置和不超过2000字符的内容")
+        entries = self._entries(owner_key)
+        if operation_id:
+            existing = next((e for e in entries if e.get("operation_id") == operation_id), None)
+            if existing is not None:
+                return existing
         entry = {
             "id": uuid4().hex[:12],
             "active_work": active_work,
@@ -350,17 +366,43 @@ class ReadingNotebookStore:
             "status": "open",
             "created_at": datetime.now(UTC).isoformat(),
             "source_session_key": source_session_key,
+            "source_turn_id": source_turn_id,
+            "source_quote": source_quote,
+            "operation_id": operation_id,
         }
-        value = _read_json(self._path(owner_key), [])
-        entries = value if isinstance(value, list) else []
         entries.append(entry)
         _atomic_write_json(self._path(owner_key), entries)
         return entry
 
-    def delete(self, owner_key: str, entry_id: str) -> bool:
-        value = _read_json(self._path(owner_key), [])
-        entries = value if isinstance(value, list) else []
-        kept = [entry for entry in entries if entry.get("id") != entry_id]
+    def revise(
+        self, owner_key: str, entry_id: str, *, active_work: str, anchor_order: int,
+        anchor_text: str | None, content: str, source_session_key: str,
+        source_turn_id: str, source_quote: str, operation_id: str,
+    ) -> dict[str, Any]:
+        entries = self._entries(owner_key)
+        entry = next((e for e in entries if e.get("id") == entry_id and e.get("active_work") == active_work), None)
+        if entry is None:
+            raise ValueError("未找到当前作品的阅读手账")
+        if type(anchor_order) is not int or anchor_order < entry["anchor_order"]:
+            raise ValueError("不能在更早或未确认的阅读范围修改后期手账")
+        if any(v.get("operation_id") == operation_id for v in [entry, *entry.get("revisions", [])]):
+            return entry
+        if not content.strip() or len(content.strip()) > 2000:
+            raise ValueError("修订内容必须在1至2000字符内")
+        previous = {key: value for key, value in entry.items() if key != "revisions"}
+        entry.setdefault("revisions", []).append(previous)
+        entry.update(content=content.strip(), anchor_order=anchor_order,
+                     anchor_status="unconfirmed" if anchor_order == 0 else "confirmed",
+                     anchor_text=anchor_text, updated_at=datetime.now(UTC).isoformat(),
+                     source_session_key=source_session_key, source_turn_id=source_turn_id,
+                     source_quote=source_quote, operation_id=operation_id)
+        _atomic_write_json(self._path(owner_key), entries)
+        return entry
+
+    def delete(self, owner_key: str, entry_id: str, *, active_work: str | None = None) -> bool:
+        entries = self._entries(owner_key)
+        kept = [entry for entry in entries if not (entry.get("id") == entry_id
+                and (active_work is None or entry.get("active_work") == active_work))]
         if len(kept) == len(entries):
             return False
         _atomic_write_json(self._path(owner_key), kept)
