@@ -1,0 +1,2884 @@
+{
+  "schema": "prospective-understanding-contract@1",
+  "version": "business-tasks-v2.1",
+  "created_date": "2026-10-04",
+  "source_sha256": "30196aab51d91b5c5b564517d6e3f32933bbf9cc4edcf23dd230cc7a19c83c6b",
+  "development_goldens_sha256": "9400f4ddadb59b78ce178b33a757c29354a9b3c8dabb7f2041800f11e352f096",
+  "authorship": "Codex locally authored and source checked; no GPT-6 Sol/Luna request in this package.",
+  "label_status": "All source candidates, alternative evidence and local decision/memory rubrics provisional; no independent semantic reviewer.",
+  "exposure": "Prior29 development and v1 results known. Added goals authored after reviewing source but before their new rankings; not unseen.",
+  "retrieval_results_used_to_set_labels": false,
+  "group_policy": "Original v1.1 groups preserved. New shared evidence or event-family contexts share groups; tasks/variants/stages not independent.",
+  "excluded_drafts": [
+    {
+      "theme": "F112撤离次序",
+      "reason": "既有R18/R19已覆盖同一灾难，不能以另一问法当新的独立事件。",
+      "existing_development_ids": [
+        "R18",
+        "R19"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "task_id": "H01",
+      "title": "第一次日出的恐惧与后续适应",
+      "split_group": "G01_early_sun_fear",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 18,
+      "categories": [
+        "时序变化",
+        "多证据",
+        "人物理解"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H01-a",
+          "text": "这些孩子最初见太阳那么害怕，后来为什么又能在太阳下待着？前后态度变了什么？",
+          "split_group": "G01_early_sun_fear"
+        },
+        {
+          "variant_id": "H01-b",
+          "text": "第一次日出让他们发抖，可后面又适应了；这是怎样发生的，能说他们一直不怕吗？",
+          "split_group": "G01_early_sun_fear"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0014",
+        "we-0018"
+      ],
+      "optional_units": [
+        "we-0016"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0014",
+          "order": 14,
+          "claim": "第一次面对日出时孩子与灵儿仍害怕。",
+          "raw_text_sha256": "10529e3a0e0ccf90ddba1023391de10e442698af2d5aaadf57b464dfcce14135",
+          "char_start": 87,
+          "char_end": 272,
+          "span_sha256": "4ae1004cf9f0923476d59dd851edb8b946cb4d5924b5f36148bfb53d832dca15",
+          "source_line_range": [
+            43,
+            55
+          ]
+        },
+        {
+          "unit_id": "we-0018",
+          "order": 18,
+          "claim": "反复安排日出后，孩子们逐渐适应。",
+          "raw_text_sha256": "344ec275995ee8ad9a555781d0bbaba8a855175c5044f6df2e350baec0b08630",
+          "char_start": 234,
+          "char_end": 398,
+          "span_sha256": "cb7db6fc79566c4abe8126df50387477c5b8a8f4bbcaaa5223797d37b1ecfb4f",
+          "source_line_range": [
+            69,
+            75
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "适应不等于太阳灾变不存在。",
+        "不将情绪变化解释为未经描述的医学治愈。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "小学环球旅行课程",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "灵儿",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [
+          "we-0018"
+        ],
+        "related_development_ids": [
+          "R03"
+        ],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0014",
+          "we-0018"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H02",
+      "title": "母亲的平静与灾变担忧",
+      "split_group": "G02_parental_response",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 37,
+      "categories": [
+        "人物立场",
+        "反证",
+        "跨段理解"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H02-a",
+          "text": "妈妈听到爸爸要离开时那么平静，就能说她什么都不在乎吗？她后来对太阳的担心怎么理解？",
+          "split_group": "G02_parental_response"
+        },
+        {
+          "variant_id": "H02-b",
+          "text": "她面对丈夫离开和太阳越来越近，反应真的一样吗？哪些地方不支持她一直冷漠这个说法？",
+          "split_group": "G02_parental_response"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0033",
+        "we-0037"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0033",
+          "order": 33,
+          "claim": "母亲平静接受父亲离开，并转而赞美焰火。",
+          "raw_text_sha256": "e43d32398b385a2ba51824fb475af6257726baf1d6b1e2c1931923516619998f",
+          "char_start": 414,
+          "char_end": 673,
+          "span_sha256": "c00e68558660bdd31cff2698fe939b285e77ceb605c79621020a4302e2af9bf4",
+          "source_line_range": [
+            164,
+            176
+          ]
+        },
+        {
+          "unit_id": "we-0037",
+          "order": 37,
+          "claim": "母亲转述观测消息并担忧来不及。",
+          "raw_text_sha256": "75745596be970bc7f712f8fcfbfbcd63a2327f08b22eb5239329bdbe7036b023",
+          "char_start": 97,
+          "char_end": 218,
+          "span_sha256": "b0f51027de2c32a6cd58e95d70a6f5b4e772b82c92dc2f37a7561cc1a8a2b6fb",
+          "source_line_range": [
+            202,
+            206
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "平静表现不能唯一确定其内心没有感情。",
+        "消息有转述链，不能把担忧当作已观测到毁灭。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "母亲",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "父亲",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0033",
+          "we-0037"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H03",
+      "title": "灵儿的旅行选择与结局未知",
+      "split_group": "G01_early_sun_fear",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 41,
+      "categories": [
+        "人物动机",
+        "时序变化",
+        "边界未知"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H03-a",
+          "text": "灵儿不是也怕太阳吗，怎么又想去地面？这段能确定她和阿东后来怎样了吗？",
+          "split_group": "G01_early_sun_fear"
+        },
+        {
+          "variant_id": "H03-b",
+          "text": "她吹泡泡说没什么可怕的，为什么反而觉得地面更好？作者到这里有交代两人的结局吗？",
+          "split_group": "G01_early_sun_fear"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0040",
+        "we-0041"
+      ],
+      "optional_units": [
+        "we-0014"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0040",
+          "order": 40,
+          "claim": "主角提及灵儿曾因怕太阳求医，她称想法已改变。",
+          "raw_text_sha256": "ab36ac2e3d55cc5d7cc5137ec0250655d902b48635b8055f935adf25b75186bf",
+          "char_start": 183,
+          "char_end": 265,
+          "span_sha256": "ac125df312ead00842e68f3ac49e144ccee2fd108ae398363e7fd2447ac96336",
+          "source_line_range": [
+            218,
+            226
+          ]
+        },
+        {
+          "unit_id": "we-0041",
+          "order": 41,
+          "claim": "灵儿比较地面与地下遭遇氦闪的方式；主角未同行，之后未再见二人。",
+          "raw_text_sha256": "995a16da96bf12747dabe695c4771df213497679d2ecbe45b9ba11743862e501",
+          "char_start": 0,
+          "char_end": 392,
+          "span_sha256": "995a16da96bf12747dabe695c4771df213497679d2ecbe45b9ba11743862e501",
+          "source_line_range": [
+            228,
+            240
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "叙述者未再见二人不等于证明死亡。",
+        "灵儿对地面死亡方式的判断是人物观点，不是科学实测。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "灵儿邀主角去旅行",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0040",
+          "we-0041"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H04",
+      "title": "冰原上的孤独与结伴",
+      "split_group": "G03_ice_race_relationship",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 52,
+      "categories": [
+        "人物关系变化",
+        "多证据",
+        "时序因果"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H04-a",
+          "text": "他遇见加代子之前为什么已经不在意比赛名次？两人后来如何从陌生到结伴并申请结婚？",
+          "split_group": "G03_ice_race_relationship"
+        },
+        {
+          "variant_id": "H04-b",
+          "text": "从只想赶快逃离孤独，到同坐一辆雪橇并申请结婚，这中间有哪些已经写出的变化？",
+          "split_group": "G03_ice_race_relationship"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0051",
+        "we-0052"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0051",
+          "order": 51,
+          "claim": "赶路旨在摆脱冰原上的孤独，名次已不重要。",
+          "raw_text_sha256": "233faed0211a2b5a9acb9f3f7c4e29db3c6e420c1d15da0e986599f704d89380",
+          "char_start": 0,
+          "char_end": 190,
+          "span_sha256": "233faed0211a2b5a9acb9f3f7c4e29db3c6e420c1d15da0e986599f704d89380",
+          "source_line_range": [
+            270,
+            270
+          ]
+        },
+        {
+          "unit_id": "we-0052",
+          "order": 52,
+          "claim": "修理失败后结伴，共同感受孤独，后来提出结婚申请。",
+          "raw_text_sha256": "70fcf41a4eab2094791080188c43511f98a7464ba48cc43de69ea384b9726c45",
+          "char_start": 0,
+          "char_end": 444,
+          "span_sha256": "70fcf41a4eab2094791080188c43511f98a7464ba48cc43de69ea384b9726c45",
+          "source_line_range": [
+            272,
+            290
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "到此只见申请，不能借后文说登记或其他手续已经完成。",
+        "不能把相遇直接当作足以证明一切长期动机。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "主角与山彬加代子相遇",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "主角与山彬加代子",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0051",
+          "we-0052"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H05",
+      "title": "飞机震动原因的纠错",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 58,
+      "categories": [
+        "纠错",
+        "事件因果"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H05-a",
+          "text": "我记得飞机那几声巨响是被流星砸中了，对吗？为什么机长让大家戴耳机，还要迫降？",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H05-b",
+          "text": "加代子以为流星击中飞机了，机长给出的原因一样吗？这说明已经没有危险了吗？",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0058"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0058",
+          "order": 58,
+          "claim": "机长将巨响解释为超音速爆音，要求保护听觉，并因飞行不再安全而迫降。",
+          "raw_text_sha256": "9261c887c66ae28b797a0df3248b2844b33655973d4d0fe12ef45f9dd49db01d",
+          "char_start": 0,
+          "char_end": 209,
+          "span_sha256": "9261c887c66ae28b797a0df3248b2844b33655973d4d0fe12ef45f9dd49db01d",
+          "source_line_range": [
+            328,
+            330
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "角色误以为被击中不是已确认事实。",
+        "爆音解释不等于飞行安全已恢复；不借后续事件作答。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "地球穿越小行星带",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0058"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H06",
+      "title": "冰海会让人安全的旧预测回看",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 61,
+      "categories": [
+        "旧预测回看",
+        "反证",
+        "多证据"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H06-a",
+          "text": "我之前猜结冰的海会挡住浪，落地就安全了。现在到了入口，还能放心这么说吗？",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H06-b",
+          "text": "前面那条关于冰面保护我们的猜测，遇到岸边和入口的新情况后，哪些部分需要改？",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0059",
+        "we-0060",
+        "we-0061"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0059",
+          "order": 59,
+          "claim": "叙述者曾以冰面会衰减浪来自我安慰。",
+          "raw_text_sha256": "51e72d7bb7aa4cb65c3225f3104cca6b0fbce01c96813ed3005652535aad6e25",
+          "char_start": 0,
+          "char_end": 253,
+          "span_sha256": "51e72d7bb7aa4cb65c3225f3104cca6b0fbce01c96813ed3005652535aad6e25",
+          "source_line_range": [
+            332,
+            338
+          ]
+        },
+        {
+          "unit_id": "we-0060",
+          "order": 60,
+          "claim": "涌浪在冰层下传递到岸边，冰层破碎，并需改找入口。",
+          "raw_text_sha256": "92a0669fa44c01b897145376abd0b2312f77f5a394c433e14c7287498e8b5b5d",
+          "char_start": 0,
+          "char_end": 215,
+          "span_sha256": "92a0669fa44c01b897145376abd0b2312f77f5a394c433e14c7287498e8b5b5d",
+          "source_line_range": [
+            340,
+            346
+          ]
+        },
+        {
+          "unit_id": "we-0061",
+          "order": 61,
+          "claim": "地下城入口外可见黑色巨浪，人员恐惧。",
+          "raw_text_sha256": "078e745124f5535d868a84c2c7f20d7aef9f3a9f01e894b99302dc6ca669e9ff",
+          "char_start": 0,
+          "char_end": 189,
+          "span_sha256": "078e745124f5535d868a84c2c7f20d7aef9f3a9f01e894b99302dc6ca669e9ff",
+          "source_line_range": [
+            348,
+            352
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "安全结论受到削弱，不证明冰面从来没有衰减作用。",
+        "保留旧预测原文，不自动修改用户手账。"
+      ],
+      "expected_sources": [
+        "reader_memory",
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "流星",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "黑色屏障",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "synthetic_journal_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "pred-H06",
+            "anchor_order": 59,
+            "content": "我猜结冰的海会挡住浪，落地后应该安全。",
+            "status": "open"
+          }
+        ],
+        "expected_review": "weakened_not_fully_falsified"
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0059",
+          "we-0060",
+          "we-0061"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H07",
+      "title": "最黑的夜与希望的实际依据",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 68,
+      "categories": [
+        "多证据",
+        "前文关联",
+        "解释边界"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H07-a",
+          "text": "最黑的那夜让他们那么绝望，为什么看到发动机蓝光就缓过来了？这和父亲说的希望有什么联系？",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H07-b",
+          "text": "从黑夜中的黯淡到蓝光带来的希望，除了情绪变化，还有哪些已读事实？怎样接上父亲前面的话？",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0038",
+        "we-0064",
+        "we-0068"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0038",
+          "order": 38,
+          "claim": "父亲把保持希望作为身处时代的价值主张。",
+          "raw_text_sha256": "472e62c761712eba06dc5f0fe04ac8c1017c18645473a8da8771d5b4bee3c775",
+          "char_start": 0,
+          "char_end": 120,
+          "span_sha256": "472e62c761712eba06dc5f0fe04ac8c1017c18645473a8da8771d5b4bee3c775",
+          "source_line_range": [
+            208,
+            208
+          ]
+        },
+        {
+          "unit_id": "we-0064",
+          "order": 64,
+          "claim": "最黑的夜使两人的心情极度黯淡。",
+          "raw_text_sha256": "aa5c46c8ab58483cefd635aa21468ba95fa321fb9a5a91c52d84ab0791572de9",
+          "char_start": 0,
+          "char_end": 94,
+          "span_sha256": "aa5c46c8ab58483cefd635aa21468ba95fa321fb9a5a91c52d84ab0791572de9",
+          "source_line_range": [
+            362,
+            362
+          ]
+        },
+        {
+          "unit_id": "we-0068",
+          "order": 68,
+          "claim": "蓝光来自发动机；东西半球损失情况和功率仍支持逃逸航行，叙述者想起父亲的话。",
+          "raw_text_sha256": "bb85acf377c11f62de387c3095fb0e9a3e4d2dab98e1727c7016e080574ff26c",
+          "char_start": 0,
+          "char_end": 364,
+          "span_sha256": "bb85acf377c11f62de387c3095fb0e9a3e4d2dab98e1727c7016e080574ff26c",
+          "source_line_range": [
+            372,
+            382
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "希望的象征解释可以不同，但不能说发动机完全没有损失。",
+        "逃逸所需功率够用不证明后续无风险。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "主角与加代子返回亚洲的旅行",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "父亲",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0038",
+          "we-0064",
+          "we-0068"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H08",
+      "title": "最后短白天之后的两半球昼夜",
+      "split_group": "G05_final_solar_orbit",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 73,
+      "categories": [
+        "时序",
+        "多证据",
+        "对照理解"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H08-a",
+          "text": "最后那次白天那么短，接下来两边半球都是一样长的黑夜吗？这里给出的安排是什么？",
+          "split_group": "G05_final_solar_orbit"
+        },
+        {
+          "variant_id": "H08-b",
+          "text": "不到一小时的日出日落过去以后，东西半球面对的昼夜各有什么不同？能直接说全球都黑了吗？",
+          "split_group": "G05_final_solar_orbit"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0071",
+        "we-0073"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0071",
+          "order": 71,
+          "claim": "最后通过近日点时，东半球的白天不到一小时。",
+          "raw_text_sha256": "1a69fcb5901a00ef887e37cbb3fbaf96b547526751997e18e9746000f99d85d8",
+          "char_start": 0,
+          "char_end": 143,
+          "span_sha256": "1a69fcb5901a00ef887e37cbb3fbaf96b547526751997e18e9746000f99d85d8",
+          "source_line_range": [
+            392,
+            392
+          ]
+        },
+        {
+          "unit_id": "we-0073",
+          "order": 73,
+          "claim": "东半球进入漫长黑夜，西半球则有较短的漫长白天。",
+          "raw_text_sha256": "25c684e3e9b671dd5e4a8638617e0af186790916aa156c9f1ad9bbe31a49237d",
+          "char_start": 0,
+          "char_end": 126,
+          "span_sha256": "25c684e3e9b671dd5e4a8638617e0af186790916aa156c9f1ad9bbe31a49237d",
+          "source_line_range": [
+            398,
+            398
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "不能将东半球的夜推广到全球。",
+        "关于未来时长属于当前叙述已给出的预期，不借全书末尾补细节。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "地球穿越小行星带",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "太阳",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0071",
+          "we-0073"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H09",
+      "title": "木星会合的计划与尚未发生的结果",
+      "split_group": "G05_final_solar_orbit",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 75,
+      "categories": [
+        "旧预测回看",
+        "阶段区别",
+        "边界未知"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H09-a",
+          "text": "我之前猜靠木星能把地球甩出去。现在光柱在摆，是为了什么，已经证明逃出去了没？",
+          "split_group": "G05_final_solar_orbit"
+        },
+        {
+          "variant_id": "H09-b",
+          "text": "贴近木星借力的那条预测，到光柱开始调整这段能算应验了吗？计划和眼前进展怎么分开？",
+          "split_group": "G05_final_solar_orbit"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0074",
+        "we-0075"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0074",
+          "order": 74,
+          "claim": "计划借近距离木星会合的引力达到逃逸速度。",
+          "raw_text_sha256": "ae4f91cd8a754527d2b1f6090ca012603a21a43a8aa1c88eb7369a5dd8ed3dcb",
+          "char_start": 0,
+          "char_end": 107,
+          "span_sha256": "ae4f91cd8a754527d2b1f6090ca012603a21a43a8aa1c88eb7369a5dd8ed3dcb",
+          "source_line_range": [
+            400,
+            400
+          ]
+        },
+        {
+          "unit_id": "we-0075",
+          "order": 75,
+          "claim": "部分光柱摆动用于会合前姿态调整，此时行星正在交会。",
+          "raw_text_sha256": "b2a79661b79780d0ae82739569a6636f60e2a778f699793f44ffb67a04ca9593",
+          "char_start": 0,
+          "char_end": 180,
+          "span_sha256": "b2a79661b79780d0ae82739569a6636f60e2a778f699793f44ffb67a04ca9593",
+          "source_line_range": [
+            402,
+            402
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "当前所见不足以宣布已达到逃逸速度。",
+        "不得使用未读会合完成的原文或终态快照。"
+      ],
+      "expected_sources": [
+        "reader_memory",
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "地球飞向木星",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "木星",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "synthetic_journal_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "pred-H09",
+            "anchor_order": 74,
+            "content": "我猜靠近木星飞过会把地球甩出去。",
+            "status": "open"
+          }
+        ],
+        "expected_review": "outcome_unknown_at_boundary"
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0074",
+          "we-0075"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H10",
+      "title": "太阳观测证据升级与未来仍未知",
+      "split_group": "G06_solar_observation",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 83,
+      "categories": [
+        "纠错",
+        "证据强弱",
+        "边界未知"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H10-a",
+          "text": "加代子用小望远镜看的结果，后来有没有更可靠的观测印证？这就能断定不会氦闪了吗？",
+          "split_group": "G06_solar_observation"
+        },
+        {
+          "variant_id": "H10-b",
+          "text": "当初他说只是玩具望远镜，后面的探测器怎么改变了依据？现在就能说太阳永远安全吗？",
+          "split_group": "G06_solar_observation"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0081",
+        "we-0083"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0081",
+          "order": 81,
+          "claim": "加代子比较影像参数，叙述者以设备和外行身份质疑。",
+          "raw_text_sha256": "67b0b5bb1f970a62761e7ce36e28584f4aba3eaeaf2c2eef7d0075a9de7329fc",
+          "char_start": 0,
+          "char_end": 331,
+          "span_sha256": "67b0b5bb1f970a62761e7ce36e28584f4aba3eaeaf2c2eef7d0075a9de7329fc",
+          "source_line_range": [
+            428,
+            436
+          ]
+        },
+        {
+          "unit_id": "we-0083",
+          "order": 83,
+          "claim": "更多精密观测和探测器印证四世纪前后未见变化。",
+          "raw_text_sha256": "3621dd1ea4570760ec6c23be81c77ccb7b77a6791c774cfc016357bf2f98e3e8",
+          "char_start": 0,
+          "char_end": 121,
+          "span_sha256": "3621dd1ea4570760ec6c23be81c77ccb7b77a6791c774cfc016357bf2f98e3e8",
+          "source_line_range": [
+            440,
+            442
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "已读观测的未变化不等于未来永久安全的逻辑保证。",
+        "叙述者态度和小说中观测报告分开，不用未读反转裁定。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "太阳",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "plotline",
+          "query": "太阳无变化谣言蔓延",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0081",
+          "we-0083"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H11",
+      "title": "养育中心之后的关系与阵营分开",
+      "split_group": "G07_rebellion_allegiance",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 88,
+      "categories": [
+        "人物关系变化",
+        "立场区别",
+        "多证据"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H11-a",
+          "text": "孩子送进养育中心后，两人关系和政治选择发生了什么变化？能说他们还站在同一边吗？",
+          "split_group": "G07_rebellion_allegiance"
+        },
+        {
+          "variant_id": "H11-b",
+          "text": "送走孩子后那句纽带没了，和后来加代子领枪、他参军，该怎么按已写出的事实连起来？",
+          "split_group": "G07_rebellion_allegiance"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0084",
+        "we-0087",
+        "we-0088"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0084",
+          "order": 84,
+          "claim": "二人感到关系纽带消失；广场开始演讲和发武器。",
+          "raw_text_sha256": "9c994b67957dd28657d101c17c2877d2d2578aa80ecd65db5df91a16760b1011",
+          "char_start": 0,
+          "char_end": 121,
+          "span_sha256": "9c994b67957dd28657d101c17c2877d2d2578aa80ecd65db5df91a16760b1011",
+          "source_line_range": [
+            444,
+            444
+          ]
+        },
+        {
+          "unit_id": "we-0087",
+          "order": 87,
+          "claim": "加代子领枪离去，主角留在原处握父亲勋章。",
+          "raw_text_sha256": "323856282602db47d84f8589eea0d71de9038960bad7971eafcc138ad2abda4b",
+          "char_start": 0,
+          "char_end": 139,
+          "span_sha256": "323856282602db47d84f8589eea0d71de9038960bad7971eafcc138ad2abda4b",
+          "source_line_range": [
+            450,
+            452
+          ]
+        },
+        {
+          "unit_id": "we-0088",
+          "order": 88,
+          "claim": "主角加入政府军，并说明家族忠诚的理由。",
+          "raw_text_sha256": "c7cc865264a5d844e5dc2f4ce196e551af6dcad2f1700afe1a8c0bb25f436f92",
+          "char_start": 0,
+          "char_end": 114,
+          "span_sha256": "c7cc865264a5d844e5dc2f4ce196e551af6dcad2f1700afe1a8c0bb25f436f92",
+          "source_line_range": [
+            454,
+            454
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "事件先后不证明送走孩子直接导致每个人的政治选择。",
+        "不编造加代子未写出的完整内心动机或后续结局。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "加代子",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "plotline",
+          "query": "叛乱爆发",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0084",
+          "we-0087",
+          "we-0088"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H12",
+      "title": "主角忠诚理由与最后行动的转折",
+      "split_group": "G07_rebellion_allegiance",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 92,
+      "categories": [
+        "立场变化",
+        "多证据",
+        "发言来源"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H12-a",
+          "text": "他最初为什么不肯背叛政府，后来又跟着冲进驾驶室？中间谁提出了什么理由？",
+          "split_group": "G07_rebellion_allegiance"
+        },
+        {
+          "variant_id": "H12-b",
+          "text": "从因家族传统参军到要把驾驶室交出去，这个转折有哪些原文依据？哪些只是别人对他的判断？",
+          "split_group": "G07_rebellion_allegiance"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0088",
+        "we-0090",
+        "we-0091",
+        "we-0092"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0088",
+          "order": 88,
+          "claim": "入伍源于家族忠诚，而非坚定相信政府。",
+          "raw_text_sha256": "c7cc865264a5d844e5dc2f4ce196e551af6dcad2f1700afe1a8c0bb25f436f92",
+          "char_start": 0,
+          "char_end": 114,
+          "span_sha256": "c7cc865264a5d844e5dc2f4ce196e551af6dcad2f1700afe1a8c0bb25f436f92",
+          "source_line_range": [
+            454,
+            454
+          ]
+        },
+        {
+          "unit_id": "we-0090",
+          "order": 90,
+          "claim": "伤兵站出现关于自责和反人类一方的他人发言。",
+          "raw_text_sha256": "0e578b204d92fa33b2334381dd13b548c1b80a25c707a3cdf2952ff84327d718",
+          "char_start": 0,
+          "char_end": 189,
+          "span_sha256": "0e578b204d92fa33b2334381dd13b548c1b80a25c707a3cdf2952ff84327d718",
+          "source_line_range": [
+            458,
+            460
+          ]
+        },
+        {
+          "unit_id": "we-0091",
+          "order": 91,
+          "claim": "将军提议占驾驶室交给叛军，以尽对人类的责任。",
+          "raw_text_sha256": "2f6d23b2d1e19da3a4d2e3c7d8643d32c99944beb7925cfd37a61be5fe5fd332",
+          "char_start": 0,
+          "char_end": 110,
+          "span_sha256": "2f6d23b2d1e19da3a4d2e3c7d8643d32c99944beb7925cfd37a61be5fe5fd332",
+          "source_line_range": [
+            462,
+            462
+          ]
+        },
+        {
+          "unit_id": "we-0092",
+          "order": 92,
+          "claim": "叙述者拿枪跟随人群冲入驾驶室。",
+          "raw_text_sha256": "36c7bb5981dc4dfb5f9177dde808561db755efa229da94323d886d4b2e03cfd3",
+          "char_start": 0,
+          "char_end": 147,
+          "span_sha256": "36c7bb5981dc4dfb5f9177dde808561db755efa229da94323d886d4b2e03cfd3",
+          "source_line_range": [
+            464,
+            464
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "他人指责与主角亲口自我判断不能互换。",
+        "不宣称文字已提供全部心理过程；不借后来的结局倒推。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "主角",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "plotline",
+          "query": "主角加入联合政府军队并受伤",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0088",
+          "we-0090",
+          "we-0091",
+          "we-0092"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H13",
+      "title": "交战双方对发动机的克制理由",
+      "split_group": "G07_rebellion_allegiance",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 95,
+      "categories": [
+        "立场对照",
+        "跨阶段因果",
+        "多证据"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H13-a",
+          "text": "叛军先前不愿毁掉发动机，政府最后也因此投降；他们担心的是同一件事吗？",
+          "split_group": "G07_rebellion_allegiance"
+        },
+        {
+          "variant_id": "H13-b",
+          "text": "围攻时少用重武器和后来不再战到底，各自给出的理由是什么？能说双方立场就相同吗？",
+          "split_group": "G07_rebellion_allegiance"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0089",
+        "we-0095"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0089",
+          "order": 89,
+          "claim": "叛军不想毁掉发动机，因而未使用重武器。",
+          "raw_text_sha256": "6b6a689720f85a3cd493f1d557db5bac7c1fbe10066f18df6b5b9b507866ca78",
+          "char_start": 0,
+          "char_end": 227,
+          "span_sha256": "6b6a689720f85a3cd493f1d557db5bac7c1fbe10066f18df6b5b9b507866ca78",
+          "source_line_range": [
+            456,
+            456
+          ]
+        },
+        {
+          "unit_id": "we-0095",
+          "order": 95,
+          "claim": "政府表示继续战斗可能失控并造成灾难，所以投降。",
+          "raw_text_sha256": "7bca46a8969144085d2892a09d27f42ad6554d43bfc3c15cb41233c28c1d8641",
+          "char_start": 0,
+          "char_end": 249,
+          "span_sha256": "7bca46a8969144085d2892a09d27f42ad6554d43bfc3c15cb41233c28c1d8641",
+          "source_line_range": [
+            470,
+            470
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "同样保护发动机不等于两方政治信念相同。",
+        "发言者的解释不证明每项政府决策都正确。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "plotline",
+          "query": "联合政府军队陷入重围",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "地球发动机",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0089",
+          "we-0095"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H14",
+      "title": "看不见光柱与发动机是否运行",
+      "split_group": "G08_late_atmosphere",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 106,
+      "categories": [
+        "纠错",
+        "明确因果",
+        "边界内核验"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H14-a",
+          "text": "这里已经看不见发动机的光柱了，是不是发动机都停了？地上的晶体和这件事有关吗？",
+          "split_group": "G08_late_atmosphere"
+        },
+        {
+          "variant_id": "H14-b",
+          "text": "光柱消失和发动机停止是一回事吗？这段对空气和地面那些块状东西怎么解释的？",
+          "split_group": "G08_late_atmosphere"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0105"
+      ],
+      "optional_units": [
+        "we-0106"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0105",
+          "order": 105,
+          "claim": "发动机仍全功率运行；大气消失使光不可见，晶体是冻结的空气。",
+          "raw_text_sha256": "c5e17bd6e595b62bd99cd40506755c6b62dbae4bda67e36bfeb4ed7ef89534f3",
+          "char_start": 0,
+          "char_end": 106,
+          "span_sha256": "c5e17bd6e595b62bd99cd40506755c6b62dbae4bda67e36bfeb4ed7ef89534f3",
+          "source_line_range": [
+            518,
+            518
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "不能借其他阶段发动机关停解释当前光柱不可见。",
+        "只按此处小说设定解释，不添加未经核对的现实物理细节。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [
+        {
+          "kind": "entity",
+          "query": "地球发动机",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        },
+        {
+          "kind": "entity",
+          "query": "固体氧氮晶体块",
+          "origin": "manual_exact_name_availability_probe_not_agent"
+        }
+      ],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "story_retrieval",
+      "acceptable_evidence_sets": [
+        [
+          "we-0105"
+        ]
+      ],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H15",
+      "title": "找不到读者旧预测时不能靠剧情补记忆",
+      "split_group": "G09_missing_reader_record",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 79,
+      "categories": [
+        "缺读者记忆",
+        "旧预测回看",
+        "澄清"
+      ],
+      "question_origin": "codex_local_authored_not_model_generated",
+      "variants": [
+        {
+          "variant_id": "H15-a",
+          "text": "我离开木星前到底怎么猜的？现在帮我核对一下当时为什么那样想。",
+          "split_group": "G09_missing_reader_record"
+        },
+        {
+          "variant_id": "H15-b",
+          "text": "你还记得我对那次木星会合的旧预测吗？我当时的依据是什么？",
+          "split_group": "G09_missing_reader_record"
+        }
+      ],
+      "visible_context": "仅提供已确认的当前阅读位置；当前聊天没有足以替代必要原文的完整材料。",
+      "annotation_status": "missing_reader_memory",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "counter_or_unknown": [
+        "隔离夹具没有旧手账、历史消息或经历记录，无法确定读者原观点。",
+        "故事事实不能恢复用户未保存的观点；应说明缺记录并请求原话，不声称用户从未预测。"
+      ],
+      "expected_sources": [
+        "reader_memory"
+      ],
+      "expected_tool_contract": [
+        "search_reading_journal",
+        "recall_interaction_history",
+        "clarify_missing_record"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "intentionally_missing_synthetic_fixture",
+        "available": false,
+        "records": [],
+        "expected_review": "missing_reader_memory_not_story_retrieval_failure"
+      },
+      "understanding_rubric": "核对各必要事实、区分发言者与事实来源；接受不同有依据的解释，不给文学感受设唯一标准答案。",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "development_exposure": {
+        "shared_required_units": [],
+        "related_development_ids": [],
+        "note": "Same work and prior materials inspected; different question goal is not proof of statistical independence."
+      },
+      "task_domain": "reader_memory",
+      "acceptable_evidence_sets": [],
+      "alternative_review": "candidate sets not independently reviewed; original required sets unchanged",
+      "prior_results_seen": true
+    },
+    {
+      "task_id": "H16",
+      "title": "最后日落与出生时的时间经验",
+      "split_group": "G10_birth_braking",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 2,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H16-a",
+          "text": "他出生时连星星和正常昼夜都没见过，是怎样的时代？那个日落为什么拖了三天？",
+          "split_group": "G10_birth_braking"
+        },
+        {
+          "variant_id": "H16-b",
+          "text": "三天三夜才落下的太阳，是每天都会重复的日落吗？当时地球和孩子的经历怎样？",
+          "split_group": "G10_birth_braking"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0001",
+        "we-0002"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0001",
+          "order": 1,
+          "claim": "自述出生时地球刚停止自转，未见普通夜空和季节。",
+          "raw_text_sha256": "5d903ca6ea30220ec30c2451e702683ae73234ccfdc80d4962aa85f989ff2c8b",
+          "char_start": 0,
+          "char_end": 53,
+          "span_sha256": "5d903ca6ea30220ec30c2451e702683ae73234ccfdc80d4962aa85f989ff2c8b",
+          "source_line_range": [
+            5,
+            7
+          ]
+        },
+        {
+          "unit_id": "we-0002",
+          "order": 2,
+          "claim": "刹车用时42年、最后日落持续三天三夜；东半球一段时间处黄昏。",
+          "raw_text_sha256": "a8291b7c6eae746eae01356770bee66e62cc94b6652b52ce89b317a6aec98149",
+          "char_start": 0,
+          "char_end": 167,
+          "span_sha256": "a8291b7c6eae746eae01356770bee66e62cc94b6652b52ce89b317a6aec98149",
+          "source_line_range": [
+            9,
+            9
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "自转停止与东半球黄昏已写明，不将某半球情况推广全球。",
+        "三天三夜日落不等于太阳永久不动，也不补未读旅行。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0001",
+          "we-0002"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H17",
+      "title": "岩石燃料与老师解释的有限性",
+      "split_group": "G01_early_sun_fear",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 11,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H17-a",
+          "text": "卡车为什么往发动机里倒石头？这就是普通烧煤吗，老师到底解释到了哪一步？",
+          "split_group": "G01_early_sun_fear"
+        },
+        {
+          "variant_id": "H17-b",
+          "text": "参观时那些岩石怎么成了燃料？这段有没有讲清全部反应原理，还是只给了概念？",
+          "split_group": "G01_early_sun_fear"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0010",
+        "we-0011"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0010",
+          "order": 10,
+          "claim": "车队运岩石进入进料口，叙述者询问燃料机制。",
+          "raw_text_sha256": "5de06388696b213095469189e8c25d7c96b2abe999604862099ddf47b9e797a3",
+          "char_start": 0,
+          "char_end": 214,
+          "span_sha256": "5de06388696b213095469189e8c25d7c96b2abe999604862099ddf47b9e797a3",
+          "source_line_range": [
+            25,
+            25
+          ]
+        },
+        {
+          "unit_id": "we-0011",
+          "order": 11,
+          "claim": "老师回应重元素聚变但拒绝详述，并说明发动机推力。",
+          "raw_text_sha256": "1d5c8aab08d681601b50678e8095c7f4ea3614dcfb5f0ad0d155ccdc860a71cd",
+          "char_start": 0,
+          "char_end": 319,
+          "span_sha256": "1d5c8aab08d681601b50678e8095c7f4ea3614dcfb5f0ad0d155ccdc860a71cd",
+          "source_line_range": [
+            27,
+            37
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "老师给出重元素聚变概念但明确未讲清细节，不编造反应流程。",
+        "只核对小说中的回答，不宣称验证现实工程。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0010",
+          "we-0011"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H18",
+      "title": "教育缩减与历史课并未取消",
+      "split_group": "G11_underground_school",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 32,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H18-a",
+          "text": "搬到地下以后是不是连艺术、哲学和历史课都没了？这段实际怎么区分的？",
+          "split_group": "G11_underground_school"
+        },
+        {
+          "variant_id": "H18-b",
+          "text": "地下学校只教理工了吗？少教艺术和完全不教历史，是同一回事吗？",
+          "split_group": "G11_underground_school"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0032"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0032",
+          "order": 32,
+          "claim": "理工科集中、艺术哲学压缩到最少，历史课仍有且旧历史显得像神话。",
+          "raw_text_sha256": "23a2cff1192e201c1f14b7df03a16254b7a39cc7ff2cab568d92c19d3528c3c4",
+          "char_start": 0,
+          "char_end": 213,
+          "span_sha256": "23a2cff1192e201c1f14b7df03a16254b7a39cc7ff2cab568d92c19d3528c3c4",
+          "source_line_range": [
+            162,
+            162
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "压缩到最少不等于全部取消；历史课明确仍在。",
+        "不从课程安排推出未经写明的个人政治态度。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0032"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H19",
+      "title": "融海巨响与冰层受热的解释",
+      "split_group": "G02_parental_response",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 36,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H19-a",
+          "text": "听到大海那阵巨响，是地球发动机爆炸了吗？先看到白冰、后来海水喷出来，这个过程怎么解释？",
+          "split_group": "G02_parental_response"
+        },
+        {
+          "variant_id": "H19-b",
+          "text": "报道说海在融化，到了却全是冰，然后突然裂开；父亲给了什么原因，现场又看见什么？",
+          "split_group": "G02_parental_response"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0035",
+        "we-0036"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0035",
+          "order": 35,
+          "claim": "看海仍见冰原；父亲将隆隆声解释为升温导致厚冰受热不均。",
+          "raw_text_sha256": "6f01944cb1f42aa444f01cc0f337fdfcf7835c109e9eace1bbdf3d0a8a4ce75b",
+          "char_start": 0,
+          "char_end": 296,
+          "span_sha256": "6f01944cb1f42aa444f01cc0f337fdfcf7835c109e9eace1bbdf3d0a8a4ce75b",
+          "source_line_range": [
+            194,
+            196
+          ]
+        },
+        {
+          "unit_id": "we-0036",
+          "order": 36,
+          "claim": "裂缝快速出现、海水喷涌，回程观察到短暂复苏。",
+          "raw_text_sha256": "88437c69f92470f49fb08c205f2183599e38e2bda26f2f44454813628cca5caa",
+          "char_start": 0,
+          "char_end": 209,
+          "span_sha256": "88437c69f92470f49fb08c205f2183599e38e2bda26f2f44454813628cca5caa",
+          "source_line_range": [
+            198,
+            200
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "巨响被父亲解释为冰层受热不均，不据此证明所有灾变都没有地核原因。",
+        "报道、现场观察与人物解释来源分开。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0035",
+          "we-0036"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H20",
+      "title": "死亡之墙的意象前后呼应",
+      "split_group": "G01_early_sun_fear",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 16,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H20-a",
+          "text": "发动机顶上想起那堵墙的谜语，后来第一次日出又想起它，这两处为什么接在一起？",
+          "split_group": "G01_early_sun_fear"
+        },
+        {
+          "variant_id": "H20-b",
+          "text": "老师说死亡的墙是黑色，可他见到光柱和日出觉得是雪亮的；前后的原文怎么对应？",
+          "split_group": "G01_early_sun_fear"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0011",
+        "we-0016"
+      ],
+      "optional_units": [
+        "we-0012"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0011",
+          "order": 11,
+          "claim": "发动机蓝色等离子体墙引出无限墙谜语，谜底为死亡。",
+          "raw_text_sha256": "1d5c8aab08d681601b50678e8095c7f4ea3614dcfb5f0ad0d155ccdc860a71cd",
+          "char_start": 0,
+          "char_end": 319,
+          "span_sha256": "1d5c8aab08d681601b50678e8095c7f4ea3614dcfb5f0ad0d155ccdc860a71cd",
+          "source_line_range": [
+            27,
+            37
+          ]
+        },
+        {
+          "unit_id": "we-0016",
+          "order": 16,
+          "claim": "日出时再想谜语，把死亡之墙想成雪亮并联系等离子体墙。",
+          "raw_text_sha256": "7a0607082861cd61e4163d46c0e65a58a45ffdbd1015850c3b8f28783e9118a6",
+          "char_start": 0,
+          "char_end": 359,
+          "span_sha256": "7a0607082861cd61e4163d46c0e65a58a45ffdbd1015850c3b8f28783e9118a6",
+          "source_line_range": [
+            59,
+            61
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "这是叙述者的意象与恐惧，不证明日出当天灾变实际发生。",
+        "象征解释可以不同，未读结局不能拿来替当前证据。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0011",
+          "we-0016"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H21",
+      "title": "撞击后寻找春天与持续遮光",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 70,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H21-a",
+          "text": "轰炸后世界为什么只剩灰色？后来已经靠近太阳了，海和地面怎么还没有解冻？",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H21-b",
+          "text": "他们再找春天却不见绿色，是完全没有阳光，还是这段写了遮光和回暖受阻的原因？",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0063",
+        "we-0070"
+      ],
+      "optional_units": [
+        "we-0062"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0063",
+          "order": 63,
+          "claim": "高层撞击尘遮蔽星日，海水冻结并覆盖灰尘。",
+          "raw_text_sha256": "827b58aa3e1834f91f5abd5e628cfc0a96c14e0f72dc151166ecaabc47633be8",
+          "char_start": 0,
+          "char_end": 143,
+          "span_sha256": "827b58aa3e1834f91f5abd5e628cfc0a96c14e0f72dc151166ecaabc47633be8",
+          "source_line_range": [
+            360,
+            360
+          ]
+        },
+        {
+          "unit_id": "we-0070",
+          "order": 70,
+          "claim": "寻找春天时撞击尘挡光使温度难回升，近日点仍不解冻。",
+          "raw_text_sha256": "d9c1a06ac6bf83d8fd07dc5b3cb5c6d66bbd7908261001b9495735261da53203",
+          "char_start": 0,
+          "char_end": 112,
+          "span_sha256": "d9c1a06ac6bf83d8fd07dc5b3cb5c6d66bbd7908261001b9495735261da53203",
+          "source_line_range": [
+            390,
+            390
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "尘埃遮光不等于太阳本身不发光；不以未读章节决定生态永远无法恢复。",
+        "只解释此次灾后环境，不把世界灰色与儿时所有黑夜混同。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0063",
+          "we-0070"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H22",
+      "title": "父亲的任务与死亡消息来源",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 69,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H22-a",
+          "text": "爸爸不是去清除小行星了吗，怎么反而在行动里死了？是谁告诉他的，原因写到什么程度？",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H22-b",
+          "text": "父亲的飞船遇到了什么，不是后来地面的叛乱造成的吗？前面的任务和这次消息怎么连起来？",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0056",
+        "we-0069"
+      ],
+      "optional_units": [],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0056",
+          "order": 56,
+          "claim": "太空舰队正在清除航线上的大石块，父亲在舰队参与行动。",
+          "raw_text_sha256": "71d2c965657372b97a0641eacbc54d78509c2f3dff6a92173b3f0457b0686245",
+          "char_start": 0,
+          "char_end": 204,
+          "span_sha256": "71d2c965657372b97a0641eacbc54d78509c2f3dff6a92173b3f0457b0686245",
+          "source_line_range": [
+            310,
+            324
+          ]
+        },
+        {
+          "unit_id": "we-0069",
+          "order": 69,
+          "claim": "基地授予追授勋章，将军解释炸出碎片击中父亲飞船。",
+          "raw_text_sha256": "bc9ff125fb26c1a44101f2f6f013b4a470dc946776dbffa94d99337aa4be70d9",
+          "char_start": 0,
+          "char_end": 229,
+          "span_sha256": "bc9ff125fb26c1a44101f2f6f013b4a470dc946776dbffa94d99337aa4be70d9",
+          "source_line_range": [
+            384,
+            388
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "死亡原因由将军转述；没有痛苦是其保证，不冒充独立医学验证。",
+        "不把未读战争或地面灾害替换成这次太空行动的原因。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0056",
+          "we-0069"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H23",
+      "title": "晚年回忆与未来图景并非已抵达",
+      "split_group": "G08_late_atmosphere",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 108,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H23-a",
+          "text": "最后他像看见新太阳、绿草和加代子，是已经到目的地了吗？叙述的现在和想象怎么区分？",
+          "split_group": "G08_late_atmosphere"
+        },
+        {
+          "variant_id": "H23-b",
+          "text": "结尾那些一百代之后的人和熟悉的人，能当成已经发生的见闻吗？已读的时间线与未来表述怎样帮我们判断？",
+          "split_group": "G08_late_atmosphere"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0104",
+        "we-0108"
+      ],
+      "optional_units": [
+        "we-0107"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0104",
+          "order": 104,
+          "claim": "回忆时半世纪已过，二十年前才出太阳系；最近地面探访是十几年前。",
+          "raw_text_sha256": "d710f5b4706b1167392bf3af587ceda6ef73d1380fa4e973352383993840744b",
+          "char_start": 0,
+          "char_end": 109,
+          "span_sha256": "d710f5b4706b1167392bf3af587ceda6ef73d1380fa4e973352383993840744b",
+          "source_line_range": [
+            514,
+            516
+          ]
+        },
+        {
+          "unit_id": "we-0108",
+          "order": 108,
+          "claim": "歌词唤起未来新太阳和后代的想象，措辞含好像看到。",
+          "raw_text_sha256": "8984b0731272e1139a33401a980bf3d446508ea883085d344c7a5e997adf170c",
+          "char_start": 0,
+          "char_end": 205,
+          "span_sha256": "8984b0731272e1139a33401a980bf3d446508ea883085d344c7a5e997adf170c",
+          "source_line_range": [
+            538,
+            540
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "晚年叙述与未来想象分开，不把已故人物出现写成现实复活。",
+        "不把未来抵达计划或愿景当作已完成。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0104",
+          "we-0108"
+        ],
+        [
+          "we-0107",
+          "we-0108"
+        ]
+      ],
+      "alternative_review": "107规划尚需2400年也可配108证明未来愿景，104配108是原候选；两套必要性待复核。",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H24",
+      "title": "太阳永恒断言与现场反证",
+      "split_group": "G07_rebellion_allegiance",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 103,
+      "categories": [
+        "source_check",
+        "provisional_understanding"
+      ],
+      "task_domain": "story_retrieval",
+      "question_origin": "codex_local_authored_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H24-a",
+          "text": "他刚说太阳永远稳定，接着又亲眼看到什么？这时还能说前面没有变化就保证永远安全吗？",
+          "split_group": "G07_rebellion_allegiance"
+        },
+        {
+          "variant_id": "H24-b",
+          "text": "从歌颂太阳到氦闪、红巨星，这些已读事实怎样改变了判断？能说所有人因此都死了吗？",
+          "split_group": "G07_rebellion_allegiance"
+        }
+      ],
+      "visible_context": "仅有已确认阅读位置，当前聊天未附完整必要原文。",
+      "annotation_status": "source_checked_pending_independent_review",
+      "necessary_unit_candidates": [
+        "we-0100",
+        "we-0101",
+        "we-0103"
+      ],
+      "optional_units": [
+        "we-0097",
+        "we-0098",
+        "we-0099",
+        "we-0102"
+      ],
+      "evidence_checks": [
+        {
+          "unit_id": "we-0100",
+          "order": 100,
+          "claim": "叙述者断言太阳稳定永恒，认为预言末日愚蠢。",
+          "raw_text_sha256": "2fe4dd54e1770cb9bfb1f2966a0c74396a7fc8e103600d06e391637d7d93839d",
+          "char_start": 0,
+          "char_end": 151,
+          "span_sha256": "2fe4dd54e1770cb9bfb1f2966a0c74396a7fc8e103600d06e391637d7d93839d",
+          "source_line_range": [
+            486,
+            488
+          ]
+        },
+        {
+          "unit_id": "we-0101",
+          "order": 101,
+          "claim": "太阳氦闪突然发生，合唱停止且人群震惊。",
+          "raw_text_sha256": "923e95faadb876edf1d6297de4e9282d4979cd6e496e7a033988164d5de44b49",
+          "char_start": 0,
+          "char_end": 243,
+          "span_sha256": "923e95faadb876edf1d6297de4e9282d4979cd6e496e7a033988164d5de44b49",
+          "source_line_range": [
+            490,
+            496
+          ]
+        },
+        {
+          "unit_id": "we-0103",
+          "order": 103,
+          "claim": "太阳成为红巨星且同伴行星毁灭；结尾明确仍有人活着。",
+          "raw_text_sha256": "a801dc3eea40f22cb1b4bd1e444aeeb36794e05716f5efc04402c13b817f7951",
+          "char_start": 0,
+          "char_end": 216,
+          "span_sha256": "a801dc3eea40f22cb1b4bd1e444aeeb36794e05716f5efc04402c13b817f7951",
+          "source_line_range": [
+            504,
+            510
+          ]
+        }
+      ],
+      "counter_or_unknown": [
+        "先前判断与后来事件分开；还有人活着，不说人类全部灭绝。",
+        "不把最终反证倒灌到更早的已读阶段。"
+      ],
+      "expected_sources": [
+        "story_raw"
+      ],
+      "expected_tool_contract": [
+        "search_story",
+        "story_context",
+        "get_story_evidence"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "none",
+        "available": false,
+        "records": []
+      },
+      "understanding_rubric": "核对来源与所有问题部分，允许不同有依据解释，材料齐备不代表回答理解正确。",
+      "question_equivalence_review": "same_author_checked_pending_independent_review",
+      "acceptable_evidence_sets": [
+        [
+          "we-0100",
+          "we-0101",
+          "we-0103"
+        ]
+      ],
+      "alternative_review": "candidate, not independent literary gold",
+      "prior_results_seen": false,
+      "development_exposure": {
+        "note": "Known same corpus and prior development; grouped by shared source/event, not independent unseen."
+      }
+    },
+    {
+      "task_id": "H25",
+      "title": "读者修订后的观点与旧版分开",
+      "split_group": "M01_journal_revision",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 61,
+      "task_domain": "reader_memory",
+      "categories": [
+        "reader_memory",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H25-a",
+          "text": "我最近把冰面会保安全那条想法改过了，你现在记的是哪个版本？",
+          "split_group": "M01_journal_revision"
+        },
+        {
+          "variant_id": "H25-b",
+          "text": "原来那条猜测已经撤回了，帮我回看最后保存的意思，不要拿旧版当我现在的判断。",
+          "split_group": "M01_journal_revision"
+        }
+      ],
+      "visible_context": "合成owner=reader-A的隔离输入；没有真实会话。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "不能将旧观点当最新，也不根据故事自动改写用户记录。"
+      ],
+      "expected_sources": [
+        "reader_journal"
+      ],
+      "expected_tool_contract": [
+        "search_reading_journal"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "J25-old",
+            "anchor_order": 59,
+            "content": "我猜落地后肯定安全。",
+            "status": "superseded",
+            "owner": "reader-A",
+            "revision": 1,
+            "content_sha256": "10f0d30e2f904c7d832f21f1b0ab14a6f38ecb4db96a07e79965f781c5410487"
+          },
+          {
+            "fixture_id": "J25-new",
+            "anchor_order": 61,
+            "content": "我撤回肯定安全的说法，现在只保留冰面可能衰减浪这一待查观点。",
+            "status": "open",
+            "owner": "reader-A",
+            "revision": 2,
+            "content_sha256": "0835e25b5e5070b01aa4479a0f5fb1a40e424b7d1f00d5af8c01e2171f246eab"
+          }
+        ]
+      },
+      "expected_fixture_ids": [
+        "J25-new"
+      ],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false
+    },
+    {
+      "task_id": "H26",
+      "title": "先听情绪的约定不触发剧情检索",
+      "split_group": "N01_saved_preference",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 18,
+      "task_domain": "no_story_search",
+      "categories": [
+        "no_story_search",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H26-a",
+          "text": "看到这段我有点难受，照我们之前约定先陪我缓一缓。",
+          "split_group": "N01_saved_preference"
+        },
+        {
+          "variant_id": "H26-b",
+          "text": "今天先听我说说感受，按保存的约定别主动分析情节。",
+          "split_group": "N01_saved_preference"
+        }
+      ],
+      "visible_context": "合成owner=reader-A的隔离输入；没有真实会话。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "情绪不是事实查证请求，不强制剧情检索；不读取真实偏好。"
+      ],
+      "expected_sources": [
+        "reader_preference"
+      ],
+      "expected_tool_contract": [],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "N26",
+            "anchor_order": 18,
+            "content": "我表达难受时请先简短回应情绪，不主动搜索或分析剧情。",
+            "status": "active",
+            "owner": "reader-A",
+            "content_sha256": "47bd14a7142d1fc30bd2e3d92cb4870a7aac38a2016254663f80cbf51d08e37a"
+          }
+        ]
+      },
+      "expected_fixture_ids": [
+        "N26"
+      ],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false
+    },
+    {
+      "task_id": "H27",
+      "title": "当前选段足够时不重复查证",
+      "split_group": "G04_asteroid_journey",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 58,
+      "task_domain": "no_story_search",
+      "categories": [
+        "no_story_search",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H27-a",
+          "text": "当前选段已经解释声音、耳机和迫降了，帮我简短整理这三个点。",
+          "split_group": "G04_asteroid_journey"
+        },
+        {
+          "variant_id": "H27-b",
+          "text": "就按眼前机长那段解释复述要点吧，别另外找情节。",
+          "split_group": "G04_asteroid_journey"
+        }
+      ],
+      "visible_context": "当前提供的已读选段要点：机长说明巨响是流星爆音，耳机保护听觉，飞行安全无法保证所以夏威夷迫降。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "当前材料足够则不重复检索；这与H05同故事事件，不当新增独立故事。"
+      ],
+      "expected_sources": [
+        "visible_story_context"
+      ],
+      "expected_tool_contract": [],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": false,
+        "records": []
+      },
+      "expected_fixture_ids": [],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false,
+      "linked_existing_story_task": "H05",
+      "context_provenance": {
+        "unit_id": "we-0058",
+        "order": 58,
+        "raw_text_sha256": "9261c887c66ae28b797a0df3248b2844b33655973d4d0fe12ef45f9dd49db01d",
+        "origin": "local paraphrase of visible story, not user memory"
+      }
+    },
+    {
+      "task_id": "H28",
+      "title": "互动记忆中的未查清与作品缺失分开",
+      "split_group": "M02_retrieval_failure_history",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 16,
+      "task_domain": "reader_memory",
+      "categories": [
+        "reader_memory",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H28-a",
+          "text": "上次是不是已经确认小说没有交代那个原因了？帮我回看我们当时的结论。",
+          "split_group": "M02_retrieval_failure_history"
+        },
+        {
+          "variant_id": "H28-b",
+          "text": "昨天查证没找到，是作品根本没写，还是我们当时只留了未查清？",
+          "split_group": "M02_retrieval_failure_history"
+        }
+      ],
+      "visible_context": "合成owner=reader-A的隔离输入；没有真实会话。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "保存的来源失败不证明故事未写，不伪造新原文查证成功。"
+      ],
+      "expected_sources": [
+        "interaction_history"
+      ],
+      "expected_tool_contract": [
+        "recall_interaction_history"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "E28",
+            "anchor_order": 16,
+            "content": "上次工具查询失败，我们只记录尚未查清原文依据，没有断言作品没交代。",
+            "status": "unresolved",
+            "owner": "reader-A",
+            "content_sha256": "0d923fb2177ed811e99c94ce027024d58bacc1460c94980a5963b6bc94392328"
+          }
+        ]
+      },
+      "expected_fixture_ids": [
+        "E28"
+      ],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false
+    },
+    {
+      "task_id": "H29",
+      "title": "归属不同的读者观点不能混用",
+      "split_group": "M03_owner_scope",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 75,
+      "task_domain": "reader_memory",
+      "categories": [
+        "reader_memory",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H29-a",
+          "text": "回看我自己的木星猜测时，别把另一个读者的观点当成我的；我当时怎么说的？",
+          "split_group": "M03_owner_scope"
+        },
+        {
+          "variant_id": "H29-b",
+          "text": "这两条记录分别是谁的，哪条能代表我之前的判断？",
+          "split_group": "M03_owner_scope"
+        }
+      ],
+      "visible_context": "合成owner=reader-A的隔离输入；没有真实会话。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "owner-B只是合成难负例，不能代表reader-A；不读真实其他用户记录。"
+      ],
+      "expected_sources": [
+        "reader_journal"
+      ],
+      "expected_tool_contract": [
+        "search_reading_journal"
+      ],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": true,
+        "records": [
+          {
+            "fixture_id": "J29-A",
+            "anchor_order": 74,
+            "content": "我对计划能否完成还拿不准。",
+            "status": "open",
+            "owner": "reader-A",
+            "content_sha256": "96675c6e93e57527b93bbd59ae01a159a79aad636f89d9a7393af7be8563502f"
+          },
+          {
+            "fixture_id": "J29-B",
+            "anchor_order": 74,
+            "content": "我确信计划一定已经完成了。",
+            "status": "open",
+            "owner": "reader-B",
+            "content_sha256": "a03e3eab7cdea23721bebf6d611ada8363e592cdea735d39e379ea259091ff2f"
+          }
+        ]
+      },
+      "expected_fixture_ids": [
+        "J29-A"
+      ],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false
+    },
+    {
+      "task_id": "H30",
+      "title": "暂停分析尊重当下指令",
+      "split_group": "N02_pause_existing_N01",
+      "split": "prospective_holdout_candidate",
+      "work_id": "wandering_earth",
+      "max_order": 22,
+      "task_domain": "no_story_search",
+      "categories": [
+        "no_story_search",
+        "source_separation"
+      ],
+      "question_origin": "codex_local_authored_synthetic_not_real_user",
+      "variants": [
+        {
+          "variant_id": "H30-a",
+          "text": "先暂停分析这段，我们聊点别的吧。",
+          "split_group": "N02_pause_existing_N01"
+        },
+        {
+          "variant_id": "H30-b",
+          "text": "这一段暂时不查不解释，让我自己消化一下。",
+          "split_group": "N02_pause_existing_N01"
+        }
+      ],
+      "visible_context": "合成owner=reader-A的隔离输入；没有真实会话。",
+      "annotation_status": "synthetic_memory_or_decision_pending_agent_review",
+      "necessary_unit_candidates": [],
+      "optional_units": [],
+      "evidence_checks": [],
+      "acceptable_evidence_sets": [],
+      "counter_or_unknown": [
+        "沿用既有N01暂停场景，不冒充新增真实Agent负例；不触发故事检索。"
+      ],
+      "expected_sources": [
+        "current_user_instruction"
+      ],
+      "expected_tool_contract": [],
+      "navigation_requests": [],
+      "reader_memory_fixture": {
+        "origin": "synthetic_not_real_user",
+        "available": false,
+        "records": []
+      },
+      "expected_fixture_ids": [],
+      "expected_story_decision": "skip",
+      "owner": "reader-A",
+      "question_equivalence_review": "local_author_checked_pending_independent_review",
+      "prior_results_seen": false,
+      "linked_existing_decision_case": "N01"
+    }
+  ],
+  "revisions": [
+    {
+      "from": "prospective-v1",
+      "date": "2026-10-04",
+      "task_id": "H04",
+      "field": "variants.H04-a.text",
+      "old_text": "他比赛时那么孤独，遇到加代子以后为什么连名次都不在意了？两人怎么走到一起的？",
+      "reason": "原文we-0051在相遇前已明确名次无关；去掉相遇后才不在意的误导前提。必要候选、边界、组和其余问法不变；新检索成绩尚未运行。",
+      "review_origin": "same Codex author local source audit; not independent Luna/human review"
+    },
+    {
+      "from": "business-tasks-v2",
+      "date": "2026-10-04",
+      "task_id": "H23",
+      "field": "H23-b.text",
+      "old_text": "他回忆时地球在哪，结尾看到一百代之后的人，能当成已经发生的见闻吗？",
+      "reason": "原b额外问当前具体位置，不能用107未来计划替代104当下位置；收敛到共同的现在/未来图景区分目标。该新增任务尚未检索评分；必要/替代集合、组、边界不变。",
+      "origin": "same author source/equivalence review, not independent verifier"
+    }
+  ],
+  "retrieval_results_used_to_set_new_labels": false,
+  "dataset_accounting": {
+    "business_tasks": 30,
+    "variants": 60,
+    "story_tasks": 23,
+    "reader_memory_tasks": 4,
+    "no_story_search_tasks": 3,
+    "new_tasks": 15,
+    "new_story_goals": 9,
+    "independent_new_event_count": "not asserted; several linked prior event families",
+    "real_user_expressions": 0,
+    "Sol_simulation_requests": 0,
+    "Luna_independent_verification_requests": 0
+  }
+}
