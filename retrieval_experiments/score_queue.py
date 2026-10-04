@@ -191,6 +191,12 @@ def run(queue_path, output, batch_index, resource_window_clear):
         if len(encoded) > SETTINGS["max_length"]:
             report["skipped"].append({"key": key, "reason": "too_long_no_truncation", "tokens": len(encoded)})
             continue
+        state = journal.state()
+        if (state["stop_seen"] or state["attempts"] >= BUDGET["attempts"]
+                or state["seconds"] + BUDGET["single_seconds"] > BUDGET["seconds"]):
+            journal.append({"event": "stop", "reason": "persistent_budget_no_room_for_next_pair"})
+            report["stop_reason"] = "persistent_budget_no_room_for_next_pair"
+            break
         attempt = journal.begin(key)
         begin = time.perf_counter()
         error = None
