@@ -9,5 +9,6 @@ dependencies:
       - pytest-asyncio>=1.3.0,<2.0.0
 
 # nanobot itself is intentionally not fetched from PyPI here. Build and install
-# the fixed source under .reference/nanobot first, then install ./chatbot in
-# editable mode. This preserves the audited upstream commit.
+# the fixed upstream commit with all patches under patches/nanobot applied to
+# .runtime/nanobot/source-build, then install ./chatbot in editable mode.
+# See docs/operations/WORK_COMPUTER_QUICKSTART.md.

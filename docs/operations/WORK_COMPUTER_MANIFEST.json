@@ -1,0 +1,196 @@
+{
+  "schema": "storypal-work-computer-handoff@1",
+  "checked_date": "2026-10-08",
+  "repositories": {
+    "storypal": {
+      "url": "https://github.com/MoidzzZ/StoryPal.git",
+      "branch": "master",
+      "progress_commit": "ba47d2facea85a42804e56df241eb961961ff87c",
+      "instruction": "Use latest master; this handoff is a later commit."
+    },
+    "storymemory": {
+      "url": "https://github.com/Pilgrimage19/offline-story-pipeline",
+      "branch": "main",
+      "tested_commit": "f60c987414992be56c1b5b1ec68d7ff963c35d17"
+    },
+    "nanobot": {
+      "url": "https://github.com/HKUDS/nanobot",
+      "commit": "9ecdc4533f935bfd7cae9b8cbe651e77eec07cd7"
+    }
+  },
+  "patches_in_order": [
+    {
+      "file": "patches/nanobot/storypal-persona-view.patch",
+      "sha256": "4f641ab5dd56a94a35af2356a6eb0dc79d1bc4982f1491a4713bdd775c78d1df"
+    },
+    {
+      "file": "patches/nanobot/storypal-dream-write-allowlist.patch",
+      "sha256": "45b3e7981f9c0bd8b7946b03ce6389af6519425f17b489dac44d5ea4141b4b2d"
+    },
+    {
+      "file": "patches/nanobot/storypal-tool-allowlist.patch",
+      "sha256": "e2f3a72238f061ad41d202c6175c7783539fee9974d1358057e8c97838d59ce1"
+    },
+    {
+      "file": "patches/nanobot/storypal-reader.patch",
+      "sha256": "9360835e9f197ee1b162511d08c481f02a1f33357c76781529c9d32ba102f6d8"
+    },
+    {
+      "file": "patches/nanobot/storypal-paragraph-markers.patch",
+      "sha256": "f6b17e0e60e652d33931d637592c7033f5ff42316fdc8bd38e7c98326ddcb3c5"
+    },
+    {
+      "file": "patches/nanobot/storypal-codex-model-catalog.patch",
+      "sha256": "a77f2b95f25a69f6dfc3f1360d1ef2cb433c484e62b8495d74c9c92104b7de2c"
+    },
+    {
+      "file": "patches/nanobot/storypal-runtime-context-replay.patch",
+      "sha256": "e62999e9b80964f9bd983ec10eb89b6b7fae7502297f15d7c2997c21e3501f9d"
+    },
+    {
+      "file": "patches/nanobot/storypal-reading-checkpoint.patch",
+      "sha256": "eae4a18a42605d9fe1d3a808f0da7930682fa74bf9207a0225f54593ea728ee4"
+    },
+    {
+      "file": "patches/nanobot/storypal-empty-tool-registry.patch",
+      "sha256": "e6c07eb78761869338956da0b00164fbe1d259720fbb6cbab809e678c8b008ab"
+    }
+  ],
+  "replay_verification": {
+    "all_nine_apply": true,
+    "touched_files": 27,
+    "all_baseline_files_present_in_runtime": true,
+    "extra_python_or_typescript_source_files": 0,
+    "comparison": "All differences after CRLF normalization: one Python comment and two trailing blank lines. No executable source difference.",
+    "comparison_files": [
+      "nanobot/config/schema.py",
+      "webui/src/components/settings/persona/PersonaSettings.tsx",
+      "webui/src/tests/settings-persona.test.tsx"
+    ]
+  },
+  "app_environment_observed_not_complete_lock": {
+    "python": "3.12",
+    "packages": {
+      "nanobot-ai": "0.3.0",
+      "storypal-chatbot": "0.1.0",
+      "torch": "2.7.1+cu126",
+      "transformers": "4.53.1",
+      "sentence-transformers": "5.7.0",
+      "lancedb": "0.38.0",
+      "pytest": "9.1.1",
+      "pytest-asyncio": "1.4.0"
+    }
+  },
+  "data": {
+    "work_id": "wandering_earth",
+    "units": 108,
+    "fact_source": "story_mem/data/wandering_earth/03_extracted/units_extracted.jsonl",
+    "source_sha256": "30196aab51d91b5c5b564517d6e3f32933bbf9cc4edcf23dd230cc7a19c83c6b",
+    "not_in_git": true
+  },
+  "models": {
+    "bge_m3": {
+      "model": "BAAI/bge-m3",
+      "revision": "5617a9f61b028005a4858fdac845db406aefb181",
+      "previous_local_path": "D:/models/BAAI/bge-m3"
+    },
+    "qwen_reranker": {
+      "identity": {
+        "model": "Qwen/Qwen3-Reranker-0.6B",
+        "files": {
+          "config.json": "d479c427a9ca5295218063d4f9aca4f297ab4ac27487cca7af42c84643d51ef0",
+          "model.safetensors": "27cd75a405b9c1b46b59abfd88aaa209e6fed2a1972cde9b70e7659537c5e65b",
+          "tokenizer.json": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "tokenizer_config.json": "253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0",
+          "vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "merges.txt": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "chat_template.jinja": "6f682162495ec5b39fd9005c01b6aa2a74669379fe967039f1e2cbbe8752369d"
+        },
+        "installed_versions": {
+          "torch": "2.7.1+cu126",
+          "transformers": "4.53.1"
+        }
+      },
+      "full_identity_sha256": "0180200f7b2a476c9be0c4a5bd9a8278a703552d5d9b483d65a7d3c8659d23cd",
+      "previous_local_path": "D:/models/Qwen/Qwen3-Reranker-0.6B",
+      "required_for_chatbot": false
+    }
+  },
+  "private_retrieval_artifacts_not_uploaded": {
+    "cpu-routes-20261004-v1.json": {
+      "sha256": "5244cfb4d7c2e3586eca621038225a23b9e7367af3fe77adab75c073319c8753",
+      "bytes": 1098690
+    },
+    "new-story-dense-20261005.json": {
+      "sha256": "11abb5954123289ee9e78c7b83f67b0928907933e030e221099fb07fd444249b",
+      "bytes": 32456
+    },
+    "new-story-routes-20261005.json": {
+      "sha256": "7e2cdcba6a24a2cdaa3405735d00c1938086d9d5fbb52662a17cbce0dccad13c",
+      "bytes": 7013098
+    },
+    "new-story-audit-20261005.json": {
+      "sha256": "fb62cb13b3954c786d60db8c71d2da9a0a9c55bdafbc85e8e1e68f7c22784abc",
+      "bytes": 1948
+    },
+    "qwen-expanded-20261004.queue.json": {
+      "sha256": "9c6d61538dc9191fb9251a3ea9fe252e4cd78ba744161a64e47818e8de3d31c2",
+      "bytes": 391424
+    },
+    "qwen-expanded-20261004.queue.scores.jsonl": {
+      "sha256": "b0308f2e0c2f3c53a98deb4db1a12c2019c9f432c42f3c5d5279041115a24177",
+      "bytes": 331596
+    },
+    "qwen-expanded-20261004.events.jsonl": {
+      "sha256": "4e46b95389d97e453d1e4699feb0bae7c04c630c21d695c432bea121c3cdf5e0",
+      "bytes": 142153
+    },
+    "qwen-expanded-analysis-20261005.json": {
+      "sha256": "91065aecd387b4e19bfb32e65c2c32a5622ca7d20fdf7c0423fca45b3c623b07",
+      "bytes": 697349
+    },
+    "heavy-qwen-audit-20261005.json": {
+      "sha256": "7a8d23fb8aa8aa895bdfe3a63851899dc624048dd4fc5831161cdef44e0e3146",
+      "bytes": 6191
+    },
+    "heavy-CPU-manifest-20261005.json": {
+      "sha256": "f3537cfa049e4f18643e6013a0395401a6be16742f6e2189a692606e3f0a7df1",
+      "bytes": 3445
+    },
+    "qwen-expanded-batch0-20261005.json": {
+      "sha256": "4919e73f25370364298801cb870d133fc1d9987db69db870d1fc0da4d819b309",
+      "bytes": 70727
+    },
+    "qwen-expanded-batch1-20261005.json": {
+      "sha256": "5dfa2c95a800fc08fe5bfeada1b3873dbe1f06af36249dcd7cff689813cc83e2",
+      "bytes": 70698
+    },
+    "qwen-expanded-batch2-20261005.json": {
+      "sha256": "ffbc667f5786f997d521b8385e296f008017aa1e2e2a20ae66cb5c8a9c156767",
+      "bytes": 70720
+    },
+    "qwen-expanded-batch3-20261005.json": {
+      "sha256": "eb8a2733aa212ccdd850e52d5a7887a5bf727c82937ac15067e5c762bfcbd602",
+      "bytes": 70689
+    },
+    "qwen-expanded-batch4-20261005.json": {
+      "sha256": "b25fc8d4513b86f45c4d3a653f4094d4c1fa226b7cfd3d9dd36dc9a1d141a4f5",
+      "bytes": 70722
+    },
+    "qwen-expanded-batch5-20261005.json": {
+      "sha256": "0c7900410eb5819b34634cec366a0ec818a5f1f7c893b9a2c6a006cccfd2d584",
+      "bytes": 49664
+    }
+  },
+  "retrieval_budget_completed": {
+    "scope_cases": 57,
+    "planned_pairs": 570,
+    "attempt_limit": 600,
+    "score_seconds_limit": 1200,
+    "actual_attempts": 570,
+    "actual_score_seconds": 1002.6361520000023,
+    "new_authorization_from_migration": false
+  },
+  "production_retrieval_changed": false,
+  "new_provider_requests_this_handoff": 0
+}

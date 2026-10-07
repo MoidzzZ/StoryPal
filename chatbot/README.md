@@ -3,14 +3,15 @@
 This directory contains the StoryPal-owned integration layer for nanobot. It does
 not copy or modify the upstream nanobot source.
 
-Planned responsibilities:
+Current responsibilities (checked 2026-10-08):
 
-- `storypal-chatbot-configure`: applies bounded local defaults without changing
-  provider credentials;
-- versioned `AGENTS.md` / `SOUL.md` / `USER.md` persona templates;
-- `story_state`: persisted per-session state plus per-turn runtime context;
-- `read_notes` / `write_note`: explicit, user-scoped notes;
-- nanobot tool entry points, so no upstream patch is required.
+- bounded configuration and versioned persona/Skill templates;
+- confirmed reading progress and per-turn progressive story context;
+- read-only raw evidence and structured history tools;
+- explicit reading journals, Note lifecycle, daily interaction episodes and recall;
+- nanobot plugin entry points plus the nine documented core/WebUI patches.
+
+For another computer, follow the [whole-project quickstart](../docs/operations/WORK_COMPUTER_QUICKSTART.md).
 
 Current PoC environment: Conda environment `storypal-chatbot` (Python 3.12).
 The minimal environment declaration is `environment.yml`. `.reference/nanobot`
@@ -34,17 +35,16 @@ defaults:
 storypal-chatbot-configure --config <config.json> --workspace <workspace>
 ```
 
-To use Codex OAuth and make GPT-5.6 Luna the sole configured model preset:
+To configure Codex OAuth presets with GPT-6 Luna as the default:
 
 ```powershell
 storypal-chatbot-configure --config <config.json> --workspace <workspace> --luna-only
 ```
 
-This removes configured model fallbacks and keeps the `my` self-modification tool
-disabled. The `story_state` runtime-context provider also rejects a turn before
-the model call if its resolved model is anything except
-`openai-codex/gpt-5.6-luna`. The OAuth account must still expose Luna in its
-online model catalog.
+GPT-5.6 Luna remains manually selectable. Both use medium reasoning and no
+automatic fallback. Other resolved models are rejected by the runtime policy.
+The account must expose the selected model in its online catalog; authenticate
+on the new computer with `nanobot provider login openai-codex`.
 
 The configurator sets the tool iteration limit to 6, disables Heartbeat and
 general command/file tools for the companion prototype, and keeps the WebUI
@@ -89,7 +89,7 @@ Browser WebUI
   -> local WebSocket gateway
   -> resolve session and the Luna-only runtime
   -> assemble persona + recent turns + checkpoint + StoryPal session state
-  -> GPT-5.6 Luna
+  -> GPT-6 Luna (or manually selected GPT-5.6 Luna)
   -> optional bounded tool calls (at most 6 iterations)
   -> stream the final response to the browser
   -> persist the raw messages, tool records, and session metadata locally
@@ -117,8 +117,11 @@ Browser WebUI
    `USER.md`. It cannot modify `MEMORY.md`, notes, StoryPal state, or story
    storage.
 
-Not implemented yet: the planned daily episodic memory and semantic recall of
-shared experiences. Existing session history and checkpoint do not provide that
-cross-session behavior. Story retrieval already uses the local StoryMemory
-adapter with a confirmed reading boundary; its private source data is not
-included in the public repository.
+Daily interaction episodes and semantic recall are now implemented. They cover
+only extracted records for the current owner, work, and reading boundary, not
+all raw history. Install the episodic extra and supply a local BGE-M3 model;
+see [episodic memory](../docs/architecture/STORYPAL_EPISODIC_MEMORY.md).
+Automatic journal review remains disabled by default. Real reader acceptance,
+natural compaction scheduling and broad semantic evaluation remain pending.
+The private story data and personal memory are not in Git; see the quickstart
+for migration paths and browser/workspace identity requirements.

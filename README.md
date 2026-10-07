@@ -1,5 +1,7 @@
 # StoryPal
 
+**另一台电脑接手：**先读[从这里开始](START_HERE.md)，再按[工作电脑快速指南](docs/operations/WORK_COMPUTER_QUICKSTART.md)安装与恢复。全项目版本、进度和检索最新聚合结果已整理，更新于2026-10-08。
+
 ## 启动本机 Chatbot
 
 以下命令针对已配置的本地开发环境。公开仓库不包含 `.runtime/`、`.reference/`、`story_mem/` 或小说原文；新克隆需要先准备 nanobot 基座、应用 [StoryPal 补丁](patches/nanobot/README.md)，并按 [StoryMemory 接入说明](chatbot/STORY_PIPELINE_INTEGRATION.md) 放置本地数据。

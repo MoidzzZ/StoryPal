@@ -4,6 +4,9 @@
 
 ## 从这里开始
 
+- 换电脑或首次接手：先读[全项目进度首页](../START_HERE.md)，再按[工作电脑快速指南](operations/WORK_COMPUTER_QUICKSTART.md)恢复；[版本清单](operations/WORK_COMPUTER_MANIFEST.json)固定代码、补丁、数据与实验产物身份。
+- 想看最新算法完成结果：查看[2026-10-05完整CPU实验报告](research/retrieval/HEAVY_CPU_2026_10_05.md)和[安全聚合快照](research/retrieval/RESULTS_SNAPSHOT_2026_10_05.json)，不要继续把10-04历史预登记当作未执行。
+
 - 想现在完整验收第一阶段：看[真人验收指南](operations/STAGE1_USER_ACCEPTANCE_GUIDE.md)，包括真实陪读、段尾进度确认、跨会话手账、Note、反馈方式与阶段完成条件；不要求用户制造超长对话。
 
 - 想从用户需求一路讲到Agent、记忆、检索实验与取舍：先看[项目完整叙述](product/STORYPAL_PROJECT_STORY.md)，区分复用基座、自研贡献、已验证与计划。
